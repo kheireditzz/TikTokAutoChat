@@ -71,7 +71,7 @@ class TikTokAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         instance = this
         loadCalibratedCoordinates()
-        Toast.makeText(this, "Aksesibilitas AutoChat Terhubung! Siap digunakan.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "AutoChat terhubung", Toast.LENGTH_SHORT).show()
     }
 
     fun loadCalibratedCoordinates() {
@@ -474,8 +474,8 @@ class TikTokAccessibilityService : AccessibilityService() {
                 onTargetReachedListener?.invoke(sentCount)
                 Toast.makeText(
                     this@TikTokAccessibilityService,
-                    "Target $maxMessageTarget pesan telah tercapai! AutoChat berhenti otomatis. ✓",
-                    Toast.LENGTH_LONG
+                    "Target $maxMessageTarget pesan tercapai",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }

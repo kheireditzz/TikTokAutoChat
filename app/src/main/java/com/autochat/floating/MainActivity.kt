@@ -11,6 +11,12 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.app.Dialog
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.os.Environment
+import java.io.File
+import java.io.FileOutputStream
 import android.view.accessibility.AccessibilityManager
 import android.widget.*
 import org.json.JSONArray
@@ -113,6 +119,27 @@ class MainActivity : Activity() {
             addSettingMessageRow("")
         }
 
+        // Toggle Disclaimer Card (Bisa disembunyikan/dibuka)
+        val layoutDisclaimerBody = findViewById<View>(R.id.layoutDisclaimerBody)
+        val btnToggleDisclaimer = findViewById<TextView>(R.id.btnToggleDisclaimer)
+        val layoutDisclaimerHeader = findViewById<View>(R.id.layoutDisclaimerHeader)
+        var isDisclaimerExpanded = false
+        val toggleDisclaimerAction = View.OnClickListener {
+            isDisclaimerExpanded = !isDisclaimerExpanded
+            if (isDisclaimerExpanded) {
+                layoutDisclaimerBody.visibility = View.VISIBLE
+                btnToggleDisclaimer.text = "Tutup ▲"
+            } else {
+                layoutDisclaimerBody.visibility = View.GONE
+                btnToggleDisclaimer.text = "Buka ▼"
+            }
+        }
+        btnToggleDisclaimer?.setOnClickListener(toggleDisclaimerAction)
+        layoutDisclaimerHeader?.setOnClickListener(toggleDisclaimerAction)
+
+        // Cek dialog persetujuan melayang saat pertama kali masuk
+        checkFirstLaunchAgreement()
+
         btnSettingsResetCoords.setOnClickListener {
             TikTokAccessibilityService.instance?.resetToDefaultCoordinates()
             prefs.edit()
@@ -122,7 +149,7 @@ class MainActivity : Activity() {
                 .remove("calibrated_send_y")
                 .apply()
             updateCoordStatusText()
-            Toast.makeText(this, "Koordinat dikembalikan ke Default TikTok Live ✅", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Koordinat kembali ke default", Toast.LENGTH_SHORT).show()
         }
 
         loadSavedSettings()
@@ -136,7 +163,7 @@ class MainActivity : Activity() {
                     )
                     startActivityForResult(intent, REQUEST_OVERLAY_CODE)
                 } else {
-                    Toast.makeText(this, "Izin Overlay sudah aktif! ✅", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Izin overlay sudah aktif", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -146,24 +173,24 @@ class MainActivity : Activity() {
         val accessibilityAction = View.OnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
-            Toast.makeText(this, "Cari dan aktifkan 'AutoChat'", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Aktifkan AutoChat di Aksesibilitas", Toast.LENGTH_SHORT).show()
         }
         findViewById<View>(R.id.cardAccessibility).setOnClickListener(accessibilityAction)
         switchAccessibility.setOnClickListener(accessibilityAction)
 
         btnSaveSettings.setOnClickListener {
             saveSettings()
-            Toast.makeText(this, "Semua pengaturan berhasil disimpan! ✅", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Pengaturan berhasil disimpan", Toast.LENGTH_SHORT).show()
         }
 
         btnLaunch.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "Aktifkan Izin Overlay terlebih dahulu!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Aktifkan izin overlay terlebih dahulu", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (!isAccessibilityServiceEnabled()) {
-                Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa mengetik otomatis!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Aktifkan izin aksesibilitas", Toast.LENGTH_SHORT).show()
             }
 
             // Simpan perubahan sebelum membuka widget
@@ -175,7 +202,7 @@ class MainActivity : Activity() {
             } else {
                 startService(serviceIntent)
             }
-            Toast.makeText(this, "Widget melayang aktif!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Widget melayang aktif", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
@@ -359,5 +386,75 @@ class MainActivity : Activity() {
             }
         }
         return false
+    }
+
+    private fun checkFirstLaunchAgreement() {
+        val hasAgreed = prefs.getBoolean("has_agreed_disclaimer", false)
+        if (hasAgreed) return
+
+        val dialog = Dialog(this, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth)
+        dialog.setContentView(R.layout.dialog_disclaimer_agreement)
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
+
+        val etConfirm = dialog.findViewById<EditText>(R.id.etAgreementConfirm)
+        val cbQuickAgree = dialog.findViewById<CheckBox>(R.id.cbQuickAgree)
+        val btnDecline = dialog.findViewById<Button>(R.id.btnAgreementDecline)
+        val btnAccept = dialog.findViewById<Button>(R.id.btnAgreementAccept)
+        val dialogRoot = dialog.findViewById<View>(R.id.dialogAgreementRoot)
+
+        cbQuickAgree.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                etConfirm.setText("SETUJU")
+            }
+        }
+
+        btnDecline.setOnClickListener {
+            Toast.makeText(this, "Persetujuan ditolak. Aplikasi ditutup.", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+            finishAffinity()
+        }
+
+        btnAccept.setOnClickListener {
+            val input = etConfirm.text.toString().trim()
+            if (!input.equals("SETUJU", ignoreCase = true) && !cbQuickAgree.isChecked) {
+                Toast.makeText(this, "Ketik SETUJU atau centang kotak persetujuan", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Screenshot otomatis bukti persetujuan user
+            captureAgreementProof(dialogRoot)
+
+            // Simpan status agar hanya muncul sekali saja
+            prefs.edit().putBoolean("has_agreed_disclaimer", true).apply()
+            dialog.dismiss()
+            Toast.makeText(this, "Persetujuan diterima", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+    }
+
+    private fun captureAgreementProof(view: View) {
+        try {
+            view.post {
+                try {
+                    val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+                    val canvas = Canvas(bitmap)
+                    view.draw(canvas)
+
+                    val picturesDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AutoChatProof")
+                    if (!picturesDir.exists()) picturesDir.mkdirs()
+
+                    val file = File(picturesDir, "Bukti_Persetujuan_${System.currentTimeMillis()}.jpg")
+                    FileOutputStream(file).use { out ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 92, out)
+                    }
+
+                    val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                    mediaScanIntent.data = Uri.fromFile(file)
+                    sendBroadcast(mediaScanIntent)
+                } catch (_: Exception) {}
+            }
+        } catch (_: Exception) {}
     }
 }

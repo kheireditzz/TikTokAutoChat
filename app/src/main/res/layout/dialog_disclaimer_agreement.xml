@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialogAgreementRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_white_card"
+    android:padding="20dp"
+    android:elevation="8dp">
+
+    <!-- Header Modal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="⚠️"
+            android:textSize="18sp"
+            android:background="@drawable/bg_warning_card"
+            android:layout_marginEnd="10dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PERINGATAN RESMI &amp; PENAFIAN"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#C2410C"
+                android:letterSpacing="0.02" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wajib disetujui untuk dapat menggunakan aplikasi"
+                android:textSize="10sp"
+                android:textColor="#64748B"
+                android:layout_marginTop="1dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E2E8F0"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Konten Scrollable Peringatan -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:maxHeight="220dp"
+        android:scrollbars="vertical"
+        android:layout_marginBottom="14dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_warning_card"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1. BATASAN LAYANAN:\nAdmin/Penjual HANYA MENJUAL lisensi software alat bantu pengetikan otomatis (accessibility tool) untuk mempermudah pengetikan di layar.\n\n2. BEBAS TANGGUNG JAWAB:\nAdmin TIDAK BERTANGGUNG JAWAB atas apa pun yang Anda lakukan, isi materi chat yang Anda kirimkan, frekuensi pesan, maupun konsekuensi hukum atau teknis dari pemakaian aplikasi ini.\n\n3. RISIKO BANNED &amp; SANKSI:\nSegala risiko sanksi akun TikTok—termasuk mute komentar, pembatasan siaran live, shadowban, hingga PEMBLOKIRAN PERMANEN (BANNED)—sepenuhnya berada di luar kendali dan tanggung jawab Admin.\n\n4. TANGGUNG JAWAB PRIBADI (USE AT YOUR OWN RISK):\nSeluruh operasional merupakan kesadaran dan tanggung jawab pribadi Anda. Gunakan jeda wajar (minimal 4–8 detik) dan aktifkan Anti-Spam demi keamanan akun Anda.\n\n5. PERSETUJUAN:\nDengan memilih 'SETUJU', Anda menyatakan telah membaca, memahami, dan membebaskan Admin dari segala tuntutan."
+                android:textSize="11sp"
+                android:textColor="#7C2D12"
+                android:lineSpacingExtra="3dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Kolom Konfirmasi Ketik / Centang -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ketik kata 'SETUJU' atau centang di bawah untuk konfirmasi:"
+        android:textSize="10.5sp"
+        android:textColor="#0F172A"
+        android:textStyle="bold"
+        android:layout_marginBottom="6dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/etAgreementConfirm"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="Ketik: SETUJU"
+            android:textColorHint="#94A3B8"
+            android:textColor="#0F172A"
+            android:background="@drawable/bg_input_white"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:singleLine="true" />
+
+        <CheckBox
+            android:id="@+id/cbQuickAgree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Saya Setuju"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#0F172A"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Tombol Aksi YES / NO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Tombol NO / Keluar -->
+        <Button
+            android:id="@+id/btnAgreementDecline"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1"
+            android:text="TOLAK / KELUAR"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#64748B"
+            android:background="@drawable/bg_white_button"
+            android:stateListAnimator="@null"
+            android:layout_marginEnd="6dp" />
+
+        <!-- Tombol YES / Setuju -->
+        <Button
+            android:id="@+id/btnAgreementAccept"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_weight="1.2"
+            android:text="SETUJU &amp; MASUK"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_tiktok_gradient"
+            android:stateListAnimator="@null"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+</LinearLayout>

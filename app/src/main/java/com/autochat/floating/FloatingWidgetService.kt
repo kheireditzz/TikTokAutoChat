@@ -371,14 +371,14 @@ class FloatingWidgetService : Service() {
             tvStatusText.text = "Berhenti"
             tvStatusText.setTextColor(Color.parseColor("#64748B"))
             tvBubbleLabel.text = "AutoChat"
-            Toast.makeText(this, "Auto Chat Dihentikan.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "AutoChat dihentikan", Toast.LENGTH_SHORT).show()
         }
 
         btnToggle.setOnClickListener {
             if (!isRunning) {
                 val service = TikTokAccessibilityService.instance
                 if (service == null) {
-                    Toast.makeText(this, "Aksesibilitas belum aktif! Buka Pengaturan HP.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Aksesibilitas belum aktif", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
@@ -391,7 +391,7 @@ class FloatingWidgetService : Service() {
                 }
 
                 if (activeList.isEmpty()) {
-                    Toast.makeText(this, "Centang minimal 1 komentar untuk dikirim!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Pilih minimal 1 pesan", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
@@ -409,7 +409,7 @@ class FloatingWidgetService : Service() {
                     totalSentCount = count
                     tvSentCountStatus.text = "$count Terkirim"
                     tvBubbleSentCount.text = "$count kirim"
-                    tvStatusText.text = "Terkirim $count pesan ✓"
+                    tvStatusText.text = "Terkirim $count pesan"
                 }
 
                 service.setOnTargetReachedListener { reachedCount ->
@@ -438,7 +438,7 @@ class FloatingWidgetService : Service() {
                 tvStatusText.text = if (targetLimit > 0) "Berjalan (${targetLimit}x)" else "Berjalan (${delay}s)"
                 tvStatusText.setTextColor(Color.parseColor("#10B981"))
                 tvBubbleLabel.text = "RUNNING"
-                Toast.makeText(this, "Auto Chat Dimulai!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "AutoChat dimulai", Toast.LENGTH_SHORT).show()
 
                 // Otomatis minimize ke samping
                 setMinimizeState(true)
@@ -688,7 +688,7 @@ class FloatingWidgetService : Service() {
                 .apply()
 
             TikTokAccessibilityService.instance?.setCalibratedCoordinates(cX, cY, sX, sY)
-            Toast.makeText(this, "✅ Posisi tersimpan! Chat: (${cX.toInt()}, ${cY.toInt()}) | Kirim: (${sX.toInt()}, ${sY.toInt()})", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Titik chat dan kirim tersimpan", Toast.LENGTH_SHORT).show()
             stopPinCalibration()
         }
 
@@ -706,19 +706,19 @@ class FloatingWidgetService : Service() {
 
             val service = TikTokAccessibilityService.instance
             if (service != null) {
-                Toast.makeText(this, "🎯 Mengetes klik Pin 1 lalu Pin 2...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Mengetes titik klik", Toast.LENGTH_SHORT).show()
                 service.testTapSingleCoordinate(cX, cY)
                 Handler(Looper.getMainLooper()).postDelayed({
                     service.testTapSingleCoordinate(sX, sY)
                 }, 600)
             } else {
-                Toast.makeText(this, "Aksesibilitas belum terhubung!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Aksesibilitas belum terhubung", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnReset.setOnClickListener {
             TikTokAccessibilityService.instance?.resetToDefaultCoordinates()
-            Toast.makeText(this, "↩ Koordinat dikembalikan ke Default TikTok Live.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Koordinat kembali ke default", Toast.LENGTH_SHORT).show()
             stopPinCalibration()
         }
 
@@ -738,7 +738,7 @@ class FloatingWidgetService : Service() {
             updateLiveCoordinatesDisplay()
         }, 100)
 
-        Toast.makeText(this, "Mode Kalibrasi Aktif. Layar bebas disentuh!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Mode kalibrasi aktif", Toast.LENGTH_SHORT).show()
     }
 
     private fun stopPinCalibration() {

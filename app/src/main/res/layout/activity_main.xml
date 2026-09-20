@@ -68,6 +68,95 @@
             android:orientation="vertical"
             android:padding="20dp">
 
+            <!-- CARD PERINGATAN RESMI & PENAFIAN TANGGUNG JAWAB (COMPACT & COLLAPSIBLE DI ATAS) -->
+            <LinearLayout
+                android:id="@+id/layoutDisclaimerCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_warning_card"
+                android:padding="12dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="14dp">
+
+                <!-- Header Bar Ringkas (Selalu Tampak) -->
+                <LinearLayout
+                    android:id="@+id/layoutDisclaimerHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ketentuan &amp; Penafian Admin"
+                            android:textSize="11.5sp"
+                            android:textStyle="bold"
+                            android:textColor="#C2410C" />
+
+                        <TextView
+                            android:id="@+id/tvDisclaimerHint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hanya jual alat bantu · Risiko banned tanggung jawab user"
+                            android:textSize="9.5sp"
+                            android:textColor="#9A3412" />
+                    </LinearLayout>
+
+                    <!-- Tombol Sembunyikan / Lihat -->
+                    <TextView
+                        android:id="@+id/btnToggleDisclaimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="28dp"
+                        android:background="@drawable/bg_stepper_btn"
+                        android:gravity="center"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="Buka ▼"
+                        android:textColor="#0F172A"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Body Ketentuan Lengkap (Bisa Disembunyikan / GONE) -->
+                <LinearLayout
+                    android:id="@+id/layoutDisclaimerBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="10dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#FED7AA"
+                        android:layout_marginBottom="10dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="1. Batasan Layanan Penjual:\nAdmin/Penjual semata-mata hanya menyediakan dan menjual lisensi software alat bantu pengetikan otomatis mandiri (accessibility assistant tool).\n\n2. Pelepasan Tanggung Jawab:\nAdmin TIDAK BERTANGGUNG JAWAB atas segala tindakan, isi percakapan, frekuensi pesan, maupun konsekuensi teknis/hukum dari pemakaian aplikasi ini.\n\n3. Risiko Akun Platform (Banned):\nSegala risiko akun TikTok—termasuk mute komentar, pembatasan live, shadowban, hingga pemblokiran permanen (banned)—sepenuhnya risiko mandiri pengguna di luar tanggung jawab Admin.\n\n4. Tanggung Jawab Pribadi (Use at Your Own Risk):\nSeluruh operasional merupakan kesadaran pribadi pembeli. Disarankan selalu mengatur jeda wajar (minimal 4–8 detik) dan mengaktifkan fitur Anti-Spam.\n\n5. Persetujuan Mutlak:\nMenggunakan aplikasi ini menandakan persetujuan penuh dan membebaskan Admin dari segala tuntutan."
+                        android:textSize="10sp"
+                        android:textColor="#7C2D12"
+                        android:lineSpacingExtra="3dp" />
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- Card Status Utama -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -116,102 +205,6 @@
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:background="@drawable/bg_indicator_dot" />
-            </LinearLayout>
-
-            <!-- CARD PERINGATAN RESMI & PENAFIAN TANGGUNG JAWAB (DISCLAIMER) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_warning_card"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="20dp">
-
-                <!-- Header Warning -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚠️"
-                        android:textSize="16sp"
-                        android:layout_marginEnd="8dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="PERINGATAN &amp; PENAFIAN RESMI"
-                            android:textSize="11.5sp"
-                            android:textStyle="bold"
-                            android:textColor="#C2410C"
-                            android:letterSpacing="0.04" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Harap dibaca dan dipahami sebelum menggunakan aplikasi"
-                            android:textSize="9.5sp"
-                            android:textColor="#9A3412" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#FED7AA"
-                    android:layout_marginBottom="10dp" />
-
-                <!-- Poin-Poin Ketentuan Sopan & Tegas -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="1. Batasan Layanan Penjual:\nAdmin/Penjual semata-mata hanya menyediakan dan mendistribusikan lisensi aplikasi ini murni sebagai alat bantu teknis pengetikan otomatis (accessibility assistant tool) untuk kemudahan operasional pengguna.\n\n2. Pelepasan Tanggung Jawab Mutlak:\nAdmin/Penjual TIDAK BERTANGGUNG JAWAB dalam bentuk apa pun atas segala perbuatan, maksud penggunaan, materi obrolan yang dikirimkan, frekuensi pengiriman, maupun akibat hukum yang timbul dari pemakaian aplikasi ini.\n\n3. Risiko Akun &amp; Sanksi Platform (Banned):\nSegala risiko terhadap akun Anda—termasuk peringatan sistem, pembatasan live, mute obrolan, shadowban, hingga penutupan/pemblokiran akun secara permanen (banned) oleh pihak platform TikTok—sepenuhnya berada di luar kendali, wewenang, dan tanggung jawab Admin.\n\n4. Tanggung Jawab Mandiri (Use at Your Own Risk):\nSeluruh operasional merupakan kesadaran dan tanggung jawab pribadi pembeli/pengguna. Sangat disarankan selalu menyetel jeda waktu wajar (minimal 4–8 detik), mengaktifkan fitur Anti-Spam, serta mematuhi norma dan panduan komunitas yang berlaku.\n\n5. Klausul Persetujuan:\nDengan menginstal, mengaktifkan izin, dan menjalankan aplikasi ini, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan ini tanpa syarat, serta membebaskan Admin dari segala bentuk tuntutan di kemudian hari."
-                    android:textSize="10.5sp"
-                    android:textColor="#7C2D12"
-                    android:lineSpacingExtra="3.5dp" />
-
-                <!-- Badge Indikator Persetujuan -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="#FFEDD5"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="✓"
-                        android:textColor="#C2410C"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:layout_marginEnd="6dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Saya memahami dan menyetujui seluruh ketentuan ini."
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:textColor="#9A3412" />
-                </LinearLayout>
             </LinearLayout>
 
             <TextView
