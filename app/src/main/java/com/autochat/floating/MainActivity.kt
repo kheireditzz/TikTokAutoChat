@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,12 +13,15 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.view.accessibility.AccessibilityManager
@@ -753,21 +757,77 @@ class MainActivity : Activity() {
         try {
             view.post {
                 try {
-                    val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-                    val canvas = Canvas(bitmap)
+                    val w = view.width.coerceAtLeast(1)
+                    val h = view.height.coerceAtLeast(1)
+                    val bannerH = (52 * resources.displayMetrics.density).toInt()
+                    val totalH = h + bannerH
+
+                    val fullBitmap = Bitmap.createBitmap(w, totalH, Bitmap.Config.ARGB_8888)
+                    val canvas = Canvas(fullBitmap)
+                    canvas.drawColor(Color.parseColor("#F8FAFC"))
+
+                    // Gambar isi dialog
                     view.draw(canvas)
 
-                    val picturesDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AutoChatProof")
-                    if (!picturesDir.exists()) picturesDir.mkdirs()
+                    // Gambar Watermark Stamp Verifikasi di Bagian Bawah
+                    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+                    val rect = RectF(0f, h.toFloat(), w.toFloat(), totalH.toFloat())
+                    paint.color = Color.parseColor("#0F172A")
+                    canvas.drawRect(rect, paint)
 
-                    val file = File(picturesDir, "Bukti_Persetujuan_${System.currentTimeMillis()}.jpg")
-                    FileOutputStream(file).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 92, out)
+                    paint.color = Color.parseColor("#10B981")
+                    paint.textSize = 12f * resources.displayMetrics.density
+                    paint.isFakeBoldText = true
+                    canvas.drawText("✓ SAH & DISETUJUI PENGGUNA", 20f * resources.displayMetrics.density, h + (22f * resources.displayMetrics.density), paint)
+
+                    val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm:ss 'WIB'", Locale("in", "ID"))
+                    val timeStr = sdf.format(Date())
+                    val devId = LicenseManager.getInstance(this).deviceId
+
+                    paint.color = Color.parseColor("#94A3B8")
+                    paint.textSize = 9.5f * resources.displayMetrics.density
+                    paint.isFakeBoldText = false
+                    canvas.drawText("$timeStr · ID: $devId", 20f * resources.displayMetrics.density, h + (40f * resources.displayMetrics.density), paint)
+
+                    // Eksekusi penyimpanan ke galeri di background thread agar anti-lag (0 lag)
+                    bgExecutor.execute {
+                        try {
+                            val fileName = "Bukti_Persetujuan_${System.currentTimeMillis()}.jpg"
+                            var savedUri: Uri? = null
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                val values = ContentValues().apply {
+                                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AutoChatProof")
+                                    put(MediaStore.Images.Media.IS_PENDING, 1)
+                                }
+                                savedUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                                if (savedUri != null) {
+                                    contentResolver.openOutputStream(savedUri)?.use { out ->
+                                        fullBitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
+                                    }
+                                    values.clear()
+                                    values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                                    contentResolver.update(savedUri, values, null, null)
+                                }
+                            } else {
+                                val picturesDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AutoChatProof")
+                                if (!picturesDir.exists()) picturesDir.mkdirs()
+                                val file = File(picturesDir, fileName)
+                                FileOutputStream(file).use { out ->
+                                    fullBitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
+                                }
+                                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                                mediaScanIntent.data = Uri.fromFile(file)
+                                sendBroadcast(mediaScanIntent)
+                            }
+
+                            mainHandler.post {
+                                Toast.makeText(this@MainActivity, "📸 Bukti persetujuan tersimpan otomatis di Galeri Foto (Album AutoChatProof)", Toast.LENGTH_LONG).show()
+                            }
+                        } catch (_: Exception) {}
                     }
-
-                    val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                    mediaScanIntent.data = Uri.fromFile(file)
-                    sendBroadcast(mediaScanIntent)
                 } catch (_: Exception) {}
             }
         } catch (_: Exception) {}
