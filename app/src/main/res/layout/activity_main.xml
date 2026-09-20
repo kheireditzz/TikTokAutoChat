@@ -356,6 +356,157 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KOORDINAT MANUAL (PERSENTASE LAYAR)"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Card Koordinat Manual -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1. Titik Kolom Komentar Live (Bawah Kiri)"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#090A0F"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="X (% Lebar):"
+                        android:textSize="12sp"
+                        android:textColor="#64748B" />
+
+                    <EditText
+                        android:id="@+id/etCoordInputX"
+                        android:layout_width="60dp"
+                        android:layout_height="36dp"
+                        android:text="25"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:inputType="number"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Y (% Tinggi):"
+                        android:textSize="12sp"
+                        android:textColor="#64748B" />
+
+                    <EditText
+                        android:id="@+id/etCoordInputY"
+                        android:layout_width="60dp"
+                        android:layout_height="36dp"
+                        android:text="96"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:inputType="number"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F1F5F9"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2. Titik Tombol Kirim / Enter (Kanan Bawah)"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#090A0F"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="X (% Lebar):"
+                        android:textSize="12sp"
+                        android:textColor="#64748B" />
+
+                    <EditText
+                        android:id="@+id/etCoordSendX"
+                        android:layout_width="60dp"
+                        android:layout_height="36dp"
+                        android:text="92"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:inputType="number"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Y (% Tinggi):"
+                        android:textSize="12sp"
+                        android:textColor="#64748B" />
+
+                    <EditText
+                        android:id="@+id/etCoordSendY"
+                        android:layout_width="60dp"
+                        android:layout_height="36dp"
+                        android:text="94"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:inputType="number"
+                        android:layout_marginStart="4dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="*Nilai dalam persen (0-100). Default: Komentar X:25 Y:96 | Kirim X:92 Y:94"
+                    android:textSize="10.5sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="10dp" />
+
+            </LinearLayout>
+
             <!-- Save Button -->
             <Button
                 android:id="@+id/btnSaveSettings"

@@ -32,6 +32,12 @@ class TikTokAccessibilityService : AccessibilityService() {
     private var onChatSentListener: ((Int, String) -> Unit)? = null
     private val handler = Handler(Looper.getMainLooper())
 
+    // Koordinat Manual (dalam persentase layar 0.0 - 1.0)
+    private var coordInputXPercent = 0.25f
+    private var coordInputYPercent = 0.96f
+    private var coordSendXPercent = 0.92f
+    private var coordSendYPercent = 0.94f
+
     private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
 
     override fun onServiceConnected() {
@@ -44,11 +50,30 @@ class TikTokAccessibilityService : AccessibilityService() {
         onChatSentListener = listener
     }
 
-    fun startAutoChat(messages: ArrayList<String>, delay: Long, antiSpam: Boolean = true) {
+    fun setManualCoordinates(inputX: Float, inputY: Float, sendX: Float, sendY: Float) {
+        coordInputXPercent = inputX
+        coordInputYPercent = inputY
+        coordSendXPercent = sendX
+        coordSendYPercent = sendY
+    }
+
+    fun startAutoChat(
+        messages: ArrayList<String>,
+        delay: Long,
+        antiSpam: Boolean = true,
+        inputX: Float = 0.25f,
+        inputY: Float = 0.96f,
+        sendX: Float = 0.92f,
+        sendY: Float = 0.94f
+    ) {
         if (messages.isEmpty()) return
         activeMessages = messages
         delaySeconds = delay
         enableAntiSpam = antiSpam
+        coordInputXPercent = inputX
+        coordInputYPercent = inputY
+        coordSendXPercent = sendX
+        coordSendYPercent = sendY
         currentMessageIndex = 0
         sentCount = 0
         isRunning = true
@@ -232,19 +257,19 @@ class TikTokAccessibilityService : AccessibilityService() {
 
             // Posisi A: Tombol kirim di samping kanan kolom chat
             if (inputRect != null && inputRect.width() > 0) {
-                val rightOfChatX = metrics.widthPixels * 0.93f
+                val rightOfChatX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
                 val chatY = inputRect.centerY().toFloat()
                 simulateTap(rightOfChatX, chatY)
             } else {
-                val rightOfChatX = metrics.widthPixels * 0.93f
-                val chatY = metrics.heightPixels * 0.58f
+                val rightOfChatX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
+                val chatY = metrics.heightPixels * coordSendYPercent.coerceIn(0.5f, 0.98f)
                 simulateTap(rightOfChatX, chatY)
             }
 
             // Posisi B: Tombol Enter / Centang di pojok kanan paling bawah keyboard
             handler.postDelayed({
-                val keyboardEnterX = metrics.widthPixels * 0.90f
-                val keyboardEnterY = metrics.heightPixels * 0.94f
+                val keyboardEnterX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
+                val keyboardEnterY = metrics.heightPixels * coordSendYPercent.coerceIn(0.5f, 0.98f)
                 simulateTap(keyboardEnterX, keyboardEnterY)
             }, 180)
 
@@ -293,7 +318,6 @@ class TikTokAccessibilityService : AccessibilityService() {
             val nodeText = node.text?.toString()?.lowercase() ?: ""
 
             // HARAMKAN klik tombol komentar video biasa:
-            // Tombol video biasa biasanya punya id comment_icon, comment_list, icon_comment di sebelah kanan layar
             val rect = Rect()
             node.getBoundsInScreen(rect)
 
@@ -319,10 +343,9 @@ class TikTokAccessibilityService : AccessibilityService() {
     private fun fallbackTapBottomInput(text: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
-            // Tap presisi area bar komentar TikTok Live:
-            // Di TikTok Live, bar "Katakan sesuatu..." selalu berada di pojok kiri bawah (X: ~25%, Y: ~96%)
-            val tapX = metrics.widthPixels * 0.25f
-            val tapY = metrics.heightPixels * 0.96f
+            // Gunakan koordinat yang dapat disetel pengguna secara manual
+            val tapX = metrics.widthPixels * coordInputXPercent.coerceIn(0.05f, 0.95f)
+            val tapY = metrics.heightPixels * coordInputYPercent.coerceIn(0.05f, 0.99f)
             simulateTap(tapX, tapY)
 
             handler.postDelayed({

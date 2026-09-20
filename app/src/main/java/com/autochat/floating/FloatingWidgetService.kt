@@ -220,6 +220,30 @@ class FloatingWidgetService : Service() {
             addWidgetMessageItem("", true)
         }
 
+        // Bind quick coordinate inputs
+        val etFloatCoordX = floatingView.findViewById<EditText>(R.id.etFloatCoordX)
+        val etFloatCoordY = floatingView.findViewById<EditText>(R.id.etFloatCoordY)
+        val etFloatSendX = floatingView.findViewById<EditText>(R.id.etFloatSendX)
+        val etFloatSendY = floatingView.findViewById<EditText>(R.id.etFloatSendY)
+
+        etFloatCoordX.setText(prefs.getInt("coord_input_x", 25).toString())
+        etFloatCoordY.setText(prefs.getInt("coord_input_y", 96).toString())
+        etFloatSendX.setText(prefs.getInt("coord_send_x", 92).toString())
+        etFloatSendY.setText(prefs.getInt("coord_send_y", 94).toString())
+
+        // Focus handling untuk coordinate input agar keyboard muncul saat ditekan
+        val coordTouchListener = View.OnTouchListener { _, _ ->
+            params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+            try {
+                windowManager.updateViewLayout(floatingView, params)
+            } catch (_: Exception) {}
+            false
+        }
+        etFloatCoordX.setOnTouchListener(coordTouchListener)
+        etFloatCoordY.setOnTouchListener(coordTouchListener)
+        etFloatSendX.setOnTouchListener(coordTouchListener)
+        etFloatSendY.setOnTouchListener(coordTouchListener)
+
         etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
@@ -333,10 +357,19 @@ class FloatingWidgetService : Service() {
                 val delay = etDelay.text.toString().toLongOrNull() ?: 4L
                 val antiSpam = prefs.getBoolean("anti_spam", true)
 
-                // Simpan perubahan pesan saat ini ke SharedPreferences secara otomatis
+                val coordInputX = etFloatCoordX.text.toString().toIntOrNull() ?: 25
+                val coordInputY = etFloatCoordY.text.toString().toIntOrNull() ?: 96
+                val coordSendX = etFloatSendX.text.toString().toIntOrNull() ?: 92
+                val coordSendY = etFloatSendY.text.toString().toIntOrNull() ?: 94
+
+                // Simpan perubahan pesan & koordinat saat ini ke SharedPreferences secara otomatis
                 prefs.edit()
                     .putString("messages_json", allListJson.toString())
                     .putInt("delay", delay.toInt())
+                    .putInt("coord_input_x", coordInputX)
+                    .putInt("coord_input_y", coordInputY)
+                    .putInt("coord_send_x", coordSendX)
+                    .putInt("coord_send_y", coordSendY)
                     .apply()
 
                 // Lepas fokus keyboard agar TikTok tidak terhalangi
@@ -351,8 +384,16 @@ class FloatingWidgetService : Service() {
                     tvStatusText.setText("Terkirim $count pesan ✓")
                 }
 
-                // Panggil service dengan proteksi anti-spam
-                service.startAutoChat(activeList, delay, antiSpam)
+                // Panggil service dengan koordinat persentase
+                service.startAutoChat(
+                    activeList,
+                    delay,
+                    antiSpam,
+                    coordInputX / 100f,
+                    coordInputY / 100f,
+                    coordSendX / 100f,
+                    coordSendY / 100f
+                )
 
                 totalSentCount = 0
                 tvSentCountStatus.setText("0 Terkirim")

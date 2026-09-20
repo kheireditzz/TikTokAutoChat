@@ -50,6 +50,12 @@ class MainActivity : Activity() {
     private lateinit var btnSaveSettings: Button
     private val settingEditTextList = mutableListOf<EditText>()
 
+    // Coordinate views
+    private lateinit var etCoordInputX: EditText
+    private lateinit var etCoordInputY: EditText
+    private lateinit var etCoordSendX: EditText
+    private lateinit var etCoordSendY: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -80,6 +86,11 @@ class MainActivity : Activity() {
         etSettingDelay = findViewById(R.id.etSettingDelay)
         switchAntiSpam = findViewById(R.id.switchAntiSpam)
         btnSaveSettings = findViewById(R.id.btnSaveSettings)
+
+        etCoordInputX = findViewById(R.id.etCoordInputX)
+        etCoordInputY = findViewById(R.id.etCoordInputY)
+        etCoordSendX = findViewById(R.id.etCoordSendX)
+        etCoordSendY = findViewById(R.id.etCoordSendY)
 
         btnSettingsAddMessage.setOnClickListener {
             addSettingMessageRow("")
@@ -197,10 +208,19 @@ class MainActivity : Activity() {
         val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
         val anti = switchAntiSpam.isChecked
 
+        val coordInputX = etCoordInputX.text.toString().toIntOrNull() ?: 25
+        val coordInputY = etCoordInputY.text.toString().toIntOrNull() ?: 96
+        val coordSendX = etCoordSendX.text.toString().toIntOrNull() ?: 92
+        val coordSendY = etCoordSendY.text.toString().toIntOrNull() ?: 94
+
         prefs.edit()
             .putString("messages_json", messages.toString())
             .putInt("delay", d)
             .putBoolean("anti_spam", anti)
+            .putInt("coord_input_x", coordInputX)
+            .putInt("coord_input_y", coordInputY)
+            .putInt("coord_send_x", coordSendX)
+            .putInt("coord_send_y", coordSendY)
             .apply()
     }
 
@@ -238,6 +258,11 @@ class MainActivity : Activity() {
 
         etSettingDelay.setText(prefs.getInt("delay", 4).toString())
         switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
+
+        etCoordInputX.setText(prefs.getInt("coord_input_x", 25).toString())
+        etCoordInputY.setText(prefs.getInt("coord_input_y", 96).toString())
+        etCoordSendX.setText(prefs.getInt("coord_send_x", 92).toString())
+        etCoordSendY.setText(prefs.getInt("coord_send_y", 94).toString())
     }
 
     private fun toggleScreen(toSettings: Boolean) {
