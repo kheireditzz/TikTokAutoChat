@@ -60,6 +60,10 @@ class MainActivity : Activity() {
     private lateinit var btnBuyLifetimeAction: Button
     private lateinit var tvLicenseDeviceWarning: TextView
 
+    // Offline Overlay Views
+    private lateinit var layoutOfflineOverlay: View
+    private lateinit var btnOpenNetworkSettings: Button
+
     // Home views
     private lateinit var tvStatusTitle: TextView
     private lateinit var tvStatusSub: TextView
@@ -125,6 +129,48 @@ class MainActivity : Activity() {
 
         if (intent.getBooleanExtra("OPEN_QRIS_DIALOG", false)) {
             showDongtubeQrisDialog()
+        }
+
+        // Init Offline Overlay
+        layoutOfflineOverlay = findViewById(R.id.layoutOfflineOverlay)
+        btnOpenNetworkSettings = findViewById(R.id.btnOpenNetworkSettings)
+
+        btnOpenNetworkSettings.setOnClickListener {
+            try {
+                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
+                } catch (_: Exception) {
+                    startActivity(Intent(Settings.ACTION_SETTINGS))
+                }
+            }
+        }
+
+        // Realtime Network Detection (Auto-detect & Anti-Lag)
+        NetworkMonitor.getInstance(this).addListener { isOnline ->
+            if (isOnline) {
+                if (layoutOfflineOverlay.visibility == View.VISIBLE) {
+                    layoutOfflineOverlay.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction {
+                            layoutOfflineOverlay.visibility = View.GONE
+                            layoutOfflineOverlay.alpha = 1f
+                        }
+                    Toast.makeText(this, "Internet terhubung kembali 🌐", Toast.LENGTH_SHORT).show()
+                    LicenseManager.getInstance(this).syncNetworkTimeAndIp {
+                        updateLicenseUI()
+                    }
+                }
+            } else {
+                layoutOfflineOverlay.alpha = 0f
+                layoutOfflineOverlay.visibility = View.VISIBLE
+                layoutOfflineOverlay.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start()
+            }
         }
 
         // Init Home views
@@ -242,6 +288,13 @@ class MainActivity : Activity() {
         }
 
         btnLaunch.setOnClickListener {
+            // Verifikasi Koneksi Internet Wajib Online
+            if (!NetworkMonitor.getInstance(this).isOnline()) {
+                Toast.makeText(this, "Harap hidupkan data internet atau WiFi terlebih dahulu", Toast.LENGTH_SHORT).show()
+                layoutOfflineOverlay.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+
             // Verifikasi Masa Trial & Lisensi
             val licState = LicenseManager.getInstance(this).getLicenseState()
             if (licState.isTrialExpired && !licState.isLifetime) {

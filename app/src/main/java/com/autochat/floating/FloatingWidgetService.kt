@@ -396,8 +396,35 @@ class FloatingWidgetService : Service() {
         }
         updateFloatingLicenseBadge()
 
+        // Realtime Network Detection in Floating Widget (Auto-pause & status warning)
+        NetworkMonitor.getInstance(this).addListener { isOnline ->
+            if (!isOnline) {
+                if (isRunning) {
+                    stopRunningState()
+                    Toast.makeText(this, "Internet terputus! AutoChat dijeda otomatis.", Toast.LENGTH_LONG).show()
+                }
+                statusIndicator.setBackgroundColor(Color.parseColor("#EF4444"))
+                bubbleStatusDot.setBackgroundColor(Color.parseColor("#EF4444"))
+                tvStatusText.text = "Offline (Butuh Internet/WiFi)"
+                tvStatusText.setTextColor(Color.parseColor("#EF4444"))
+            } else {
+                if (!isRunning) {
+                    statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
+                    bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
+                    tvStatusText.text = "Online • Siap"
+                    tvStatusText.setTextColor(Color.parseColor("#64748B"))
+                }
+            }
+        }
+
         btnToggle.setOnClickListener {
             if (!isRunning) {
+                // Verifikasi Koneksi Internet Wajib Online
+                if (!NetworkMonitor.getInstance(this).isOnline()) {
+                    Toast.makeText(this, "Hidupkan data internet atau WiFi untuk menggunakan AutoChat", Toast.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
+
                 // Verifikasi Lisensi & Trial 3 Hari
                 val licenseState = LicenseManager.getInstance(this).getLicenseState()
                 if (licenseState.isTrialExpired && !licenseState.isLifetime) {
