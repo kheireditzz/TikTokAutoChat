@@ -1,253 +1,316 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layoutFloatingRoot"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutRootContainer"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/bg_floating_card"
-    android:padding="16dp"
-    android:elevation="18dp">
+    android:layout_height="wrap_content">
 
-    <!-- Top Handle & Header Bar -->
+    <!-- 1. BUBBLE / ICON KECIL (Saat Diperkecil / Minimized) -->
     <LinearLayout
-        android:id="@+id/layoutHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/layoutBubble"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="12dp">
+        android:background="@drawable/bg_floating_bubble"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:visibility="gone"
+        android:elevation="20dp">
 
-        <!-- Live Pulse Indicator -->
         <View
-            android:id="@+id/statusIndicator"
-            android:layout_width="9dp"
-            android:layout_height="9dp"
-            android:background="#3FB950"
-            android:layout_marginEnd="10dp" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AutoChat"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:letterSpacing="0.02" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Live Stream Automation"
-                android:textColor="#6E7681"
-                android:textSize="9.5sp" />
-        </LinearLayout>
-
-        <!-- Close Button -->
-        <ImageView
-            android:id="@+id/btnCloseFloating"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/bg_circle_btn"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:tint="#8B949E"
-            android:padding="6dp" />
-    </LinearLayout>
-
-    <!-- Section Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+            android:id="@+id/bubbleStatusDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_indicator_dot" />
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="ROTATING PRESETS"
-            android:textColor="#8B949E"
-            android:textSize="9sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.08" />
-
-        <TextView
-            android:id="@+id/tvActiveCount"
+            android:id="@+id/tvBubbleLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2 Aktif"
-            android:textColor="#58A6FF"
-            android:textSize="9.5sp"
-            android:textStyle="bold" />
+            android:text="AutoChat"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⛶"
+            android:textColor="#00D2FF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp" />
     </LinearLayout>
 
-    <!-- Preset Cards Container -->
+    <!-- 2. CARD LENGKAP (Expanded / Layar Penuh Melayang) -->
     <LinearLayout
-        android:layout_width="250dp"
+        android:id="@+id/layoutExpanded"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_input_field"
-        android:padding="6dp"
-        android:layout_marginBottom="12dp">
+        android:background="@drawable/bg_floating_card"
+        android:padding="14dp"
+        android:elevation="20dp">
 
-        <!-- Item 1 -->
+        <!-- Header Bar (Drag Handle) -->
+        <LinearLayout
+            android:id="@+id/layoutHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="10dp">
+
+            <View
+                android:id="@+id/statusIndicator"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:background="@drawable/bg_indicator_dot"
+                android:layout_marginEnd="8dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TikTok AutoChat"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Siap dikirimkan"
+                    android:textColor="#8B949E"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Tombol Perkecil (Minimize) -->
+            <TextView
+                android:id="@+id/btnMinimize"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:background="@drawable/bg_circle_btn"
+                android:text="—"
+                android:textColor="#00D2FF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp" />
+
+            <!-- Tombol Tutup (Close) -->
+            <TextView
+                android:id="@+id/btnCloseFloating"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:background="@drawable/bg_circle_btn"
+                android:text="✕"
+                android:textColor="#F85149"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Section Info Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="5dp">
-            <CheckBox
-                android:id="@+id/cbPreset1"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:checked="true"
-                android:buttonTint="#00B4D8" />
-            <EditText
-                android:id="@+id/etPreset1"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:text="Halo host, barangnya ready? 🔥"
-                android:textColor="#F0F6FC"
-                android:textSize="11.5sp"
-                android:background="@null"
-                android:paddingStart="6dp"
-                android:paddingEnd="4dp"
-                android:singleLine="true" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#1B212D"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
-
-        <!-- Item 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="5dp">
-            <CheckBox
-                android:id="@+id/cbPreset2"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:checked="true"
-                android:buttonTint="#00B4D8" />
-            <EditText
-                android:id="@+id/etPreset2"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:text="Spill promo etalase 1 dong kak 🛍️"
-                android:textColor="#F0F6FC"
-                android:textSize="11.5sp"
-                android:background="@null"
-                android:paddingStart="6dp"
-                android:paddingEnd="4dp"
-                android:singleLine="true" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#1B212D"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
-
-        <!-- Item 3 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="5dp">
-            <CheckBox
-                android:id="@+id/cbPreset3"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:checked="false"
-                android:buttonTint="#00B4D8" />
-            <EditText
-                android:id="@+id/etPreset3"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:text="Tap tap layar terus guys! ✨"
-                android:textColor="#F0F6FC"
-                android:textSize="11.5sp"
-                android:background="@null"
-                android:paddingStart="6dp"
-                android:paddingEnd="4dp"
-                android:singleLine="true" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Bottom Action Bar: Interval & Start Button -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:background="@drawable/bg_input_field"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp">
+            android:layout_marginBottom="6dp">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="DAFTAR PESAN BERPUTAR"
+                android:textColor="#00D2FF"
+                android:textSize="9.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:id="@+id/tvActiveCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Interval"
-                android:textColor="#8B949E"
-                android:textSize="10.5sp" />
+                android:text="3 Aktif"
+                android:textColor="#7EE787"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-            <EditText
-                android:id="@+id/etDelayInput"
-                android:layout_width="32dp"
-                android:layout_height="match_parent"
-                android:text="5"
-                android:gravity="center"
-                android:textColor="#00B4D8"
-                android:background="@null"
+        <!-- Container Input Pesan -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_input_field"
+            android:padding="6dp"
+            android:layout_marginBottom="10dp">
+
+            <!-- Item 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="4dp">
+                <CheckBox
+                    android:id="@+id/cbPreset1"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:checked="true"
+                    android:buttonTint="#00D2FF" />
+                <EditText
+                    android:id="@+id/etPreset1"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:text="Halo kak, barangnya ready? 🔥"
+                    android:textColor="#F0F6FC"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#24324F"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp" />
+
+            <!-- Item 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="4dp">
+                <CheckBox
+                    android:id="@+id/cbPreset2"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:checked="true"
+                    android:buttonTint="#00D2FF" />
+                <EditText
+                    android:id="@+id/etPreset2"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:text="Spill etalase nomor 1 dong kak 🛍️"
+                    android:textColor="#F0F6FC"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#24324F"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp" />
+
+            <!-- Item 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="4dp">
+                <CheckBox
+                    android:id="@+id/cbPreset3"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:checked="true"
+                    android:buttonTint="#00D2FF" />
+                <EditText
+                    android:id="@+id/etPreset3"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:text="Tap tap layar terus guys! ✨"
+                    android:textColor="#F0F6FC"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bottom Action Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Interval Setting -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jeda:"
+                    android:textColor="#8B949E"
+                    android:textSize="11sp" />
+
+                <EditText
+                    android:id="@+id/etDelayInput"
+                    android:layout_width="34dp"
+                    android:layout_height="match_parent"
+                    android:text="4"
+                    android:gravity="center"
+                    android:textColor="#00D2FF"
+                    android:background="@null"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:inputType="number"
+                    android:layout_marginStart="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="detik"
+                    android:textColor="#8B949E"
+                    android:textSize="11sp"
+                    android:layout_marginStart="2dp" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Tombol Start / Stop AutoChat -->
+            <Button
+                android:id="@+id/btnToggleStart"
+                android:layout_width="92dp"
+                android:layout_height="36dp"
+                android:text="MULAI"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:inputType="number"
-                android:layout_marginStart="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="s"
-                android:textColor="#8B949E"
-                android:textSize="10.5sp"
-                android:layout_marginStart="2dp" />
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_action_btn"
+                android:stateListAnimator="@null" />
         </LinearLayout>
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/btnToggleStart"
-            android:layout_width="82dp"
-            android:layout_height="34dp"
-            android:text="START"
-            android:textSize="11.5sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_action_btn"
-            android:elevation="0dp"
-            android:stateListAnimator="@null" />
     </LinearLayout>
-</LinearLayout>
+
+</FrameLayout>
