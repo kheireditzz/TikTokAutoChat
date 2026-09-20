@@ -24,8 +24,8 @@ class MainActivity : Activity() {
     private lateinit var mainStatusDot: View
     private lateinit var switchOverlay: Switch
     private lateinit var switchAccessibility: Switch
-    private lateinit var btnGrantOverlay: Button
-    private lateinit var btnGrantAccessibility: Button
+    private lateinit var indicatorOverlay: View
+    private lateinit var indicatorAccessibility: View
     private lateinit var btnLaunch: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +36,8 @@ class MainActivity : Activity() {
         mainStatusDot = findViewById(R.id.mainStatusDot)
         switchOverlay = findViewById(R.id.switchOverlay)
         switchAccessibility = findViewById(R.id.switchAccessibility)
-        btnGrantOverlay = findViewById(R.id.btnGrantOverlay)
-        btnGrantAccessibility = findViewById(R.id.btnGrantAccessibility)
+        indicatorOverlay = findViewById(R.id.indicatorOverlay)
+        indicatorAccessibility = findViewById(R.id.indicatorAccessibility)
         btnLaunch = findViewById(R.id.btnLaunchFloating)
 
         val overlayAction = View.OnClickListener {
@@ -53,7 +53,7 @@ class MainActivity : Activity() {
                 }
             }
         }
-        btnGrantOverlay.setOnClickListener(overlayAction)
+        findViewById<View>(R.id.cardOverlay).setOnClickListener(overlayAction)
         switchOverlay.setOnClickListener(overlayAction)
 
         val accessibilityAction = View.OnClickListener {
@@ -61,7 +61,7 @@ class MainActivity : Activity() {
             startActivity(intent)
             Toast.makeText(this, "Cari dan aktifkan 'AutoChat'", Toast.LENGTH_LONG).show()
         }
-        btnGrantAccessibility.setOnClickListener(accessibilityAction)
+        findViewById<View>(R.id.cardAccessibility).setOnClickListener(accessibilityAction)
         switchAccessibility.setOnClickListener(accessibilityAction)
 
         btnLaunch.setOnClickListener {
@@ -74,7 +74,6 @@ class MainActivity : Activity() {
                 Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa mengetik otomatis!", Toast.LENGTH_LONG).show()
             }
 
-            // Luncurkan widget melayang
             val serviceIntent = Intent(this, FloatingWidgetService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent)
@@ -101,20 +100,17 @@ class MainActivity : Activity() {
         switchOverlay.isChecked = hasOverlay
         switchAccessibility.isChecked = hasAccessibility
 
+        // Indikator Warna Murni: HIJAU = AKTIF, MERAH = MATI
         if (hasOverlay) {
-            btnGrantOverlay.text = "Izin Overlay Sudah Aktif"
-            btnGrantOverlay.setTextColor(Color.parseColor("#10B981"))
+            indicatorOverlay.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            btnGrantOverlay.text = "Buka Izin Overlay"
-            btnGrantOverlay.setTextColor(Color.parseColor("#EF4444"))
+            indicatorOverlay.setBackgroundColor(Color.parseColor("#EF4444"))
         }
 
         if (hasAccessibility) {
-            btnGrantAccessibility.text = "Aksesibilitas Sudah Aktif"
-            btnGrantAccessibility.setTextColor(Color.parseColor("#10B981"))
+            indicatorAccessibility.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            btnGrantAccessibility.text = "Buka Pengaturan Aksesibilitas"
-            btnGrantAccessibility.setTextColor(Color.parseColor("#EF4444"))
+            indicatorAccessibility.setBackgroundColor(Color.parseColor("#EF4444"))
         }
 
         if (hasOverlay && hasAccessibility) {
@@ -123,8 +119,8 @@ class MainActivity : Activity() {
             mainStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
             tvSystemStatus.text = "Periksa Izin Di Bawah"
-            tvSystemStatus.setTextColor(Color.parseColor("#F59E0B"))
-            mainStatusDot.setBackgroundColor(Color.parseColor("#F59E0B"))
+            tvSystemStatus.setTextColor(Color.parseColor("#EF4444"))
+            mainStatusDot.setBackgroundColor(Color.parseColor("#EF4444"))
         }
     }
 

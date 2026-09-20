@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Clean White Header Bar -->
+        <!-- Clean Header Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                 android:paddingBottom="5dp" />
         </LinearLayout>
 
-        <!-- Status Card (Clean Modern Style) -->
+        <!-- Status Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Step 1: Overlay Card with Toggle Switch -->
+        <!-- Step 1: Overlay Card (HANYA WARNA HIJAU/MERAH, TANPA TEKS PANJANG) -->
         <LinearLayout
             android:id="@+id/cardOverlay"
             android:layout_width="match_parent"
@@ -164,19 +164,16 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnGrantOverlay"
-                android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:text="Izin Overlay Sudah Aktif"
-                android:textSize="12sp"
-                android:textColor="#0F172A"
-                android:background="@drawable/bg_white_button"
-                android:layout_marginTop="10dp"
-                android:stateListAnimator="@null" />
+            <!-- Indikator Warna Garis Pill Saja (Hijau / Merah) -->
+            <View
+                android:id="@+id/indicatorOverlay"
+                android:layout_width="38dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_indicator_pill"
+                android:layout_marginTop="10dp" />
         </LinearLayout>
 
-        <!-- Step 2: Accessibility Card with Toggle Switch -->
+        <!-- Step 2: Accessibility Card (HANYA WARNA HIJAU/MERAH, TANPA TEKS PANJANG) -->
         <LinearLayout
             android:id="@+id/cardAccessibility"
             android:layout_width="match_parent"
@@ -223,16 +220,13 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnGrantAccessibility"
-                android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:text="Aksesibilitas Sudah Aktif"
-                android:textSize="12sp"
-                android:textColor="#0F172A"
-                android:background="@drawable/bg_white_button"
-                android:layout_marginTop="10dp"
-                android:stateListAnimator="@null" />
+            <!-- Indikator Warna Garis Pill Saja (Hijau / Merah) -->
+            <View
+                android:id="@+id/indicatorAccessibility"
+                android:layout_width="38dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_indicator_pill"
+                android:layout_marginTop="10dp" />
         </LinearLayout>
 
         <!-- Launch Floating Widget Button -->
