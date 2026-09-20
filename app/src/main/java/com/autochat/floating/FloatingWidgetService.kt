@@ -10,12 +10,13 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
-import android.provider.Settings
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
-import kotlin.math.abs
+import org.json.JSONArray
 
 class FloatingWidgetService : Service() {
 
@@ -28,6 +29,11 @@ class FloatingWidgetService : Service() {
     private var isMinimized = false
 
     private val CHANNEL_ID = "AutoChat_Floating_Channel"
+
+    // Views untuk Kalibrasi Non-Blocking (Bebas Sentuh Layar)
+    private var pinChatView: View? = null
+    private var pinSendView: View? = null
+    private var calibrationToolbarView: View? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -55,8 +61,8 @@ class FloatingWidgetService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 40
-            y = 200
+            x = 30
+            y = 180
         }
 
         windowManager.addView(floatingView, params)
@@ -75,7 +81,7 @@ class FloatingWidgetService : Service() {
 
             val notification: Notification = Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle("TikTok AutoChat Aktif")
-                .setContentText("Widget melayang siap mengontrol obrolan.")
+                .setContentText("Widget melayang siap mengontrol chat otomatis.")
                 .setSmallIcon(android.R.drawable.ic_menu_send)
                 .build()
 
@@ -92,6 +98,7 @@ class FloatingWidgetService : Service() {
         val btnClose = floatingView.findViewById<TextView>(R.id.btnCloseFloating)
         val btnToggle = floatingView.findViewById<Button>(R.id.btnToggleStart)
         val etDelay = floatingView.findViewById<EditText>(R.id.etDelayInput)
+        val etTargetLimit = floatingView.findViewById<EditText>(R.id.etTargetLimitInput)
         val statusIndicator = floatingView.findViewById<View>(R.id.statusIndicator)
         val bubbleStatusDot = floatingView.findViewById<View>(R.id.bubbleStatusDot)
         val tvStatusText = floatingView.findViewById<TextView>(R.id.tvStatusText)
@@ -101,18 +108,22 @@ class FloatingWidgetService : Service() {
         val tvSentCountStatus = floatingView.findViewById<TextView>(R.id.tvSentCountStatus)
         val containerMessages = floatingView.findViewById<LinearLayout>(R.id.containerFloatingMessages)
         val btnAddMessage = floatingView.findViewById<TextView>(R.id.btnFloatingAddMessage)
+        val btnCalibrate = floatingView.findViewById<TextView>(R.id.btnCalibrate)
 
         var totalSentCount = 0
 
-        // Pasang listener status kirim chat valid
-        TikTokAccessibilityService.instance?.setOnChatSentListener { count, _ ->
-            totalSentCount = count
-            tvSentCountStatus.setText("$count Terkirim")
-            tvBubbleSentCount.setText("$count kirim")
-            tvStatusText.setText("Terkirim $count pesan ✓")
-        }
-
         val widgetMessageItems = mutableListOf<Pair<CheckBox, EditText>>()
+
+        fun persistMessages() {
+            val arr = JSONArray()
+            for ((_, et) in widgetMessageItems) {
+                val t = et.text.toString().trim()
+                if (t.isNotBlank()) arr.put(t)
+            }
+            if (arr.length() > 0) {
+                prefs.edit().putString("messages_json", arr.toString()).apply()
+            }
+        }
 
         fun updateCountText() {
             var count = 0
@@ -120,6 +131,7 @@ class FloatingWidgetService : Service() {
                 if (cb.isChecked && et.text.isNotBlank()) count++
             }
             tvActiveCount.text = "$count Aktif"
+            persistMessages()
         }
 
         fun addWidgetMessageItem(text: String, isChecked: Boolean = true) {
@@ -154,13 +166,19 @@ class FloatingWidgetService : Service() {
                     } catch (_: Exception) {}
                     false
                 }
+
+                setOnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        persistMessages()
+                    }
+                }
             }
 
             val btnDel = TextView(this).apply {
                 val s = (24 * resources.displayMetrics.density).toInt()
                 layoutParams = LinearLayout.LayoutParams(s, s)
                 gravity = Gravity.CENTER
-                setText("✕")
+                text = "✕"
                 setTextColor(Color.parseColor("#94A3B8"))
                 textSize = 11f
                 setOnClickListener {
@@ -190,42 +208,47 @@ class FloatingWidgetService : Service() {
             updateCountText()
         }
 
-        // Load pesan tersimpan dari SharedPreferences
-        val jsonStr = prefs.getString("messages_json", null)
-        val loadedList = mutableListOf<String>()
-        if (!jsonStr.isNullOrBlank()) {
-            try {
-                val arr = org.json.JSONArray(jsonStr)
-                for (i in 0 until arr.length()) {
-                    val s = arr.getString(i)
-                    if (s.isNotBlank()) loadedList.add(s)
-                }
-            } catch (_: Exception) {}
-        }
+        // Muat pesan dari SharedPreferences
+        fun reloadMessagesFromPrefs() {
+            containerMessages.removeAllViews()
+            widgetMessageItems.clear()
 
-        if (loadedList.isEmpty()) {
-            loadedList.add(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥") ?: "")
-            loadedList.add(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️") ?: "")
-            loadedList.add(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨") ?: "")
-        }
-
-        containerMessages.removeAllViews()
-        for (msg in loadedList) {
-            if (msg.isNotBlank()) {
-                addWidgetMessageItem(msg, true)
+            val jsonStr = prefs.getString("messages_json", null)
+            val loadedList = mutableListOf<String>()
+            if (!jsonStr.isNullOrBlank()) {
+                try {
+                    val arr = JSONArray(jsonStr)
+                    for (i in 0 until arr.length()) {
+                        val s = arr.getString(i)
+                        if (s.isNotBlank()) loadedList.add(s)
+                    }
+                } catch (_: Exception) {}
             }
+
+            if (loadedList.isEmpty()) {
+                loadedList.add(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥") ?: "")
+                loadedList.add(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️") ?: "")
+                loadedList.add(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨") ?: "")
+            }
+
+            for (msg in loadedList) {
+                if (msg.isNotBlank()) {
+                    addWidgetMessageItem(msg, true)
+                }
+            }
+            etDelay.setText(prefs.getInt("delay", 4).toString())
+            etTargetLimit.setText(prefs.getInt("max_count", 0).toString())
         }
+
+        reloadMessagesFromPrefs()
 
         btnAddMessage.setOnClickListener {
             addWidgetMessageItem("", true)
         }
 
-        val btnCalibrate = floatingView.findViewById<TextView>(R.id.btnCalibrate)
         btnCalibrate.setOnClickListener {
-            startOneTouchCalibration()
+            startPinCalibration()
         }
-
-        etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
             isMinimized = minimized
@@ -240,8 +263,7 @@ class FloatingWidgetService : Service() {
             } else {
                 layoutBubble.visibility = View.GONE
                 layoutExpanded.visibility = View.VISIBLE
-                // Pastikan saat diperbesar, widget tidak terpotong di tepi kanan layar
-                val expandedWidth = (270 * resources.displayMetrics.density).toInt()
+                val expandedWidth = (275 * resources.displayMetrics.density).toInt()
                 if (params.x + expandedWidth > screenWidth) {
                     params.x = (screenWidth - expandedWidth - 16).coerceAtLeast(16)
                 }
@@ -259,153 +281,180 @@ class FloatingWidgetService : Service() {
             setMinimizeState(false)
         }
 
-        // Drag Handler dengan Auto Snap ke Samping Layar & Deteksi Klik
-        val dragTouchListener = object : View.OnTouchListener {
-            private var initialX = 0
-            private var initialY = 0
-            private var initialTouchX = 0f
-            private var initialTouchY = 0f
-            private var isClick = false
-
-            override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        initialX = params.x
-                        initialY = params.y
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
-                        isClick = true
-                        return true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        val dx = event.rawX - initialTouchX
-                        val dy = event.rawY - initialTouchY
-                        if (abs(dx) > 10 || abs(dy) > 10) {
-                            isClick = false
-                        }
-                        params.x = initialX + dx.toInt()
-                        params.y = initialY + dy.toInt()
-                        try {
-                            windowManager.updateViewLayout(floatingView, params)
-                        } catch (_: Exception) {}
-                        return true
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (isClick) {
-                            if (v == layoutBubble || isMinimized) {
-                                setMinimizeState(false)
-                            } else {
-                                v?.performClick()
-                            }
-                        } else {
-                            if (isMinimized) {
-                                snapToNearestEdge()
-                            }
-                        }
-                        return true
-                    }
-                }
-                return false
-            }
+        // Listener status kirim sukses
+        TikTokAccessibilityService.instance?.setOnChatSentListener { count, _ ->
+            totalSentCount = count
+            tvSentCountStatus.text = "$count Terkirim"
+            tvBubbleSentCount.text = "$count kirim"
+            tvStatusText.text = "Terkirim $count pesan ✓"
         }
 
-        header.setOnTouchListener(dragTouchListener)
-        layoutBubble.setOnTouchListener(dragTouchListener)
-
-        etDelay.setOnTouchListener { _, _ ->
-            params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-            try {
-                windowManager.updateViewLayout(floatingView, params)
-            } catch (_: Exception) {}
-            false
+        // Listener jika target batas pesan telah tercapai
+        TikTokAccessibilityService.instance?.setOnTargetReachedListener { reachedCount ->
+            isRunning = false
+            btnToggle.text = "MULAI"
+            btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
+            statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
+            bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
+            tvStatusText.text = "Selesai ($reachedCount pesan)"
+            tvStatusText.setTextColor(Color.parseColor("#3B82F6"))
+            tvBubbleLabel.text = "SELESAI"
         }
 
-        btnClose.setOnClickListener {
+        fun stopRunningState() {
             TikTokAccessibilityService.instance?.stopAutoChat()
-            stopSelf()
+            isRunning = false
+            btnToggle.text = "MULAI"
+            btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
+            statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
+            bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
+            tvStatusText.text = "Berhenti"
+            tvStatusText.setTextColor(Color.parseColor("#64748B"))
+            tvBubbleLabel.text = "AutoChat"
+            Toast.makeText(this, "Auto Chat Dihentikan.", Toast.LENGTH_SHORT).show()
         }
 
         btnToggle.setOnClickListener {
             if (!isRunning) {
                 val service = TikTokAccessibilityService.instance
                 if (service == null) {
-                    Toast.makeText(this, "Aksesibilitas belum aktif! Aktifkan 'AutoChat' di pengaturan.", Toast.LENGTH_LONG).show()
-                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    startActivity(intent)
+                    Toast.makeText(this, "Aksesibilitas belum aktif! Buka Pengaturan HP.", Toast.LENGTH_LONG).show()
                     return@setOnClickListener
                 }
 
                 val activeList = arrayListOf<String>()
-                val allListJson = org.json.JSONArray()
                 for ((cb, et) in widgetMessageItems) {
                     val t = et.text.toString().trim()
-                    if (t.isNotBlank()) {
-                        allListJson.put(t)
-                        if (cb.isChecked) {
-                            activeList.add(t)
-                        }
+                    if (cb.isChecked && t.isNotBlank()) {
+                        activeList.add(t)
                     }
                 }
 
                 if (activeList.isEmpty()) {
-                    Toast.makeText(this, "Centang minimal 1 pesan!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Centang minimal 1 komentar untuk dikirim!", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
                 val delay = etDelay.text.toString().toLongOrNull() ?: 4L
+                val targetLimit = etTargetLimit.text.toString().toIntOrNull() ?: 0
                 val antiSpam = prefs.getBoolean("anti_spam", true)
 
-                // Simpan perubahan pesan saat ini ke SharedPreferences secara otomatis
+                // Simpan delay & limit terbaru
                 prefs.edit()
-                    .putString("messages_json", allListJson.toString())
                     .putInt("delay", delay.toInt())
+                    .putInt("max_count", targetLimit)
                     .apply()
 
-                // Lepas fokus keyboard agar TikTok tidak terhalangi
-                params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                windowManager.updateViewLayout(floatingView, params)
-
-                // Pasang listener status kirim chat valid
                 service.setOnChatSentListener { count, _ ->
                     totalSentCount = count
-                    tvSentCountStatus.setText("$count Terkirim")
-                    tvBubbleSentCount.setText("$count kirim")
-                    tvStatusText.setText("Terkirim $count pesan ✓")
+                    tvSentCountStatus.text = "$count Terkirim"
+                    tvBubbleSentCount.text = "$count kirim"
+                    tvStatusText.text = "Terkirim $count pesan ✓"
                 }
 
-                // Panggil service AutoChat cerdas (Smart Keyboard Flow)
-                service.startAutoChat(activeList, delay, antiSpam)
+                service.setOnTargetReachedListener { reachedCount ->
+                    isRunning = false
+                    btnToggle.text = "MULAI"
+                    btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
+                    statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
+                    bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
+                    tvStatusText.text = "Selesai ($reachedCount pesan)"
+                    tvStatusText.setTextColor(Color.parseColor("#3B82F6"))
+                    tvBubbleLabel.text = "SELESAI"
+                }
+
+                // Mulai AutoChat
+                service.startAutoChat(activeList, delay, antiSpam, targetLimit)
 
                 totalSentCount = 0
-                tvSentCountStatus.setText("0 Terkirim")
-                tvBubbleSentCount.setText("0 kirim")
+                tvSentCountStatus.text = "0 Terkirim"
+                tvBubbleSentCount.text = "0 kirim"
 
                 isRunning = true
                 btnToggle.text = "STOP"
                 btnToggle.setBackgroundColor(Color.parseColor("#EF4444"))
                 statusIndicator.setBackgroundColor(Color.parseColor("#10B981"))
                 bubbleStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
-                tvStatusText.text = "Berjalan (Tiap ${delay}s)"
+                tvStatusText.text = if (targetLimit > 0) "Berjalan (${targetLimit}x)" else "Berjalan (${delay}s)"
                 tvStatusText.setTextColor(Color.parseColor("#10B981"))
                 tvBubbleLabel.text = "RUNNING"
-                Toast.makeText(this, "Auto Chat Mulai Berjalan!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Auto Chat Dimulai!", Toast.LENGTH_SHORT).show()
 
-                // Otomatis minimize ke bubble samping agar tidak menghalangi live
+                // Otomatis minimize ke samping
                 setMinimizeState(true)
             } else {
-                TikTokAccessibilityService.instance?.stopAutoChat()
+                stopRunningState()
+            }
+        }
 
-                isRunning = false
-                btnToggle.text = "MULAI"
-                btnToggle.setBackgroundColor(Color.parseColor("#FE2C55"))
-                statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
-                bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
-                tvStatusText.text = "Berhenti"
-                tvStatusText.setTextColor(Color.parseColor("#64748B"))
-                tvBubbleLabel.text = "AutoChat"
-                Toast.makeText(this, "Auto Chat Dihentikan.", Toast.LENGTH_SHORT).show()
+        btnCloseFloating.setOnClickListener {
+            stopRunningState()
+            stopPinCalibration()
+            stopSelf()
+        }
+
+        // Dragging handler untuk header dan bubble
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+
+        val dragListener = View.OnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    try {
+                        windowManager.updateViewLayout(floatingView, params)
+                    } catch (_: Exception) {}
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (isMinimized) {
+                        snapToNearestEdge()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+
+        header.setOnTouchListener(dragListener)
+        layoutBubble.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    try {
+                        windowManager.updateViewLayout(floatingView, params)
+                    } catch (_: Exception) {}
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val diffX = kotlin.math.abs(event.rawX - initialTouchX)
+                    val diffY = kotlin.math.abs(event.rawY - initialTouchY)
+                    if (diffX < 15 && diffY < 15) {
+                        setMinimizeState(false)
+                    } else {
+                        snapToNearestEdge()
+                    }
+                    true
+                }
+                else -> false
             }
         }
     }
@@ -429,14 +478,13 @@ class FloatingWidgetService : Service() {
     }
 
     /**
-     * MODE KALIBRASI 1x SENTUH:
-     * Menampilkan overlay transparan satu layar penuh untuk merekam pixel koordinat asli
-     * saat user menyentuh langsung kolom komentar & tombol kirim di TikTok Live.
+     * MODE KALIBRASI PIN TARGET (NON-BLOCKING / BEBAS SENTUH LAYAR):
+     * Memunculkan Pin 1 (Chat) dan Pin 2 (Kirim) serta Toolbar Mini di atas.
+     * Layar di belakangnya 100% bebas disentuh sehingga user bisa memunculkan keyboard
+     * dan mengeklik tombol TikTok tanpa terhalang sama sekali.
      */
-    private var calibrationOverlayView: View? = null
-
-    private fun startOneTouchCalibration() {
-        if (calibrationOverlayView != null) return
+    private fun startPinCalibration() {
+        if (pinChatView != null || pinSendView != null) return
 
         val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -445,131 +493,215 @@ class FloatingWidgetService : Service() {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
-        val calParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+
+        // Koordinat awal (ambil dari saved prefs atau default layar)
+        val savedChatX = prefs.getFloat("calibrated_chat_x", screenWidth * 0.15f)
+        val savedChatY = prefs.getFloat("calibrated_chat_y", screenHeight * 0.94f)
+        val savedSendX = prefs.getFloat("calibrated_send_x", screenWidth * 0.85f)
+        val savedSendY = prefs.getFloat("calibrated_send_y", screenHeight * 0.62f)
+
+        // 1. PIN 1: CHAT / KOLOM KOMENTAR (Merah TikTok)
+        val pin1 = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
+        val tvLabel1 = pin1.findViewById<TextView>(R.id.tvTargetLabel)
+        tvLabel1.text = "🔴 1. CHAT"
+
+        val pin1Params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
-        )
-
-        val calContainer = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#44000000")) // Semi transparan gelap lembut
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = (savedChatX - 24 * displayMetrics.density).toInt().coerceAtLeast(0)
+            y = (savedChatY - 24 * displayMetrics.density).toInt().coerceAtLeast(0)
         }
 
-        // Banner petunjuk di atas layar
-        val bannerLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            val padH = (16 * resources.displayMetrics.density).toInt()
-            val padV = (12 * resources.displayMetrics.density).toInt()
-            setPadding(padH, padV, padH, padV)
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(Color.parseColor("#0F172A"))
-                cornerRadius = 16 * resources.displayMetrics.density
-            }
-            val lp = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                topMargin = (60 * resources.displayMetrics.density).toInt()
-            }
-            layoutParams = lp
+        // 2. PIN 2: TOMBOL KIRIM (Biru)
+        val pin2 = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
+        val tvLabel2 = pin2.findViewById<TextView>(R.id.tvTargetLabel)
+        tvLabel2.text = "🔵 2. KIRIM"
+        tvLabel2.setTextColor(Color.parseColor("#38BDF8"))
+        pin2.findViewById<View>(R.id.viewTargetRing).setBackgroundResource(R.drawable.bg_target_ring_blue)
+        pin2.findViewById<View>(R.id.viewCrossH).setBackgroundColor(Color.parseColor("#3B82F6"))
+        pin2.findViewById<View>(R.id.viewCrossV).setBackgroundColor(Color.parseColor("#3B82F6"))
+        pin2.findViewById<View>(R.id.viewTargetCenter).setBackgroundResource(R.drawable.bg_target_center_blue)
+
+        val pin2Params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = (savedSendX - 24 * displayMetrics.density).toInt().coerceAtLeast(0)
+            y = (savedSendY - 24 * displayMetrics.density).toInt().coerceAtLeast(0)
         }
 
-        val tvStepTitle = TextView(this).apply {
-            text = "📍 MODE KALIBRASI 1x SENTUH"
-            setTextColor(Color.parseColor("#FE2C55"))
-            textSize = 14f
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-            gravity = Gravity.CENTER
+        // 3. TOOLBAR KONTROL KALIBRASI DI ATAS LAYAR
+        val toolbar = LayoutInflater.from(this).inflate(R.layout.layout_calibration_toolbar, null)
+        val tvCoordInfo = toolbar.findViewById<TextView>(R.id.tvCalibCoordInfo)
+        val btnSave = toolbar.findViewById<Button>(R.id.btnCalibSave)
+        val btnTest = toolbar.findViewById<Button>(R.id.btnCalibTest)
+        val btnReset = toolbar.findViewById<TextView>(R.id.btnCalibResetDefault)
+        val btnClose = toolbar.findViewById<TextView>(R.id.btnCalibClose)
+
+        val toolbarParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP
+            y = (35 * displayMetrics.density).toInt()
         }
 
-        val tvStepDesc = TextView(this).apply {
-            text = "Langkah 1/2: Sentuh KOLOM KOMENTAR di TikTok Anda"
-            setTextColor(Color.WHITE)
-            textSize = 12.5f
-            gravity = Gravity.CENTER
-            setPadding(0, 4, 0, 8)
+        fun updateLiveCoordinatesDisplay() {
+            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
+            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val loc1 = IntArray(2)
+            val loc2 = IntArray(2)
+            circle1.getLocationOnScreen(loc1)
+            circle2.getLocationOnScreen(loc2)
+            val cX = loc1[0] + circle1.width / 2
+            val cY = loc1[1] + circle1.height / 2
+            val sX = loc2[0] + circle2.width / 2
+            val sY = loc2[1] + circle2.height / 2
+            tvCoordInfo.text = "🔴 Chat: ($cX, $cY) • 🔵 Kirim: ($sX, $sY)"
         }
 
-        val btnBatal = TextView(this).apply {
-            text = "✕ Batal Kalibrasi"
-            setTextColor(Color.parseColor("#94A3B8"))
-            textSize = 11f
-            gravity = Gravity.CENTER
-            setPadding(8, 4, 8, 4)
-            setOnClickListener {
-                stopOneTouchCalibration()
-            }
-        }
+        fun makeDraggable(v: View, p: WindowManager.LayoutParams) {
+            var startX = 0
+            var startY = 0
+            var touchX = 0f
+            var touchY = 0f
 
-        bannerLayout.addView(tvStepTitle)
-        bannerLayout.addView(tvStepDesc)
-        bannerLayout.addView(btnBatal)
-        calContainer.addView(bannerLayout)
-
-        var step = 1
-        var recordedChatX = 0f
-        var recordedChatY = 0f
-
-        calContainer.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                if (step == 1) {
-                    recordedChatX = event.rawX
-                    recordedChatY = event.rawY
-                    step = 2
-
-                    // Animasi update teks banner langkah kedua
-                    tvStepDesc.text = "Langkah 2/2: Sentuh TOMBOL KIRIM / PANAH TikTok"
-                    tvStepDesc.setTextColor(Color.parseColor("#10B981"))
-                    Toast.makeText(this, "Kolom Chat terkunci (${recordedChatX.toInt()}, ${recordedChatY.toInt()})", Toast.LENGTH_SHORT).show()
-                } else if (step == 2) {
-                    val recordedSendX = event.rawX
-                    val recordedSendY = event.rawY
-
-                    // Simpan ke SharedPreferences & Accessibility Service
-                    prefs.edit()
-                        .putFloat("calibrated_chat_x", recordedChatX)
-                        .putFloat("calibrated_chat_y", recordedChatY)
-                        .putFloat("calibrated_send_x", recordedSendX)
-                        .putFloat("calibrated_send_y", recordedSendY)
-                        .apply()
-
-                    TikTokAccessibilityService.instance?.setCalibratedCoordinates(
-                        recordedChatX, recordedChatY, recordedSendX, recordedSendY
-                    )
-
-                    Toast.makeText(this, "Kalibrasi Berhasil! Titik chat & kirim terkunci 100% presisi.", Toast.LENGTH_LONG).show()
-                    stopOneTouchCalibration()
+            v.setOnTouchListener { _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startX = p.x
+                        startY = p.y
+                        touchX = event.rawX
+                        touchY = event.rawY
+                        true
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        p.x = startX + (event.rawX - touchX).toInt()
+                        p.y = startY + (event.rawY - touchY).toInt()
+                        try {
+                            windowManager.updateViewLayout(v, p)
+                        } catch (_: Exception) {}
+                        updateLiveCoordinatesDisplay()
+                        true
+                    }
+                    else -> false
                 }
-                return@setOnTouchListener true
             }
-            false
         }
 
-        calibrationOverlayView = calContainer
-        windowManager.addView(calContainer, calParams)
+        makeDraggable(pin1, pin1Params)
+        makeDraggable(pin2, pin2Params)
+
+        btnSave.setOnClickListener {
+            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
+            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val loc1 = IntArray(2)
+            val loc2 = IntArray(2)
+            circle1.getLocationOnScreen(loc1)
+            circle2.getLocationOnScreen(loc2)
+            val cX = (loc1[0] + circle1.width / 2f)
+            val cY = (loc1[1] + circle1.height / 2f)
+            val sX = (loc2[0] + circle2.width / 2f)
+            val sY = (loc2[1] + circle2.height / 2f)
+
+            prefs.edit()
+                .putFloat("calibrated_chat_x", cX)
+                .putFloat("calibrated_chat_y", cY)
+                .putFloat("calibrated_send_x", sX)
+                .putFloat("calibrated_send_y", sY)
+                .apply()
+
+            TikTokAccessibilityService.instance?.setCalibratedCoordinates(cX, cY, sX, sY)
+            Toast.makeText(this, "✅ Posisi tersimpan! Chat: (${cX.toInt()}, ${cY.toInt()}) | Kirim: (${sX.toInt()}, ${sY.toInt()})", Toast.LENGTH_SHORT).show()
+            stopPinCalibration()
+        }
+
+        btnTest.setOnClickListener {
+            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
+            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val loc1 = IntArray(2)
+            val loc2 = IntArray(2)
+            circle1.getLocationOnScreen(loc1)
+            circle2.getLocationOnScreen(loc2)
+            val cX = loc1[0] + circle1.width / 2f
+            val cY = loc1[1] + circle1.height / 2f
+            val sX = loc2[0] + circle2.width / 2f
+            val sY = loc2[1] + circle2.height / 2f
+
+            val service = TikTokAccessibilityService.instance
+            if (service != null) {
+                Toast.makeText(this, "🎯 Mengetes klik Pin 1 lalu Pin 2...", Toast.LENGTH_SHORT).show()
+                service.testTapSingleCoordinate(cX, cY)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    service.testTapSingleCoordinate(sX, sY)
+                }, 600)
+            } else {
+                Toast.makeText(this, "Aksesibilitas belum terhubung!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnReset.setOnClickListener {
+            TikTokAccessibilityService.instance?.resetToDefaultCoordinates()
+            Toast.makeText(this, "↩ Koordinat dikembalikan ke Default TikTok Live.", Toast.LENGTH_SHORT).show()
+            stopPinCalibration()
+        }
+
+        btnClose.setOnClickListener {
+            stopPinCalibration()
+        }
+
+        pinChatView = pin1
+        pinSendView = pin2
+        calibrationToolbarView = toolbar
+
+        windowManager.addView(pin1, pin1Params)
+        windowManager.addView(pin2, pin2Params)
+        windowManager.addView(toolbar, toolbarParams)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            updateLiveCoordinatesDisplay()
+        }, 100)
+
+        Toast.makeText(this, "Mode Kalibrasi Aktif. Layar bebas disentuh!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun stopOneTouchCalibration() {
-        calibrationOverlayView?.let {
-            try {
-                windowManager.removeView(it)
-            } catch (_: Exception) {}
-            calibrationOverlayView = null
+    private fun stopPinCalibration() {
+        pinChatView?.let {
+            try { windowManager.removeView(it) } catch (_: Exception) {}
+            pinChatView = null
+        }
+        pinSendView?.let {
+            try { windowManager.removeView(it) } catch (_: Exception) {}
+            pinSendView = null
+        }
+        calibrationToolbarView?.let {
+            try { windowManager.removeView(it) } catch (_: Exception) {}
+            calibrationToolbarView = null
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopOneTouchCalibration()
+        stopPinCalibration()
         TikTokAccessibilityService.instance?.stopAutoChat()
         if (::floatingView.isInitialized) {
-            windowManager.removeView(floatingView)
+            try { windowManager.removeView(floatingView) } catch (_: Exception) {}
         }
     }
 }

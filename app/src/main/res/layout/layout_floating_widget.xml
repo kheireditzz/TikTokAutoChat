@@ -56,7 +56,7 @@
     <!-- 2. CARD LENGKAP - TEMA WHITE CLEAN DENGAN AKSEN TIKTOK -->
     <LinearLayout
         android:id="@+id/layoutExpanded"
-        android:layout_width="270dp"
+        android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_floating_glass"
@@ -170,7 +170,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="160dp"
+            android:maxHeight="150dp"
             android:scrollbars="vertical"
             android:layout_marginBottom="6dp">
 
@@ -183,7 +183,7 @@
                 android:padding="4dp" />
         </ScrollView>
 
-        <!-- Tombol Tambah Chat & Kalibrasi 1x Sentuh -->
+        <!-- Tombol Tambah Chat & Kalibrasi Pin Target -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -207,8 +207,8 @@
                 android:id="@+id/btnCalibrate"
                 android:layout_width="0dp"
                 android:layout_height="30dp"
-                android:layout_weight="1.3"
-                android:text="📍 Kalibrasi 1x Sentuh"
+                android:layout_weight="1.4"
+                android:text="📍 Kalibrasi Pin"
                 android:textColor="#3B82F6"
                 android:textSize="10.5sp"
                 android:textStyle="bold"
@@ -217,37 +217,38 @@
                 android:layout_marginStart="4dp" />
         </LinearLayout>
 
-        <!-- Bottom Controls: Delay & Start Button -->
+        <!-- Controls Row: Jeda Detik, Target Limit, dan Tombol Start -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <!-- Delay Input -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:background="@drawable/bg_input_white"
                 android:gravity="center_vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp">
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jeda:"
                     android:textColor="#64748B"
-                    android:textSize="10.5sp" />
+                    android:textSize="9.5sp" />
 
                 <EditText
                     android:id="@+id/etDelayInput"
-                    android:layout_width="30dp"
+                    android:layout_width="26dp"
                     android:layout_height="match_parent"
                     android:text="4"
                     android:gravity="center"
                     android:textColor="#0F172A"
                     android:background="@null"
-                    android:textSize="12sp"
+                    android:textSize="11.5sp"
                     android:textStyle="bold"
                     android:inputType="number"
                     android:layout_marginStart="2dp" />
@@ -255,9 +256,48 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="dtk"
+                    android:text="s"
                     android:textColor="#64748B"
-                    android:textSize="10.5sp" />
+                    android:textSize="9.5sp" />
+            </LinearLayout>
+
+            <!-- Target Limit Input -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_input_white"
+                android:gravity="center_vertical"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:layout_marginStart="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Target:"
+                    android:textColor="#64748B"
+                    android:textSize="9.5sp" />
+
+                <EditText
+                    android:id="@+id/etTargetLimitInput"
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:text="0"
+                    android:hint="0"
+                    android:gravity="center"
+                    android:textColor="#0F172A"
+                    android:background="@null"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:inputType="number"
+                    android:layout_marginStart="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="x"
+                    android:textColor="#64748B"
+                    android:textSize="9.5sp" />
             </LinearLayout>
 
             <Space
@@ -267,7 +307,7 @@
 
             <Button
                 android:id="@+id/btnToggleStart"
-                android:layout_width="85dp"
+                android:layout_width="78dp"
                 android:layout_height="32dp"
                 android:text="MULAI"
                 android:textSize="11.5sp"

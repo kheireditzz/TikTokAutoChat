@@ -10,20 +10,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
 import android.view.accessibility.AccessibilityManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.Spinner
-import android.widget.Switch
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import org.json.JSONArray
 
 class MainActivity : Activity() {
@@ -31,7 +20,7 @@ class MainActivity : Activity() {
     private val REQUEST_OVERLAY_CODE = 2001
     private lateinit var prefs: SharedPreferences
 
-    // Navigation Header Button (Gear saat di Beranda, Back saat di Pengaturan)
+    // Header & Navigation
     private lateinit var btnHeaderAction: ImageView
     private lateinit var tvHeaderTitle: TextView
     private lateinit var tvHeaderSub: TextView
@@ -50,7 +39,10 @@ class MainActivity : Activity() {
     private lateinit var containerMessageSettings: LinearLayout
     private lateinit var btnSettingsAddMessage: TextView
     private lateinit var etSettingDelay: EditText
+    private lateinit var etSettingMaxCount: EditText
     private lateinit var switchAntiSpam: Switch
+    private lateinit var tvSettingsCoordStatus: TextView
+    private lateinit var btnSettingsResetCoords: Button
     private lateinit var btnSaveSettings: Button
     private val settingEditTextList = mutableListOf<EditText>()
 
@@ -71,22 +63,37 @@ class MainActivity : Activity() {
             toggleScreen(!isSettingsOpen)
         }
 
-        // Init Home
+        // Init Home views
         tvStatusTitle = findViewById(R.id.tvStatusTitle)
         tvStatusSub = findViewById(R.id.tvStatusSub)
         switchOverlay = findViewById(R.id.switchOverlay)
         switchAccessibility = findViewById(R.id.switchAccessibility)
         btnLaunch = findViewById(R.id.btnLaunchFloating)
 
-        // Init Settings
+        // Init Settings views
         containerMessageSettings = findViewById(R.id.containerMessageSettings)
         btnSettingsAddMessage = findViewById(R.id.btnSettingsAddMessage)
         etSettingDelay = findViewById(R.id.etSettingDelay)
+        etSettingMaxCount = findViewById(R.id.etSettingMaxCount)
         switchAntiSpam = findViewById(R.id.switchAntiSpam)
+        tvSettingsCoordStatus = findViewById(R.id.tvSettingsCoordStatus)
+        btnSettingsResetCoords = findViewById(R.id.btnSettingsResetCoords)
         btnSaveSettings = findViewById(R.id.btnSaveSettings)
 
         btnSettingsAddMessage.setOnClickListener {
             addSettingMessageRow("")
+        }
+
+        btnSettingsResetCoords.setOnClickListener {
+            TikTokAccessibilityService.instance?.resetToDefaultCoordinates()
+            prefs.edit()
+                .remove("calibrated_chat_x")
+                .remove("calibrated_chat_y")
+                .remove("calibrated_send_x")
+                .remove("calibrated_send_y")
+                .apply()
+            updateCoordStatusText()
+            Toast.makeText(this, "Koordinat dikembalikan ke Default TikTok Live ✅", Toast.LENGTH_SHORT).show()
         }
 
         loadSavedSettings()
@@ -117,7 +124,7 @@ class MainActivity : Activity() {
 
         btnSaveSettings.setOnClickListener {
             saveSettings()
-            Toast.makeText(this, "Pengaturan & daftar pesan berhasil disimpan! ✅", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Semua pengaturan berhasil disimpan! ✅", Toast.LENGTH_SHORT).show()
         }
 
         btnLaunch.setOnClickListener {
@@ -130,7 +137,7 @@ class MainActivity : Activity() {
                 Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa mengetik otomatis!", Toast.LENGTH_LONG).show()
             }
 
-            // Simpan perubahan pesan saat ini sebelum membuka widget
+            // Simpan perubahan sebelum membuka widget
             saveSettings()
 
             val serviceIntent = Intent(this, FloatingWidgetService::class.java)
@@ -170,7 +177,7 @@ class MainActivity : Activity() {
                 marginStart = (8 * resources.displayMetrics.density).toInt()
             }
             gravity = android.view.Gravity.CENTER
-            setText("✕")
+            text = "✕"
             setTextColor(Color.parseColor("#EF4444"))
             textSize = 12f
             setBackgroundResource(R.drawable.bg_circle_btn_white)
@@ -199,13 +206,30 @@ class MainActivity : Activity() {
         }
 
         val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
+        val maxTarget = etSettingMaxCount.text.toString().toIntOrNull() ?: 0
         val anti = switchAntiSpam.isChecked
 
         prefs.edit()
             .putString("messages_json", messages.toString())
             .putInt("delay", d)
+            .putInt("max_count", maxTarget)
             .putBoolean("anti_spam", anti)
             .apply()
+    }
+
+    private fun updateCoordStatusText() {
+        val chatX = prefs.getFloat("calibrated_chat_x", -1f)
+        val chatY = prefs.getFloat("calibrated_chat_y", -1f)
+        val sendX = prefs.getFloat("calibrated_send_x", -1f)
+        val sendY = prefs.getFloat("calibrated_send_y", -1f)
+
+        if (chatX > 0 && sendX > 0) {
+            tvSettingsCoordStatus.text = "Status: Kalibrasi Aktif (${chatX.toInt()}, ${chatY.toInt()}) & (${sendX.toInt()}, ${sendY.toInt()})"
+            tvSettingsCoordStatus.setTextColor(Color.parseColor("#10B981"))
+        } else {
+            tvSettingsCoordStatus.text = "Status: Default TikTok Live (Auto Deteksi)"
+            tvSettingsCoordStatus.setTextColor(Color.parseColor("#090A0F"))
+        }
     }
 
     private fun loadSavedSettings() {
@@ -241,7 +265,9 @@ class MainActivity : Activity() {
         }
 
         etSettingDelay.setText(prefs.getInt("delay", 4).toString())
+        etSettingMaxCount.setText(prefs.getInt("max_count", 0).toString())
         switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
+        updateCoordStatusText()
     }
 
     private fun toggleScreen(toSettings: Boolean) {
@@ -252,6 +278,7 @@ class MainActivity : Activity() {
             tvHeaderTitle.text = "Pengaturan"
             tvHeaderSub.text = "KUSTOMISASI CHAT"
             btnHeaderAction.setImageResource(R.drawable.ic_arrow_back)
+            updateCoordStatusText()
         } else {
             viewHome.visibility = View.VISIBLE
             viewSettings.visibility = View.GONE
@@ -272,6 +299,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         updatePermissionStatuses()
+        loadSavedSettings()
     }
 
     private fun updatePermissionStatuses() {

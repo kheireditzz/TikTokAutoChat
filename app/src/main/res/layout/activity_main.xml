@@ -1,52 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="#FFFFFF">
+    android:background="#F8FAFC"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Top App Bar (BERADA DI DALAM SCROLL SEHINGGA IKUT TERSCROLL KE BAWAH) -->
+        <!-- HEADER BAR (PUTIH BERSIH) -->
         <LinearLayout
-            android:id="@+id/topBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="72dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:background="#FFFFFF"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:paddingTop="18dp"
-            android:paddingBottom="14dp"
-            android:background="#FFFFFF">
-
-            <ImageView
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:src="@drawable/ic_tiktok_official"
-                android:background="@drawable/bg_white_button"
-                android:padding="8dp" />
+            android:elevation="1dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvHeaderTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="AutoChat"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="#090A0F"
-                    android:letterSpacing="-0.03" />
+                    android:letterSpacing="-0.02" />
 
                 <TextView
                     android:id="@+id/tvHeaderSub"
@@ -56,27 +45,22 @@
                     android:textSize="9.5sp"
                     android:textStyle="bold"
                     android:textColor="#94A3B8"
-                    android:letterSpacing="0.08" />
+                    android:letterSpacing="0.08"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
 
-            <!-- Tombol Aksi di Kanan Atas: Gear saat di Beranda, Back saat di Pengaturan -->
             <ImageView
                 android:id="@+id/btnHeaderAction"
                 android:layout_width="38dp"
                 android:layout_height="38dp"
-                android:scaleType="centerInside"
+                android:background="@drawable/bg_circle_btn_white"
                 android:src="@drawable/ic_tab_settings"
-                android:tint="#0F172A"
-                android:background="@drawable/bg_white_button"
-                android:padding="8dp" />
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:contentDescription="Pengaturan" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#F1F5F9" />
-
-        <!-- LAYAR 1: BERANDA -->
+        <!-- LAYAR 1: BERANDA STATUS & IZIN -->
         <LinearLayout
             android:id="@+id/viewHome"
             android:layout_width="match_parent"
@@ -84,46 +68,67 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Minimal Status Banner (Bersih tanpa bulatan) -->
+            <!-- Card Status Utama -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:background="@drawable/bg_white_card"
-                android:padding="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="18dp"
                 android:elevation="1dp"
-                android:layout_marginBottom="14dp">
+                android:layout_marginBottom="20dp">
 
-                <TextView
-                    android:id="@+id/tvStatusTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sistem Siap"
-                    android:textSize="14.5sp"
-                    android:textStyle="bold"
-                    android:textColor="#090A0F" />
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_tiktok_official"
+                    android:layout_marginEnd="14dp"
+                    android:contentDescription="TikTok" />
 
-                <TextView
-                    android:id="@+id/tvStatusSub"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Semua izin terhubung"
-                    android:textSize="11.5sp"
-                    android:textColor="#64748B"
-                    android:layout_marginTop="2dp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvStatusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sistem Siap"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#090A0F" />
+
+                    <TextView
+                        android:id="@+id/tvStatusSub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Semua izin terhubung"
+                        android:textSize="11.5sp"
+                        android:textColor="#10B981"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/dotStatus"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/bg_indicator_dot" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IZIN SISTEM"
+                android:text="IZIN DIPERLUKAN"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:textColor="#94A3B8"
                 android:letterSpacing="0.08"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Card 1: Overlay (Bersih tanpa bulatan) -->
+            <!-- Card 1: Overlay -->
             <LinearLayout
                 android:id="@+id/cardOverlay"
                 android:layout_width="match_parent"
@@ -152,7 +157,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Widget overlay TikTok"
+                        android:text="Widget bubble di atas TikTok"
                         android:textSize="11sp"
                         android:textColor="#64748B"
                         android:layout_marginTop="2dp" />
@@ -164,7 +169,7 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <!-- Card 2: Aksesibilitas (Bersih tanpa bulatan) -->
+            <!-- Card 2: Aksesibilitas -->
             <LinearLayout
                 android:id="@+id/cardAccessibility"
                 android:layout_width="match_parent"
@@ -266,7 +271,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="JEDA &amp; KEAMANAN"
+                android:text="JEDA &amp; TARGET BATAS"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:textColor="#94A3B8"
@@ -274,7 +279,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="6dp" />
 
-            <!-- Setting Delay & Anti-Banned Switch -->
+            <!-- Card Setting Delay & Target Limit -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -282,8 +287,9 @@
                 android:background="@drawable/bg_white_card"
                 android:padding="16dp"
                 android:elevation="1dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
+                <!-- Jeda Waktu -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -295,14 +301,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Jeda Pengiriman (Detik)"
+                        android:text="Jeda Antar Pesan (Detik)"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textColor="#090A0F" />
 
                     <EditText
                         android:id="@+id/etSettingDelay"
-                        android:layout_width="48dp"
+                        android:layout_width="54dp"
                         android:layout_height="36dp"
                         android:text="4"
                         android:gravity="center"
@@ -319,6 +325,57 @@
                     android:background="#F1F5F9"
                     android:layout_marginBottom="12dp" />
 
+                <!-- Target Batas Jumlah Pesan -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Target Batas Pesan"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#090A0F" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 = Tanpa batas (Stop otomatis saat tercapai)"
+                            android:textSize="10.5sp"
+                            android:textColor="#64748B"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/etSettingMaxCount"
+                        android:layout_width="54dp"
+                        android:layout_height="36dp"
+                        android:text="0"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:inputType="number" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F1F5F9"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Anti-Spam Switch -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -334,7 +391,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Anti-Deteksi Bot"
+                            android:text="Anti-Spam Cerdas"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             android:textColor="#090A0F" />
@@ -342,8 +399,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Emoji &amp; jeda acak"
-                            android:textSize="11sp"
+                            android:text="200+ emoji acak &amp; zero-width code unik"
+                            android:textSize="10.5sp"
                             android:textColor="#64748B"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -356,12 +413,62 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KALIBRASI KOORDINAT"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Card Koordinat Kalibrasi -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/tvSettingsCoordStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status: Menggunakan Default TikTok Live"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#090A0F" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kalibrasi pin bisa dibuka langsung di widget melayang saat di atas TikTok."
+                    android:textSize="10.5sp"
+                    android:textColor="#64748B"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="12dp" />
+
+                <Button
+                    android:id="@+id/btnSettingsResetCoords"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:text="↩ Reset Koordinat ke Default TikTok"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:background="@drawable/bg_input_white"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+
             <!-- Save Button -->
             <Button
                 android:id="@+id/btnSaveSettings"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Simpan Pengaturan 💾"
+                android:text="Simpan Semua Pengaturan 💾"
                 android:textSize="13.5sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
