@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0D1117"
+    android:padding="24dp">
+
+    <!-- Header Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TikTok Auto Assistant"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#F0F6FC"
+        android:letterSpacing="-0.02" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Floating controller &amp; auto-typing engine"
+        android:textSize="13sp"
+        android:textColor="#8B949E"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="28dp" />
+
+    <!-- Card Step 1: Overlay Permission -->
+    <LinearLayout
+        android:id="@+id/cardOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_input_field"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1. Izin Tampil di Atas Aplikasi"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#F0F6FC" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Diperlukan agar widget melayang dapat tampil dan dikontrol saat membuka TikTok."
+            android:textSize="12sp"
+            android:textColor="#8B949E"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnGrantOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:text="Aktifkan Overlay"
+            android:textSize="12sp"
+            android:textColor="#F0F6FC"
+            android:background="@drawable/bg_circle_btn"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- Card Step 2: Accessibility Permission -->
+    <LinearLayout
+        android:id="@+id/cardAccessibility"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_input_field"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2. Layanan Aksesibilitas"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#F0F6FC" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Diperlukan untuk membaca kolom komentar dan menekan tombol kirim secara otomatis."
+            android:textSize="12sp"
+            android:textColor="#8B949E"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnGrantAccessibility"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:text="Aktifkan Aksesibilitas"
+            android:textSize="12sp"
+            android:textColor="#F0F6FC"
+            android:background="@drawable/bg_circle_btn"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- Launch Floating Widget Button -->
+    <Button
+        android:id="@+id/btnLaunchFloating"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:text="🚀 Luncurkan Widget Melayang"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_action_btn"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>

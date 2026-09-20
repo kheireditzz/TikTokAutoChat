@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AutoChat</string>
+    <string name="accessibility_desc">Mengotomatiskan pengetikan dan pengiriman pesan ke kolom chat TikTok Live.</string>
+</resources>
