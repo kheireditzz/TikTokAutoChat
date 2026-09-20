@@ -178,13 +178,14 @@ class TikTokAccessibilityService : AccessibilityService() {
         }, 300)
     }
 
-    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null, sentText: String = "") {
-        fun notifySuccess() {
-            sentCount++
-            handler.post {
-                onChatSentListener?.invoke(sentCount, sentText)
-            }
+    private fun notifySuccess(sentText: String = "") {
+        sentCount++
+        handler.post {
+            onChatSentListener?.invoke(sentCount, sentText)
         }
+    }
+
+    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null, sentText: String = "") {
         // 1. Cek tombol send berdasarkan resource ID TikTok
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",
