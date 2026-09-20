@@ -14,6 +14,7 @@ import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import kotlin.random.Random
 
 class TikTokAccessibilityService : AccessibilityService() {
 
@@ -26,7 +27,10 @@ class TikTokAccessibilityService : AccessibilityService() {
     private var activeMessages: ArrayList<String> = arrayListOf()
     private var currentMessageIndex = 0
     private var delaySeconds: Long = 4
+    private var enableAntiSpam = true
     private val handler = Handler(Looper.getMainLooper())
+
+    private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -34,10 +38,11 @@ class TikTokAccessibilityService : AccessibilityService() {
         Toast.makeText(this, "Aksesibilitas AutoChat Terhubung! Siap digunakan.", Toast.LENGTH_SHORT).show()
     }
 
-    fun startAutoChat(messages: ArrayList<String>, delay: Long) {
+    fun startAutoChat(messages: ArrayList<String>, delay: Long, antiSpam: Boolean = true) {
         if (messages.isEmpty()) return
         activeMessages = messages
         delaySeconds = delay
+        enableAntiSpam = antiSpam
         currentMessageIndex = 0
         isRunning = true
         handler.removeCallbacks(actionRunnable)
@@ -53,8 +58,14 @@ class TikTokAccessibilityService : AccessibilityService() {
         override fun run() {
             if (!isRunning || activeMessages.isEmpty()) return
 
-            val messageToSend = activeMessages[currentMessageIndex % activeMessages.size]
+            var messageToSend = activeMessages[currentMessageIndex % activeMessages.size]
             currentMessageIndex++
+
+            // Proteksi Anti-Spam: Beri variasi halus jika diaktifkan
+            if (enableAntiSpam) {
+                val suffix = safeVariations[Random.nextInt(safeVariations.size)]
+                messageToSend = "$messageToSend $suffix"
+            }
 
             try {
                 executeCommentWorkflow(messageToSend)
@@ -99,7 +110,6 @@ class TikTokAccessibilityService : AccessibilityService() {
         val allNodes = getAllNodes(root)
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
-            // HANYA ambil input yang berasal dari paket TikTok / bukan dari com.autochat.floating
             if (node.className == "android.widget.EditText" && !pkg.contains("autochat")) {
                 result.add(node)
             }
@@ -111,14 +121,12 @@ class TikTokAccessibilityService : AccessibilityService() {
         inputNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
         inputNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
 
-        // Masukkan teks ke clipboard sistem
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         if (clipboard != null) {
             val clip = ClipData.newPlainText("AutoChat", text)
             clipboard.setPrimaryClip(clip)
         }
 
-        // Set text langsung via accessibility argument
         val args = Bundle().apply {
             putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
         }
@@ -128,7 +136,6 @@ class TikTokAccessibilityService : AccessibilityService() {
             inputNode.performAction(AccessibilityNodeInfo.ACTION_PASTE)
         }
 
-        // Jeda sebentar agar TikTok mengaktifkan tombol send, lalu klik
         handler.postDelayed({
             val root = rootInActiveWindow ?: return@postDelayed
             sendComment(root)
@@ -136,7 +143,6 @@ class TikTokAccessibilityService : AccessibilityService() {
     }
 
     private fun sendComment(root: AccessibilityNodeInfo) {
-        // Cari view spesifik tombol kirim milik TikTok
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",
             "com.zhiliaoapp.musically:id/send_btn",
@@ -154,7 +160,7 @@ class TikTokAccessibilityService : AccessibilityService() {
         val allNodes = getAllNodes(root)
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
-            if (pkg.contains("autochat")) continue // Jangan klik tombol di widget sendiri
+            if (pkg.contains("autochat")) continue
 
             val desc = node.contentDescription?.toString()?.lowercase() ?: ""
             val text = node.text?.toString()?.lowercase() ?: ""
@@ -167,7 +173,7 @@ class TikTokAccessibilityService : AccessibilityService() {
             }
         }
 
-        // Fallback Gesture Tap tombol kirim di atas keyboard (pojok kanan)
+        // Fallback Gesture Tap
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
             val x = metrics.widthPixels * 0.92f

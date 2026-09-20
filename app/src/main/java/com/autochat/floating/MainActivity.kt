@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -12,6 +13,8 @@ import android.provider.Settings
 import android.view.View
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -19,26 +22,66 @@ import android.widget.Toast
 class MainActivity : Activity() {
 
     private val REQUEST_OVERLAY_CODE = 2001
+    private lateinit var prefs: SharedPreferences
 
-    private lateinit var tvSystemStatus: TextView
+    // Tabs
+    private lateinit var tabHome: TextView
+    private lateinit var tabSettings: TextView
+    private lateinit var viewHome: ScrollView
+    private lateinit var viewSettings: ScrollView
+
+    // Home views
+    private lateinit var tvStatusTitle: TextView
+    private lateinit var tvStatusSub: TextView
     private lateinit var mainStatusDot: View
+    private lateinit var dotOverlay: View
+    private lateinit var dotAccessibility: View
     private lateinit var switchOverlay: Switch
     private lateinit var switchAccessibility: Switch
-    private lateinit var indicatorOverlay: View
-    private lateinit var indicatorAccessibility: View
     private lateinit var btnLaunch: Button
+
+    // Settings views
+    private lateinit var etSettingMsg1: EditText
+    private lateinit var etSettingMsg2: EditText
+    private lateinit var etSettingMsg3: EditText
+    private lateinit var etSettingDelay: EditText
+    private lateinit var switchAntiSpam: Switch
+    private lateinit var btnSaveSettings: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        tvSystemStatus = findViewById(R.id.tvSystemStatus)
+        prefs = getSharedPreferences("AutoChatPrefs", Context.MODE_PRIVATE)
+
+        // Init Tabs
+        tabHome = findViewById(R.id.tabHome)
+        tabSettings = findViewById(R.id.tabSettings)
+        viewHome = findViewById(R.id.viewHome)
+        viewSettings = findViewById(R.id.viewSettings)
+
+        tabHome.setOnClickListener { switchTab(true) }
+        tabSettings.setOnClickListener { switchTab(false) }
+
+        // Init Home
+        tvStatusTitle = findViewById(R.id.tvStatusTitle)
+        tvStatusSub = findViewById(R.id.tvStatusSub)
         mainStatusDot = findViewById(R.id.mainStatusDot)
+        dotOverlay = findViewById(R.id.dotOverlay)
+        dotAccessibility = findViewById(R.id.dotAccessibility)
         switchOverlay = findViewById(R.id.switchOverlay)
         switchAccessibility = findViewById(R.id.switchAccessibility)
-        indicatorOverlay = findViewById(R.id.indicatorOverlay)
-        indicatorAccessibility = findViewById(R.id.indicatorAccessibility)
         btnLaunch = findViewById(R.id.btnLaunchFloating)
+
+        // Init Settings
+        etSettingMsg1 = findViewById(R.id.etSettingMsg1)
+        etSettingMsg2 = findViewById(R.id.etSettingMsg2)
+        etSettingMsg3 = findViewById(R.id.etSettingMsg3)
+        etSettingDelay = findViewById(R.id.etSettingDelay)
+        switchAntiSpam = findViewById(R.id.switchAntiSpam)
+        btnSaveSettings = findViewById(R.id.btnSaveSettings)
+
+        loadSavedSettings()
 
         val overlayAction = View.OnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -64,6 +107,24 @@ class MainActivity : Activity() {
         findViewById<View>(R.id.cardAccessibility).setOnClickListener(accessibilityAction)
         switchAccessibility.setOnClickListener(accessibilityAction)
 
+        btnSaveSettings.setOnClickListener {
+            val m1 = etSettingMsg1.text.toString().trim()
+            val m2 = etSettingMsg2.text.toString().trim()
+            val m3 = etSettingMsg3.text.toString().trim()
+            val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
+            val anti = switchAntiSpam.isChecked
+
+            prefs.edit()
+                .putString("msg1", m1)
+                .putString("msg2", m2)
+                .putString("msg3", m3)
+                .putInt("delay", d)
+                .putBoolean("anti_spam", anti)
+                .apply()
+
+            Toast.makeText(this, "Pengaturan berhasil disimpan secara permanen! ✅", Toast.LENGTH_SHORT).show()
+        }
+
         btnLaunch.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "Aktifkan Izin Overlay terlebih dahulu!", Toast.LENGTH_SHORT).show()
@@ -85,6 +146,32 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun switchTab(showHome: Boolean) {
+        if (showHome) {
+            viewHome.visibility = View.VISIBLE
+            viewSettings.visibility = View.GONE
+            tabHome.setBackgroundResource(R.drawable.bg_tab_active)
+            tabHome.setTextColor(Color.WHITE)
+            tabSettings.setBackgroundResource(R.drawable.bg_tab_inactive)
+            tabSettings.setTextColor(Color.parseColor("#64748B"))
+        } else {
+            viewHome.visibility = View.GONE
+            viewSettings.visibility = View.VISIBLE
+            tabSettings.setBackgroundResource(R.drawable.bg_tab_active)
+            tabSettings.setTextColor(Color.WHITE)
+            tabHome.setBackgroundResource(R.drawable.bg_tab_inactive)
+            tabHome.setTextColor(Color.parseColor("#64748B"))
+        }
+    }
+
+    private fun loadSavedSettings() {
+        etSettingMsg1.setText(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥"))
+        etSettingMsg2.setText(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️"))
+        etSettingMsg3.setText(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨"))
+        etSettingDelay.setText(prefs.getInt("delay", 4).toString())
+        switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
+    }
+
     override fun onResume() {
         super.onResume()
         updatePermissionStatuses()
@@ -100,26 +187,25 @@ class MainActivity : Activity() {
         switchOverlay.isChecked = hasOverlay
         switchAccessibility.isChecked = hasAccessibility
 
-        // Indikator Warna Murni: HIJAU = AKTIF, MERAH = MATI
         if (hasOverlay) {
-            indicatorOverlay.setBackgroundColor(Color.parseColor("#10B981"))
+            dotOverlay.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            indicatorOverlay.setBackgroundColor(Color.parseColor("#EF4444"))
+            dotOverlay.setBackgroundColor(Color.parseColor("#EF4444"))
         }
 
         if (hasAccessibility) {
-            indicatorAccessibility.setBackgroundColor(Color.parseColor("#10B981"))
+            dotAccessibility.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            indicatorAccessibility.setBackgroundColor(Color.parseColor("#EF4444"))
+            dotAccessibility.setBackgroundColor(Color.parseColor("#EF4444"))
         }
 
         if (hasOverlay && hasAccessibility) {
-            tvSystemStatus.text = "Semua Sistem Siap Beroperasi!"
-            tvSystemStatus.setTextColor(Color.parseColor("#10B981"))
+            tvStatusTitle.text = "Sistem Siap Beroperasi"
+            tvStatusSub.text = "Semua izin sistem telah terhubung"
             mainStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            tvSystemStatus.text = "Periksa Izin Di Bawah"
-            tvSystemStatus.setTextColor(Color.parseColor("#EF4444"))
+            tvStatusTitle.text = "Izin Belum Lengkap"
+            tvStatusSub.text = "Aktifkan izin bertanda merah"
             mainStatusDot.setBackgroundColor(Color.parseColor("#EF4444"))
         }
     }

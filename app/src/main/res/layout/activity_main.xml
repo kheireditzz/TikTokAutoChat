@@ -1,138 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="#FFFFFF">
 
+    <!-- Top App Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="12dp">
 
-        <!-- Clean Header Bar -->
+        <ImageView
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:src="@drawable/ic_tiktok_official"
+            android:background="@drawable/bg_white_button"
+            android:padding="8dp" />
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="16dp">
-
-            <ImageView
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:src="@drawable/ic_launcher_foreground"
-                android:background="@drawable/bg_white_card"
-                android:padding="2dp" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TikTok AutoChat"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#0F172A"
-                    android:letterSpacing="-0.02" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bot Balas &amp; Spam Chat Otomatis TikTok Live"
-                    android:textSize="12sp"
-                    android:textColor="#64748B" />
-            </LinearLayout>
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PRO"
-                android:textColor="#FE2C55"
+                android:text="AutoChat"
+                android:textSize="19sp"
                 android:textStyle="bold"
-                android:textSize="11sp"
-                android:background="#FFE4E8"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp" />
+                android:textColor="#090A0F"
+                android:letterSpacing="-0.03" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TIKTOK LIVE ASSISTANT"
+                android:textSize="9.5sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:letterSpacing="0.08" />
         </LinearLayout>
 
-        <!-- Status Card -->
+        <!-- Segmented Tab Switcher (Beranda vs Pengaturan) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_white_button"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/tabHome"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Beranda"
+                android:textColor="#FFFFFF"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:background="@drawable/bg_tab_active" />
+
+            <TextView
+                android:id="@+id/tabSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Pengaturan"
+                android:textColor="#64748B"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:background="@drawable/bg_tab_inactive" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F1F5F9" />
+
+    <!-- TAB 1: BERANDA VIEW -->
+    <ScrollView
+        android:id="@+id/viewHome"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_white_card"
-            android:padding="16dp"
-            android:elevation="2dp"
-            android:layout_marginBottom="16dp">
+            android:padding="20dp">
 
+            <!-- Minimal Status Banner -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="16dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="STATUS SISTEM"
-                    android:textColor="#94A3B8"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvStatusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sistem Siap Beroperasi"
+                        android:textSize="14.5sp"
+                        android:textStyle="bold"
+                        android:textColor="#090A0F" />
+
+                    <TextView
+                        android:id="@+id/tvStatusSub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Semua izin sistem telah terhubung"
+                        android:textSize="11.5sp"
+                        android:textColor="#64748B"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
 
                 <View
                     android:id="@+id/mainStatusDot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:background="@drawable/bg_indicator_dot" />
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:background="@drawable/bg_dot_circle" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvSystemStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Semua Sistem Siap Beroperasi!"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:textColor="#0F172A"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Aplikasi memerlukan 2 izin utama: Overlay (Layar Melayang) dan Aksesibilitas (Ketik Otomatis)."
-                android:textSize="12sp"
-                android:textColor="#64748B"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
-
-        <!-- Step 1: Overlay Card (HANYA WARNA HIJAU/MERAH, TANPA TEKS PANJANG) -->
-        <LinearLayout
-            android:id="@+id/cardOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_white_card"
-            android:padding="16dp"
-            android:elevation="2dp"
-            android:layout_marginBottom="12dp">
-
+            <!-- Card 1: Overlay -->
             <LinearLayout
+                android:id="@+id/cardOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="12dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -143,20 +167,26 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1. Izin Tampil di Atas Aplikasi"
-                        android:textSize="14sp"
+                        android:text="Layar Melayang (Overlay)"
+                        android:textSize="13.5sp"
                         android:textStyle="bold"
-                        android:textColor="#0F172A" />
+                        android:textColor="#090A0F" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Memungkinkan widget mengambang tetap muncul di atas aplikasi TikTok agar bisa digeser dan dikontrol."
-                        android:textSize="11.5sp"
+                        android:text="Kontroler mengambang di atas TikTok"
+                        android:textSize="11sp"
                         android:textColor="#64748B"
-                        android:layout_marginTop="2dp"
-                        android:paddingEnd="8dp" />
+                        android:layout_marginTop="2dp" />
                 </LinearLayout>
+
+                <View
+                    android:id="@+id/dotOverlay"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/bg_dot_circle"
+                    android:layout_marginEnd="12dp" />
 
                 <Switch
                     android:id="@+id/switchOverlay"
@@ -164,31 +194,17 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <!-- Indikator Warna Garis Pill Saja (Hijau / Merah) -->
-            <View
-                android:id="@+id/indicatorOverlay"
-                android:layout_width="38dp"
-                android:layout_height="8dp"
-                android:background="@drawable/bg_indicator_pill"
-                android:layout_marginTop="10dp" />
-        </LinearLayout>
-
-        <!-- Step 2: Accessibility Card (HANYA WARNA HIJAU/MERAH, TANPA TEKS PANJANG) -->
-        <LinearLayout
-            android:id="@+id/cardAccessibility"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_white_card"
-            android:padding="16dp"
-            android:elevation="2dp"
-            android:layout_marginBottom="20dp">
-
+            <!-- Card 2: Aksesibilitas -->
             <LinearLayout
+                android:id="@+id/cardAccessibility"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -199,20 +215,26 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2. Izin Aksesibilitas (Ketik Otomatis)"
-                        android:textSize="14sp"
+                        android:text="Aksesibilitas Auto-Ketik"
+                        android:textSize="13.5sp"
                         android:textStyle="bold"
-                        android:textColor="#0F172A" />
+                        android:textColor="#090A0F" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PENTING: Aktifkan 'AutoChat' di pengaturan Aksesibilitas agar robot dapat mengetik teks dan menekan tombol kirim di TikTok."
-                        android:textSize="11.5sp"
+                        android:text="Ketik &amp; kirim komentar otomatis"
+                        android:textSize="11sp"
                         android:textColor="#64748B"
-                        android:layout_marginTop="2dp"
-                        android:paddingEnd="8dp" />
+                        android:layout_marginTop="2dp" />
                 </LinearLayout>
+
+                <View
+                    android:id="@+id/dotAccessibility"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/bg_dot_circle"
+                    android:layout_marginEnd="12dp" />
 
                 <Switch
                     android:id="@+id/switchAccessibility"
@@ -220,37 +242,202 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <!-- Indikator Warna Garis Pill Saja (Hijau / Merah) -->
-            <View
-                android:id="@+id/indicatorAccessibility"
-                android:layout_width="38dp"
-                android:layout_height="8dp"
-                android:background="@drawable/bg_indicator_pill"
-                android:layout_marginTop="10dp" />
+            <Button
+                android:id="@+id/btnLaunchFloating"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Buka Widget Melayang  →"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_btn_black"
+                android:elevation="2dp"
+                android:stateListAnimator="@null" />
+
         </LinearLayout>
+    </ScrollView>
 
-        <!-- Launch Floating Widget Button -->
-        <Button
-            android:id="@+id/btnLaunchFloating"
+    <!-- TAB 2: PENGATURAN LENGKAP & TEMPLATE PESAN -->
+    <ScrollView
+        android:id="@+id/viewSettings"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="BUKA WIDGET MELAYANG"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_tiktok_gradient"
-            android:elevation="3dp"
-            android:stateListAnimator="@null" />
-
-        <TextView
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Fitur: Bisa diperkecil, digeser ke samping layar, &amp; atur pesan"
-            android:textSize="11.5sp"
-            android:textColor="#94A3B8"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="16dp" />
+            android:orientation="vertical"
+            android:padding="20dp">
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TEMPLATE PESAN CHAT"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Dynamic Message Inputs Container -->
+            <LinearLayout
+                android:id="@+id/containerMessageSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="12dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="12dp">
+
+                <EditText
+                    android:id="@+id/etSettingMsg1"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:text="Halo kak, barangnya ready? 🔥"
+                    android:textColor="#090A0F"
+                    android:textSize="12.5sp"
+                    android:background="@drawable/bg_input_white"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:singleLine="true" />
+
+                <EditText
+                    android:id="@+id/etSettingMsg2"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:text="Spill etalase nomor 1 dong kak 🛍️"
+                    android:textColor="#090A0F"
+                    android:textSize="12.5sp"
+                    android:background="@drawable/bg_input_white"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:singleLine="true" />
+
+                <EditText
+                    android:id="@+id/etSettingMsg3"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:text="Tap tap layar terus ya guys! ✨"
+                    android:textColor="#090A0F"
+                    android:textSize="12.5sp"
+                    android:background="@drawable/bg_input_white"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="JEDA &amp; PROTEKSI ANTI-SPAM"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:textColor="#94A3B8"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="6dp" />
+
+            <!-- Setting Delay & Anti-Banned Switch -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_white_card"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Interval Pengiriman (Detik)"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#090A0F" />
+
+                    <EditText
+                        android:id="@+id/etSettingDelay"
+                        android:layout_width="48dp"
+                        android:layout_height="36dp"
+                        android:text="4"
+                        android:gravity="center"
+                        android:textColor="#090A0F"
+                        android:background="@drawable/bg_input_white"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:inputType="number" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F1F5F9"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mode Anti-Deteksi Randomizer"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#090A0F" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Variasi karakter/emoji agar akun aman"
+                            android:textSize="11sp"
+                            android:textColor="#64748B"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switchAntiSpam"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Save Button -->
+            <Button
+                android:id="@+id/btnSaveSettings"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Simpan Pengaturan Permanen 💾"
+                android:textSize="13.5sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_btn_black"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

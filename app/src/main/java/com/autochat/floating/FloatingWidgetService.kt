@@ -4,7 +4,9 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
@@ -20,6 +22,8 @@ class FloatingWidgetService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var floatingView: View
     private lateinit var params: WindowManager.LayoutParams
+    private lateinit var prefs: SharedPreferences
+
     private var isRunning = false
     private var isMinimized = false
 
@@ -30,6 +34,7 @@ class FloatingWidgetService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        prefs = getSharedPreferences("AutoChatPrefs", Context.MODE_PRIVATE)
         startForegroundNotification()
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -100,6 +105,12 @@ class FloatingWidgetService : Service() {
         val et2 = floatingView.findViewById<EditText>(R.id.etPreset2)
         val cb3 = floatingView.findViewById<CheckBox>(R.id.cbPreset3)
         val et3 = floatingView.findViewById<EditText>(R.id.etPreset3)
+
+        // Load pesan tersimpan dari SharedPreferences
+        et1.setText(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥"))
+        et2.setText(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️"))
+        et3.setText(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨"))
+        etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun updateCountText() {
             var count = 0
@@ -197,7 +208,6 @@ class FloatingWidgetService : Service() {
 
         btnToggle.setOnClickListener {
             if (!isRunning) {
-                // Verifikasi apakah Layanan Aksesibilitas aktif
                 val service = TikTokAccessibilityService.instance
                 if (service == null) {
                     Toast.makeText(this, "Aksesibilitas belum aktif! Aktifkan 'AutoChat' di pengaturan.", Toast.LENGTH_LONG).show()
@@ -219,13 +229,22 @@ class FloatingWidgetService : Service() {
                 }
 
                 val delay = etDelay.text.toString().toLongOrNull() ?: 4L
+                val antiSpam = prefs.getBoolean("anti_spam", true)
+
+                // Simpan perubahan pesan saat ini ke SharedPreferences secara otomatis
+                prefs.edit()
+                    .putString("msg1", et1.text.toString().trim())
+                    .putString("msg2", et2.text.toString().trim())
+                    .putString("msg3", et3.text.toString().trim())
+                    .putInt("delay", delay.toInt())
+                    .apply()
 
                 // Lepas fokus keyboard agar TikTok tidak terhalangi
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 windowManager.updateViewLayout(floatingView, params)
 
-                // Panggil service
-                service.startAutoChat(activeList, delay)
+                // Panggil service dengan proteksi anti-spam
+                service.startAutoChat(activeList, delay, antiSpam)
 
                 isRunning = true
                 btnToggle.text = "STOP"
