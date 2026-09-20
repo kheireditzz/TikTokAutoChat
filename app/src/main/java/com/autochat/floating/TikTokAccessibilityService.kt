@@ -147,8 +147,12 @@ class TikTokAccessibilityService : AccessibilityService() {
             "com.zhiliaoapp.musically:id/btn_send",
             "com.zhiliaoapp.musically:id/send_btn",
             "com.zhiliaoapp.musically:id/iv_send",
+            "com.zhiliaoapp.musically:id/live_send_btn",
+            "com.zhiliaoapp.musically:id/live_btn_send",
+            "com.zhiliaoapp.musically:id/live_comment_send",
             "com.zhiliaoapp.musically.go:id/send",
-            "com.ss.android.ugc.trill:id/btn_send"
+            "com.ss.android.ugc.trill:id/btn_send",
+            "com.ss.android.ugc.trill:id/live_send_btn"
         )
         for (id in knownSendIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
@@ -168,12 +172,12 @@ class TikTokAccessibilityService : AccessibilityService() {
 
             if (desc.contains("kirim") || desc.contains("send") ||
                 text.contains("kirim") || text.contains("send") ||
-                viewId.contains("send") || viewId.contains("submit")) {
+                viewId.contains("send") || viewId.contains("submit") || viewId.contains("enter")) {
                 if (performSafeClick(node)) return
             }
         }
 
-        // Fallback Gesture Tap
+        // Fallback Gesture Tap: Area tombol kirim di atas keyboard (kanan bawah)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
             val x = metrics.widthPixels * 0.92f
@@ -183,14 +187,16 @@ class TikTokAccessibilityService : AccessibilityService() {
     }
 
     private fun clickCommentTrigger(root: AccessibilityNodeInfo): Boolean {
-        val triggers = listOf(
+        // Prioritaskan teks pemicu chat Live TikTok
+        val liveTriggers = listOf(
             "Tambahkan komentar...", "Tambahkan komentar",
-            "Add comment...", "Add comment",
             "Say something...", "Say something",
-            "Kirim komentar", "Komentar", "Chat"
+            "Katakan sesuatu...", "Katakan sesuatu",
+            "Send a comment...", "Send a comment",
+            "Chat...", "Chat", "Obrolan...", "Obrolan"
         )
 
-        for (triggerText in triggers) {
+        for (triggerText in liveTriggers) {
             val nodes = root.findAccessibilityNodeInfosByText(triggerText)
             for (node in nodes) {
                 val pkg = node.packageName?.toString() ?: ""
@@ -199,6 +205,26 @@ class TikTokAccessibilityService : AccessibilityService() {
         }
 
         val allNodes = getAllNodes(root)
+        // 1. Scan berdasarkan id atau desc yang mengandung live chat
+        for (node in allNodes) {
+            val pkg = node.packageName?.toString() ?: ""
+            if (pkg.contains("autochat")) continue
+
+            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
+            val idName = node.viewIdResourceName?.lowercase() ?: ""
+            val nodeText = node.text?.toString()?.lowercase() ?: ""
+
+            // JANGAN klik tombol komentar video reguler jika ada alternatif live
+            if (idName.contains("live_chat") || idName.contains("comment_et") ||
+                idName.contains("et_comment") || idName.contains("input_box") ||
+                desc.contains("say something") || desc.contains("katakan sesuatu") ||
+                nodeText.contains("say something") || nodeText.contains("katakan sesuatu") ||
+                desc.contains("obrolan") || desc.contains("tambahkan komentar")) {
+                if (performSafeClick(node)) return true
+            }
+        }
+
+        // 2. Scan fallback jika belum ketemu
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
             if (pkg.contains("autochat")) continue
@@ -216,8 +242,9 @@ class TikTokAccessibilityService : AccessibilityService() {
     private fun fallbackTapBottomInput(text: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
-            val tapX = metrics.widthPixels * 0.25f
-            val tapY = metrics.heightPixels * 0.94f
+            // Tap area bawah layar kiri tempat input bar TikTok Live biasanya berada
+            val tapX = metrics.widthPixels * 0.28f
+            val tapY = metrics.heightPixels * 0.955f
             simulateTap(tapX, tapY)
 
             handler.postDelayed({

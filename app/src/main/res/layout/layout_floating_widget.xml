@@ -146,107 +146,35 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Input List Container -->
-        <LinearLayout
+        <!-- Dynamic Message List Container with Scroll -->
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_input_white"
-            android:padding="4dp"
-            android:layout_marginBottom="8dp">
+            android:maxHeight="160dp"
+            android:scrollbars="vertical"
+            android:layout_marginBottom="6dp">
 
-            <!-- Item 1 -->
             <LinearLayout
+                android:id="@+id/containerFloatingMessages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="2dp">
-                <CheckBox
-                    android:id="@+id/cbPreset1"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:checked="true"
-                    android:buttonTint="#FE2C55" />
-                <EditText
-                    android:id="@+id/etPreset1"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:text="Halo kak, barangnya ready? 🔥"
-                    android:textColor="#0F172A"
-                    android:textSize="11.5sp"
-                    android:background="@null"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"
-                    android:singleLine="true" />
-            </LinearLayout>
+                android:orientation="vertical"
+                android:background="@drawable/bg_input_white"
+                android:padding="4dp" />
+        </ScrollView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E2E8F0"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp" />
-
-            <!-- Item 2 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="2dp">
-                <CheckBox
-                    android:id="@+id/cbPreset2"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:checked="true"
-                    android:buttonTint="#FE2C55" />
-                <EditText
-                    android:id="@+id/etPreset2"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:text="Spill etalase nomor 1 dong kak 🛍️"
-                    android:textColor="#0F172A"
-                    android:textSize="11.5sp"
-                    android:background="@null"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"
-                    android:singleLine="true" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E2E8F0"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp" />
-
-            <!-- Item 3 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="2dp">
-                <CheckBox
-                    android:id="@+id/cbPreset3"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:checked="true"
-                    android:buttonTint="#FE2C55" />
-                <EditText
-                    android:id="@+id/etPreset3"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:text="Tap tap layar terus ya guys! ✨"
-                    android:textColor="#0F172A"
-                    android:textSize="11.5sp"
-                    android:background="@null"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp"
-                    android:singleLine="true" />
-            </LinearLayout>
-        </LinearLayout>
+        <!-- Button Tambah Chat Baru -->
+        <TextView
+            android:id="@+id/btnFloatingAddMessage"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:text="+ Tambah Pesan Chat"
+            android:textColor="#FE2C55"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@drawable/bg_btn_add"
+            android:layout_marginBottom="8dp" />
 
         <!-- Bottom Controls: Delay & Start Button -->
         <LinearLayout

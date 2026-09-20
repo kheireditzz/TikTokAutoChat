@@ -24,17 +24,22 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Generate Production Release Keystore
+      - name: Verify or Generate Release Keystore
         run: |
-          keytool -genkeypair -v \
-            -keystore release.keystore \
-            -alias autochat \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass autochatrelease \
-            -keypass autochatrelease \
-            -dname "CN=TikTokAutoChat, OU=Production, O=AutoChat Corp, L=Jakarta, ST=DKI, C=ID"
+          if [ ! -f "release.keystore" ]; then
+            echo "Generating new keystore..."
+            keytool -genkeypair -v \
+              -keystore release.keystore \
+              -alias autochat \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass autochatrelease \
+              -keypass autochatrelease \
+              -dname "CN=TikTokAutoChat, OU=Production, O=AutoChat Corp, L=Jakarta, ST=DKI, C=ID"
+          else
+            echo "Using committed permanent release.keystore for consistent signing."
+          fi
 
       - name: Build Release Production APK
         run: gradle assembleRelease --no-daemon

@@ -97,32 +97,118 @@ class FloatingWidgetService : Service() {
         val tvStatusText = floatingView.findViewById<TextView>(R.id.tvStatusText)
         val tvBubbleLabel = floatingView.findViewById<TextView>(R.id.tvBubbleLabel)
         val tvActiveCount = floatingView.findViewById<TextView>(R.id.tvActiveCount)
+        val containerMessages = floatingView.findViewById<LinearLayout>(R.id.containerFloatingMessages)
+        val btnAddMessage = floatingView.findViewById<TextView>(R.id.btnFloatingAddMessage)
 
-        // Custom Chat Checkboxes & EditTexts
-        val cb1 = floatingView.findViewById<CheckBox>(R.id.cbPreset1)
-        val et1 = floatingView.findViewById<EditText>(R.id.etPreset1)
-        val cb2 = floatingView.findViewById<CheckBox>(R.id.cbPreset2)
-        val et2 = floatingView.findViewById<EditText>(R.id.etPreset2)
-        val cb3 = floatingView.findViewById<CheckBox>(R.id.cbPreset3)
-        val et3 = floatingView.findViewById<EditText>(R.id.etPreset3)
-
-        // Load pesan tersimpan dari SharedPreferences
-        et1.setText(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥"))
-        et2.setText(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️"))
-        et3.setText(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨"))
-        etDelay.setText(prefs.getInt("delay", 4).toString())
+        val widgetMessageItems = mutableListOf<Pair<CheckBox, EditText>>()
 
         fun updateCountText() {
             var count = 0
-            if (cb1.isChecked) count++
-            if (cb2.isChecked) count++
-            if (cb3.isChecked) count++
+            for ((cb, et) in widgetMessageItems) {
+                if (cb.isChecked && et.text.isNotBlank()) count++
+            }
             tvActiveCount.text = "$count Aktif"
         }
 
-        cb1.setOnCheckedChangeListener { _, _ -> updateCountText() }
-        cb2.setOnCheckedChangeListener { _, _ -> updateCountText() }
-        cb3.setOnCheckedChangeListener { _, _ -> updateCountText() }
+        fun addWidgetMessageItem(text: String, isChecked: Boolean = true) {
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(2, 2, 2, 2)
+            }
+
+            val cb = CheckBox(this).apply {
+                layoutParams = LinearLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt())
+                this.isChecked = isChecked
+                buttonTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#FE2C55"))
+                setOnCheckedChangeListener { _, _ -> updateCountText() }
+            }
+
+            val et = EditText(this).apply {
+                layoutParams = LinearLayout.LayoutParams(0, (30 * resources.displayMetrics.density).toInt(), 1f)
+                setText(text)
+                hint = "Ketik komentar..."
+                setTextColor(Color.parseColor("#0F172A"))
+                textSize = 11.5f
+                background = null
+                val pad = (4 * resources.displayMetrics.density).toInt()
+                setPadding(pad, 0, pad, 0)
+                isSingleLine = true
+
+                setOnTouchListener { _, _ ->
+                    params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                    try {
+                        windowManager.updateViewLayout(floatingView, params)
+                    } catch (_: Exception) {}
+                    false
+                }
+            }
+
+            val btnDel = TextView(this).apply {
+                val s = (24 * resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(s, s)
+                gravity = Gravity.CENTER
+                text = "✕"
+                setTextColor(Color.parseColor("#94A3B8"))
+                textSize = 11f
+                setOnClickListener {
+                    containerMessages.removeView(itemLayout)
+                    widgetMessageItems.removeAll { it.second == et }
+                    updateCountText()
+                }
+            }
+
+            itemLayout.addView(cb)
+            itemLayout.addView(et)
+            itemLayout.addView(btnDel)
+
+            if (containerMessages.childCount > 0) {
+                val divider = View(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1).apply {
+                        val m = (4 * resources.displayMetrics.density).toInt()
+                        setMargins(m, 0, m, 0)
+                    }
+                    setBackgroundColor(Color.parseColor("#E2E8F0"))
+                }
+                containerMessages.addView(divider)
+            }
+
+            containerMessages.addView(itemLayout)
+            widgetMessageItems.add(Pair(cb, et))
+            updateCountText()
+        }
+
+        // Load pesan tersimpan dari SharedPreferences
+        val jsonStr = prefs.getString("messages_json", null)
+        val loadedList = mutableListOf<String>()
+        if (!jsonStr.isNullOrBlank()) {
+            try {
+                val arr = org.json.JSONArray(jsonStr)
+                for (i in 0 until arr.length()) {
+                    val s = arr.getString(i)
+                    if (s.isNotBlank()) loadedList.add(s)
+                }
+            } catch (_: Exception) {}
+        }
+
+        if (loadedList.isEmpty()) {
+            loadedList.add(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥") ?: "")
+            loadedList.add(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️") ?: "")
+            loadedList.add(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨") ?: "")
+        }
+
+        containerMessages.removeAllViews()
+        for (msg in loadedList) {
+            if (msg.isNotBlank()) {
+                addWidgetMessageItem(msg, true)
+            }
+        }
+
+        btnAddMessage.setOnClickListener {
+            addWidgetMessageItem("", true)
+        }
+
+        etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
             isMinimized = minimized
@@ -190,16 +276,13 @@ class FloatingWidgetService : Service() {
         header.setOnTouchListener(dragTouchListener)
         layoutBubble.setOnTouchListener(dragTouchListener)
 
-        // Buka keyboard saat edit text diklik
-        val textTouchListener = View.OnTouchListener { _, _ ->
+        etDelay.setOnTouchListener { _, _ ->
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-            windowManager.updateViewLayout(floatingView, params)
+            try {
+                windowManager.updateViewLayout(floatingView, params)
+            } catch (_: Exception) {}
             false
         }
-        et1.setOnTouchListener(textTouchListener)
-        et2.setOnTouchListener(textTouchListener)
-        et3.setOnTouchListener(textTouchListener)
-        etDelay.setOnTouchListener(textTouchListener)
 
         btnClose.setOnClickListener {
             TikTokAccessibilityService.instance?.stopAutoChat()
@@ -219,9 +302,16 @@ class FloatingWidgetService : Service() {
                 }
 
                 val activeList = arrayListOf<String>()
-                if (cb1.isChecked && et1.text.isNotBlank()) activeList.add(et1.text.toString().trim())
-                if (cb2.isChecked && et2.text.isNotBlank()) activeList.add(et2.text.toString().trim())
-                if (cb3.isChecked && et3.text.isNotBlank()) activeList.add(et3.text.toString().trim())
+                val allListJson = org.json.JSONArray()
+                for ((cb, et) in widgetMessageItems) {
+                    val t = et.text.toString().trim()
+                    if (t.isNotBlank()) {
+                        allListJson.put(t)
+                        if (cb.isChecked) {
+                            activeList.add(t)
+                        }
+                    }
+                }
 
                 if (activeList.isEmpty()) {
                     Toast.makeText(this, "Centang minimal 1 pesan!", Toast.LENGTH_SHORT).show()
@@ -233,9 +323,7 @@ class FloatingWidgetService : Service() {
 
                 // Simpan perubahan pesan saat ini ke SharedPreferences secara otomatis
                 prefs.edit()
-                    .putString("msg1", et1.text.toString().trim())
-                    .putString("msg2", et2.text.toString().trim())
-                    .putString("msg3", et3.text.toString().trim())
+                    .putString("messages_json", allListJson.toString())
                     .putInt("delay", delay.toInt())
                     .apply()
 

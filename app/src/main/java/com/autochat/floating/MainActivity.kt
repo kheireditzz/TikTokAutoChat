@@ -15,10 +15,12 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import org.json.JSONArray
 
 class MainActivity : Activity() {
 
@@ -41,12 +43,12 @@ class MainActivity : Activity() {
     private lateinit var btnLaunch: Button
 
     // Settings views
-    private lateinit var etSettingMsg1: EditText
-    private lateinit var etSettingMsg2: EditText
-    private lateinit var etSettingMsg3: EditText
+    private lateinit var containerMessageSettings: LinearLayout
+    private lateinit var btnSettingsAddMessage: TextView
     private lateinit var etSettingDelay: EditText
     private lateinit var switchAntiSpam: Switch
     private lateinit var btnSaveSettings: Button
+    private val settingEditTextList = mutableListOf<EditText>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,12 +75,15 @@ class MainActivity : Activity() {
         btnLaunch = findViewById(R.id.btnLaunchFloating)
 
         // Init Settings
-        etSettingMsg1 = findViewById(R.id.etSettingMsg1)
-        etSettingMsg2 = findViewById(R.id.etSettingMsg2)
-        etSettingMsg3 = findViewById(R.id.etSettingMsg3)
+        containerMessageSettings = findViewById(R.id.containerMessageSettings)
+        btnSettingsAddMessage = findViewById(R.id.btnSettingsAddMessage)
         etSettingDelay = findViewById(R.id.etSettingDelay)
         switchAntiSpam = findViewById(R.id.switchAntiSpam)
         btnSaveSettings = findViewById(R.id.btnSaveSettings)
+
+        btnSettingsAddMessage.setOnClickListener {
+            addSettingMessageRow("")
+        }
 
         loadSavedSettings()
 
@@ -107,21 +112,8 @@ class MainActivity : Activity() {
         switchAccessibility.setOnClickListener(accessibilityAction)
 
         btnSaveSettings.setOnClickListener {
-            val m1 = etSettingMsg1.text.toString().trim()
-            val m2 = etSettingMsg2.text.toString().trim()
-            val m3 = etSettingMsg3.text.toString().trim()
-            val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
-            val anti = switchAntiSpam.isChecked
-
-            prefs.edit()
-                .putString("msg1", m1)
-                .putString("msg2", m2)
-                .putString("msg3", m3)
-                .putInt("delay", d)
-                .putBoolean("anti_spam", anti)
-                .apply()
-
-            Toast.makeText(this, "Pengaturan berhasil disimpan secara permanen! ✅", Toast.LENGTH_SHORT).show()
+            saveSettings()
+            Toast.makeText(this, "Pengaturan & daftar pesan berhasil disimpan! ✅", Toast.LENGTH_SHORT).show()
         }
 
         btnLaunch.setOnClickListener {
@@ -134,6 +126,9 @@ class MainActivity : Activity() {
                 Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa mengetik otomatis!", Toast.LENGTH_LONG).show()
             }
 
+            // Simpan perubahan pesan saat ini sebelum membuka widget
+            saveSettings()
+
             val serviceIntent = Intent(this, FloatingWidgetService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent)
@@ -143,6 +138,106 @@ class MainActivity : Activity() {
             Toast.makeText(this, "Widget melayang aktif!", Toast.LENGTH_SHORT).show()
             finish()
         }
+    }
+
+    private fun addSettingMessageRow(initialText: String) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(0, 6, 0, 6)
+        }
+
+        val et = EditText(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, (42 * resources.displayMetrics.density).toInt(), 1f)
+            setText(initialText)
+            hint = "Tulis template komentar..."
+            setTextColor(Color.parseColor("#090A0F"))
+            setHintTextColor(Color.parseColor("#94A3B8"))
+            textSize = 12.5f
+            setBackgroundResource(R.drawable.bg_input_white)
+            val pad = (12 * resources.displayMetrics.density).toInt()
+            setPadding(pad, 0, pad, 0)
+            isSingleLine = true
+        }
+
+        val btnDel = TextView(this).apply {
+            val size = (32 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                marginStart = (8 * resources.displayMetrics.density).toInt()
+            }
+            gravity = android.view.Gravity.CENTER
+            text = "✕"
+            setTextColor(Color.parseColor("#EF4444"))
+            textSize = 12f
+            setBackgroundResource(R.drawable.bg_circle_btn_white)
+            setOnClickListener {
+                containerMessageSettings.removeView(row)
+                settingEditTextList.remove(et)
+            }
+        }
+
+        row.addView(et)
+        row.addView(btnDel)
+        containerMessageSettings.addView(row)
+        settingEditTextList.add(et)
+    }
+
+    private fun saveSettings() {
+        val messages = JSONArray()
+        for (et in settingEditTextList) {
+            val t = et.text.toString().trim()
+            if (t.isNotBlank()) {
+                messages.put(t)
+            }
+        }
+        if (messages.length() == 0) {
+            messages.put("Halo kak, barangnya ready? 🔥")
+        }
+
+        val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
+        val anti = switchAntiSpam.isChecked
+
+        prefs.edit()
+            .putString("messages_json", messages.toString())
+            .putInt("delay", d)
+            .putBoolean("anti_spam", anti)
+            .apply()
+    }
+
+    private fun loadSavedSettings() {
+        containerMessageSettings.removeAllViews()
+        settingEditTextList.clear()
+
+        val jsonStr = prefs.getString("messages_json", null)
+        val list = mutableListOf<String>()
+
+        if (!jsonStr.isNullOrBlank()) {
+            try {
+                val arr = JSONArray(jsonStr)
+                for (i in 0 until arr.length()) {
+                    list.add(arr.getString(i))
+                }
+            } catch (_: Exception) {}
+        }
+
+        if (list.isEmpty()) {
+            list.add(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥") ?: "")
+            list.add(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️") ?: "")
+            list.add(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨") ?: "")
+        }
+
+        for (item in list) {
+            if (item.isNotBlank()) {
+                addSettingMessageRow(item)
+            }
+        }
+
+        if (settingEditTextList.isEmpty()) {
+            addSettingMessageRow("Halo kak, barangnya ready? 🔥")
+        }
+
+        etSettingDelay.setText(prefs.getInt("delay", 4).toString())
+        switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
     }
 
     private fun toggleScreen(toSettings: Boolean) {

@@ -247,46 +247,21 @@
                 android:background="@drawable/bg_white_card"
                 android:padding="12dp"
                 android:elevation="1dp"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="8dp" />
 
-                <EditText
-                    android:id="@+id/etSettingMsg1"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:text="Halo kak, barangnya ready? 🔥"
-                    android:textColor="#090A0F"
-                    android:textSize="12.5sp"
-                    android:background="@drawable/bg_input_white"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:layout_marginBottom="8dp"
-                    android:singleLine="true" />
-
-                <EditText
-                    android:id="@+id/etSettingMsg2"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:text="Spill etalase nomor 1 dong kak 🛍️"
-                    android:textColor="#090A0F"
-                    android:textSize="12.5sp"
-                    android:background="@drawable/bg_input_white"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:layout_marginBottom="8dp"
-                    android:singleLine="true" />
-
-                <EditText
-                    android:id="@+id/etSettingMsg3"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:text="Tap tap layar terus ya guys! ✨"
-                    android:textColor="#090A0F"
-                    android:textSize="12.5sp"
-                    android:background="@drawable/bg_input_white"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:singleLine="true" />
-            </LinearLayout>
+            <!-- Tombol Tambah Pesan di Pengaturan -->
+            <TextView
+                android:id="@+id/btnSettingsAddMessage"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="+ Tambah Pesan Rotasi Baru"
+                android:textColor="#FE2C55"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/bg_white_card"
+                android:elevation="1dp"
+                android:layout_marginBottom="16dp" />
 
             <TextView
                 android:layout_width="wrap_content"
