@@ -157,6 +157,138 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- CARD STATUS LISENSI & TRIAL 3 HARI -->
+            <LinearLayout
+                android:id="@+id/cardLicenseStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_white_card"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvLicenseIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👑"
+                        android:textSize="18sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvLicenseTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lisensi &amp; Akses Aplikasi"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#090A0F" />
+
+                        <TextView
+                            android:id="@+id/tvLicenseSubtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Masa Uji Coba 3 Hari atau Seumur Hidup"
+                            android:textSize="10sp"
+                            android:textColor="#64748B"
+                            android:layout_marginTop="1dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/badgeLicenseStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:background="@drawable/bg_stepper_btn"
+                        android:gravity="center"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="TRIAL 3 HARI"
+                        android:textColor="#0F172A"
+                        android:textSize="9.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Box Detail Countdown & Status Waktu -->
+                <LinearLayout
+                    android:id="@+id/layoutLicenseCountdownBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#F8FAFC"
+                    android:padding="10dp"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:id="@+id/tvLicenseTimeRemaining"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sisa Waktu Trial: Memuat data..."
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F172A" />
+
+                    <TextView
+                        android:id="@+id/tvLicenseDeviceBoundInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ID: DEV-XXXX · IP: 127.0.0.1"
+                        android:textSize="9.5sp"
+                        android:textColor="#94A3B8"
+                        android:layout_marginTop="3dp" />
+                </LinearLayout>
+
+                <!-- Tombol Aksi: Klaim Trial 3 Hari Gratis -->
+                <Button
+                    android:id="@+id/btnClaimTrialAction"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_btn_trial"
+                    android:text="🎁  Klaim Uji Coba 3 Hari Gratis"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:stateListAnimator="@null"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone" />
+
+                <!-- Tombol Aksi: Beli Lisensi Seumur Hidup 10 Ribu -->
+                <Button
+                    android:id="@+id/btnBuyLifetimeAction"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_btn_gold"
+                    android:text="👑  Beli Lisensi Seumur Hidup — Rp 10.000"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:stateListAnimator="@null"
+                    android:layout_marginTop="10dp" />
+
+                <!-- Disclaimer Terikat Device -->
+                <TextView
+                    android:id="@+id/tvLicenseDeviceWarning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="*Peringatan: Lisensi dikunci permanen pada Device ID ini. Pembelian hanya berlaku untuk perangkat ini dan tidak dapat dipindahkan."
+                    android:textSize="9sp"
+                    android:textColor="#94A3B8"
+                    android:lineSpacingExtra="1dp"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
             <!-- Card Status Utama -->
             <LinearLayout
                 android:layout_width="match_parent"

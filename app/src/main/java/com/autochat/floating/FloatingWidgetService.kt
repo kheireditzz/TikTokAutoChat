@@ -102,6 +102,7 @@ class FloatingWidgetService : Service() {
         val statusIndicator = floatingView.findViewById<View>(R.id.statusIndicator)
         val bubbleStatusDot = floatingView.findViewById<View>(R.id.bubbleStatusDot)
         val tvStatusText = floatingView.findViewById<TextView>(R.id.tvStatusText)
+        val tvFloatingLicensePill = floatingView.findViewById<TextView>(R.id.tvFloatingLicensePill)
         val tvBubbleLabel = floatingView.findViewById<TextView>(R.id.tvBubbleLabel)
         val tvBubbleSentCount = floatingView.findViewById<TextView>(R.id.tvBubbleSentCount)
         val tvActiveCount = floatingView.findViewById<TextView>(R.id.tvActiveCount)
@@ -374,8 +375,42 @@ class FloatingWidgetService : Service() {
             Toast.makeText(this, "AutoChat dihentikan", Toast.LENGTH_SHORT).show()
         }
 
+        fun updateFloatingLicenseBadge() {
+            try {
+                val licState = LicenseManager.getInstance(this).getLicenseState()
+                if (licState.isLifetime) {
+                    tvFloatingLicensePill.text = "👑 PRO"
+                    tvFloatingLicensePill.setTextColor(Color.parseColor("#D97706"))
+                } else if (licState.isTrialActive) {
+                    val hours = (licState.remainingMillis / (1000 * 60 * 60)).coerceAtLeast(1)
+                    tvFloatingLicensePill.text = "⏳ ${hours}j"
+                    tvFloatingLicensePill.setTextColor(Color.parseColor("#059669"))
+                } else if (licState.isTrialExpired) {
+                    tvFloatingLicensePill.text = "🔒 HABIS"
+                    tvFloatingLicensePill.setTextColor(Color.parseColor("#EF4444"))
+                } else {
+                    tvFloatingLicensePill.text = "🎁 TRIAL"
+                    tvFloatingLicensePill.setTextColor(Color.parseColor("#3B82F6"))
+                }
+            } catch (_: Exception) {}
+        }
+        updateFloatingLicenseBadge()
+
         btnToggle.setOnClickListener {
             if (!isRunning) {
+                // Verifikasi Lisensi & Trial 3 Hari
+                val licenseState = LicenseManager.getInstance(this).getLicenseState()
+                if (licenseState.isTrialExpired && !licenseState.isLifetime) {
+                    Toast.makeText(this, "Masa trial 3 hari telah berakhir. Beli lisensi seumur hidup (Rp 10.000)", Toast.LENGTH_LONG).show()
+                    val mainIntent = Intent(this, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        putExtra("OPEN_QRIS_DIALOG", true)
+                    }
+                    startActivity(mainIntent)
+                    return@setOnClickListener
+                }
+                updateFloatingLicenseBadge()
+
                 val service = TikTokAccessibilityService.instance
                 if (service == null) {
                     Toast.makeText(this, "Aksesibilitas belum aktif", Toast.LENGTH_SHORT).show()

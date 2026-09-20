@@ -102,6 +102,21 @@
                     android:textSize="9.5sp" />
             </LinearLayout>
 
+            <!-- Pill Status Lisensi / Trial -->
+            <TextView
+                android:id="@+id/tvFloatingLicensePill"
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_stepper_btn"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:gravity="center"
+                android:text="👑 PRO"
+                android:textColor="#D97706"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp" />
+
             <!-- Tombol Perkecil (—) -->
             <TextView
                 android:id="@+id/btnMinimize"

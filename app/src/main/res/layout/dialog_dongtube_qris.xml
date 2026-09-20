@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:id="@+id/qrisDialogContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Header: Dongtube Payment & QRIS Resmi -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pembayaran Lisensi"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dongtube Payment Gateway · QRIS Realtime"
+                    android:textSize="10.5sp"
+                    android:textColor="#64748B"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btnQrisClose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_circle_btn_white"
+                android:gravity="center"
+                android:text="✕"
+                android:textColor="#64748B"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Peringatan Disclaimer Khusus Device Ini -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_warning_card"
+            android:padding="10dp"
+            android:layout_marginBottom="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️ PERINGATAN KETENTUAN LISENSI"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:textColor="#C2410C" />
+
+            <TextView
+                android:id="@+id/tvQrisDeviceDisclaimer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lisensi Seumur Hidup (Rp 10.000) ini dikunci khusus untuk Device ID ini. Pembelian di HP ini hanya berlaku untuk HP ini dan tidak dapat dipindahkan ke perangkat lain."
+                android:textSize="9.5sp"
+                android:textColor="#7C2D12"
+                android:lineSpacingExtra="2dp"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <!-- Loading State Saat Membuat Invoice -->
+        <LinearLayout
+            android:id="@+id/layoutQrisLoading"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:indeterminateTint="#FE2C55" />
+
+            <TextView
+                android:id="@+id/tvQrisLoadingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Menghubungkan ke Dongtube Payment..."
+                android:textColor="#64748B"
+                android:textSize="12sp"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+        <!-- Layout QRIS Content (Tampak setelah invoice didapat) -->
+        <LinearLayout
+            android:id="@+id/layoutQrisContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
+
+            <!-- Card Box Frame QRIS -->
+            <LinearLayout
+                android:layout_width="230dp"
+                android:layout_height="230dp"
+                android:background="@drawable/bg_license_card"
+                android:gravity="center"
+                android:padding="10dp"
+                android:elevation="2dp">
+
+                <ImageView
+                    android:id="@+id/ivQrisCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="QRIS Image" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BCA · GoPay · DANA · OVO · ShopeePay · Semua Bank"
+                android:textSize="9.5sp"
+                android:textColor="#94A3B8"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+
+            <!-- Nominal Transfer Details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#F1F5F9"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TOTAL PEMBAYARAN"
+                    android:textSize="9.5sp"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.05"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQrisTotalAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rp 10.500"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:id="@+id/tvQrisInvoiceNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="*Transfer sesuai nominal termasuk biaya admin"
+                    android:textSize="9.5sp"
+                    android:textColor="#EF4444"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:id="@+id/btnCopyAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_stepper_btn"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:gravity="center"
+                    android:text="📋 Salin Nominal Transfer"
+                    android:textColor="#0F172A"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <!-- Status Polling Realtime Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:layout_marginTop="8dp">
+
+                <ProgressBar
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:indeterminateTint="#10B981"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tvQrisStatusLive"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Menunggu pembayaran... (Auto-Check)"
+                    android:textColor="#10B981"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQrisExpiryCountdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="29:59"
+                    android:textColor="#64748B"
+                    android:textSize="10.5sp" />
+            </LinearLayout>
+
+            <!-- Tombol Cek Manual -->
+            <Button
+                android:id="@+id/btnCheckPaymentManual"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_btn_black"
+                android:text="🔄  Cek Status Pembayaran"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:stateListAnimator="@null"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
+        <!-- Success Screen (Tampak saat pembayaran terkonfirmasi) -->
+        <LinearLayout
+            android:id="@+id/layoutQrisSuccess"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/bg_circle_btn_white"
+                android:gravity="center"
+                android:text="✓"
+                android:textColor="#10B981"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PEMBAYARAN LUNAS!"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#10B981"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lisensi Seumur Hidup TikTok AutoChat telah aktif permanen pada perangkat ini."
+                android:textSize="11.5sp"
+                android:textColor="#334155"
+                android:gravity="center"
+                android:layout_marginTop="6dp" />
+
+            <Button
+                android:id="@+id/btnSuccessDone"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_tiktok_gradient"
+                android:text="Mulai Gunakan AutoChat"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:stateListAnimator="@null"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

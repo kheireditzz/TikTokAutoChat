@@ -286,6 +286,113 @@
       transform: scale(0.99);
     }
 
+    /* LICENSE & TRIAL CARD */
+    .license-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-default);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .badge-trial { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .badge-expired { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .badge-lifetime { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .badge-unused { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+
+    .btn-gold {
+      width: 100%;
+      height: 42px;
+      background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.25);
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+    .btn-gold:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-gold:active { transform: scale(0.98); }
+
+    .btn-trial-claim {
+      width: 100%;
+      height: 40px;
+      background: #0F172A;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+    }
+    .btn-trial-claim:hover { background: #1E293B; }
+
+    /* DONGTUBE QRIS MODAL */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 300;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-content {
+      width: 100%;
+      max-height: 90%;
+      background: #FFFFFF;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      padding: 22px 20px;
+      overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .qris-box-frame {
+      width: 200px;
+      height: 200px;
+      border-radius: 16px;
+      border: 1.5px solid var(--border-default);
+      margin: 12px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFFFFF;
+      padding: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .qris-box-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     /* SECTION LABELS */
     .section-eyebrow {
       font-size: 9.5px;
@@ -592,6 +699,41 @@
           </div>
         </div>
 
+        <!-- STATUS LISENSI & TRIAL 3 HARI CARD -->
+        <div class="license-card">
+          <div class="card-flex">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="previewLicenseIcon" style="font-size: 18px;">👑</span>
+              <div>
+                <div class="card-title" id="previewLicenseTitle">Lisensi &amp; Akses</div>
+                <div class="card-subtitle" id="previewLicenseSub">Masa Uji Coba 3 Hari</div>
+              </div>
+            </div>
+            <span class="badge-status badge-trial" id="previewLicenseBadge">TRIAL 3 HARI</span>
+          </div>
+
+          <div style="background: var(--surface-secondary); border-radius: 10px; padding: 10px; margin-top: 12px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-main);" id="previewTimeRemaining">
+              Sisa Waktu: 2 Hari 23 Jam 59 Mnt 48 Dtk
+            </div>
+            <div style="font-size: 9.5px; color: var(--text-faint); margin-top: 3px;" id="previewDeviceBound">
+              Device ID: DEV-479D20A1 · IP: 180.244.132.89
+            </div>
+          </div>
+
+          <button class="btn-trial-claim" id="btnPreviewClaimTrial" style="display: none;" onclick="claimTrialInPreview()">
+            🎁  Klaim Uji Coba 3 Hari Gratis
+          </button>
+
+          <button class="btn-gold" id="btnPreviewBuyLifetime" onclick="openQrisModal()">
+            👑  Beli Lisensi Seumur Hidup — Rp 10.000
+          </button>
+
+          <div style="font-size: 9px; color: var(--text-faint); line-height: 1.3; margin-top: 8px;">
+            *Peringatan: Lisensi dikunci permanen pada Device ID ini. Pembelian pada HP ini hanya berlaku untuk HP ini (tidak dapat dipindah).
+          </div>
+        </div>
+
         <div class="section-eyebrow">
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           <span>Izin Sistem</span>
@@ -751,6 +893,69 @@
       </div>
     </div>
 
+    <!-- DONGTUBE QRIS PAYMENT MODAL -->
+    <div class="modal-overlay" id="qrisModalOverlay">
+      <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 15px; font-weight: 800; color: var(--text-main);">Pembayaran Lisensi</div>
+            <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 1px;">Dongtube Payment Gateway · QRIS Realtime</div>
+          </div>
+          <div class="f-circle-btn close" onclick="closeQrisModal()">✕</div>
+        </div>
+
+        <!-- Warning Disclaimer -->
+        <div style="background: #FFF7ED; border: 1px solid #FFEDD5; border-radius: 12px; padding: 10px; margin-bottom: 12px;">
+          <div style="font-size: 10px; font-weight: 800; color: #C2410C;">⚠️ PERINGATAN KETENTUAN LISENSI</div>
+          <div style="font-size: 9.5px; color: #9A3412; margin-top: 3px; line-height: 1.35;">
+            Lisensi Seumur Hidup (Rp 10.000) ini dikunci khusus untuk Device ID: <b>DEV-479D20A1</b>. Pembelian di perangkat ini hanya berlaku selamanya untuk perangkat ini dan tidak dapat dipindahkan.
+          </div>
+        </div>
+
+        <div id="qrisModalLoading" style="text-align: center; padding: 30px 0;">
+          <div style="font-size: 24px; animation: spin 1s linear infinite; display: inline-block;">⏳</div>
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 8px;">Membuat Invoice Dongtube...</div>
+        </div>
+
+        <div id="qrisModalBody" style="display: none; text-align: center;">
+          <div class="qris-box-frame">
+            <img id="qrisCodeImg" src="https://payment.dongtube.cyou/img-cache/qris-05a42f793e670818640425c2ef9cef40.png" alt="QRIS Code">
+          </div>
+          <div style="font-size: 9px; font-weight: 700; color: var(--text-faint);">BCA · GoPay · DANA · OVO · ShopeePay · Semua Bank</div>
+
+          <div style="background: var(--surface-secondary); border-radius: 12px; padding: 12px; margin-top: 12px;">
+            <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px;">TOTAL PEMBAYARAN</div>
+            <div style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="qrisDisplayAmount">Rp 10.500</div>
+            <div style="font-size: 9px; color: var(--danger); margin-top: 2px;">*Transfer sesuai nominal termasuk biaya admin</div>
+            <button class="btn-ghost-add" style="margin-top: 8px; height: 30px; font-size: 10.5px;" onclick="copyTransferAmount()">
+              📋 Salin Nominal Transfer
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 10.5px; color: var(--success); font-weight: 700;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 1.5s infinite;"></span>
+            <span id="qrisLiveStatusText">Menunggu pembayaran... (Auto-Check)</span>
+          </div>
+
+          <button class="btn-action-black" style="margin-top: 12px; height: 40px; font-size: 12px;" onclick="simulatePaymentSuccess()">
+            ✓ Konfirmasi Pembayaran Berhasil (Simulasi)
+          </button>
+        </div>
+
+        <div id="qrisModalSuccess" style="display: none; text-align: center; padding: 20px 0;">
+          <div style="font-size: 42px; color: var(--success);">✓</div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--success); margin-top: 8px;">PEMBAYARAN DITERIMA!</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; padding: 0 10px;">
+            Lisensi Seumur Hidup TikTok AutoChat telah aktif permanen pada perangkat ini.
+          </div>
+          <button class="btn-action-black" style="margin-top: 16px;" onclick="finishPaymentSuccess()">
+            Mulai Gunakan AutoChat
+          </button>
+        </div>
+
+      </div>
+    </div>
+
     <div class="toast-msg" id="toastBox">Pengaturan tersimpan!</div>
 
   </div>
@@ -758,6 +963,137 @@
   <script>
     let isRunning = false;
     let currentScreen = 'home';
+
+    // LICENSE & PERSISTENCE SIMULATION
+    const DURATION_3_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+    let licenseState = {
+      isLifetime: localStorage.getItem('autochat_lifetime') === 'true',
+      trialStart: parseInt(localStorage.getItem('autochat_trial_start') || '0', 10),
+      deviceId: 'DEV-479D20A1',
+      ip: '180.244.132.89'
+    };
+
+    // Auto-init trial if fresh user
+    if (!licenseState.isLifetime && licenseState.trialStart === 0) {
+      licenseState.trialStart = Date.now();
+      localStorage.setItem('autochat_trial_start', licenseState.trialStart.toString());
+    }
+
+    function updateLicenseDisplay() {
+      const now = Date.now();
+      const badge = document.getElementById('previewLicenseBadge');
+      const title = document.getElementById('previewLicenseTitle');
+      const sub = document.getElementById('previewLicenseSub');
+      const timeRemaining = document.getElementById('previewTimeRemaining');
+      const btnClaim = document.getElementById('btnPreviewClaimTrial');
+      const btnBuy = document.getElementById('btnPreviewBuyLifetime');
+      const icon = document.getElementById('previewLicenseIcon');
+      const deviceBound = document.getElementById('previewDeviceBound');
+
+      if (!badge) return;
+      deviceBound.innerText = `Device ID: ${licenseState.deviceId} · IP: ${licenseState.ip}`;
+
+      if (licenseState.isLifetime) {
+        icon.innerText = '👑';
+        title.innerText = 'Lisensi Seumur Hidup';
+        sub.innerText = 'Akses Penuh Selamanya';
+        badge.className = 'badge-status badge-lifetime';
+        badge.innerText = 'SEUMUR HIDUP';
+        timeRemaining.innerText = 'Status: Aktif Selamanya (Lunas)';
+        timeRemaining.style.color = '#D97706';
+        btnClaim.style.display = 'none';
+        btnBuy.style.display = 'none';
+      } else if (licenseState.trialStart > 0) {
+        const elapsed = now - licenseState.trialStart;
+        const remaining = DURATION_3_DAYS_MS - elapsed;
+        if (remaining > 0) {
+          icon.innerText = '⏳';
+          title.innerText = 'Masa Uji Coba Aktif';
+          sub.innerText = 'Masa Trial 3 Hari (72 Jam)';
+          badge.className = 'badge-status badge-trial';
+          badge.innerText = 'TRIAL AKTIF';
+
+          const days = Math.floor(remaining / (24 * 3600 * 1000));
+          const hours = Math.floor((remaining % (24 * 3600 * 1000)) / (3600 * 1000));
+          const mins = Math.floor((remaining % (3600 * 1000)) / (60 * 1000));
+          const secs = Math.floor((remaining % (60 * 1000)) / 1000);
+
+          timeRemaining.innerText = `Sisa Waktu: ${days} Hari ${hours} Jam ${mins} Mnt ${secs} Dtk`;
+          timeRemaining.style.color = '#0F172A';
+          btnClaim.style.display = 'none';
+          btnBuy.style.display = 'block';
+        } else {
+          icon.innerText = '🔒';
+          title.innerText = 'Masa Uji Coba Habis';
+          sub.innerText = 'Akses Terkunci';
+          badge.className = 'badge-status badge-expired';
+          badge.innerText = 'TRIAL HABIS';
+          timeRemaining.innerText = 'Masa Percobaan 3 Hari Telah Berakhir';
+          timeRemaining.style.color = '#DC2626';
+          btnClaim.style.display = 'none';
+          btnBuy.style.display = 'block';
+        }
+      } else {
+        icon.innerText = '🎁';
+        title.innerText = 'Percobaan 3 Hari Gratis';
+        sub.innerText = 'Coba 72 Jam Tanpa Bayar';
+        badge.className = 'badge-status badge-unused';
+        badge.innerText = 'GRATIS 3 HARI';
+        timeRemaining.innerText = 'Tersedia Uji Coba 3 Hari (72 Jam)';
+        timeRemaining.style.color = '#0F172A';
+        btnClaim.style.display = 'block';
+        btnBuy.style.display = 'block';
+      }
+    }
+
+    setInterval(updateLicenseDisplay, 1000);
+    setTimeout(updateLicenseDisplay, 50);
+
+    function claimTrialInPreview() {
+      licenseState.trialStart = Date.now();
+      localStorage.setItem('autochat_trial_start', licenseState.trialStart.toString());
+      showToast('Masa Uji Coba 3 Hari Aktif! 🎉');
+      updateLicenseDisplay();
+    }
+
+    function openQrisModal() {
+      const modal = document.getElementById('qrisModalOverlay');
+      modal.style.display = 'flex';
+      document.getElementById('qrisModalLoading').style.display = 'block';
+      document.getElementById('qrisModalBody').style.display = 'none';
+      document.getElementById('qrisModalSuccess').style.display = 'none';
+
+      setTimeout(() => {
+        document.getElementById('qrisModalLoading').style.display = 'none';
+        document.getElementById('qrisModalBody').style.display = 'block';
+      }, 700);
+    }
+
+    function closeQrisModal() {
+      document.getElementById('qrisModalOverlay').style.display = 'none';
+    }
+
+    function copyTransferAmount() {
+      navigator.clipboard.writeText('10500').then(() => {
+        showToast('Nominal Rp 10.500 disalin ke clipboard! 📋');
+      }).catch(() => {
+        showToast('Nominal Rp 10.500 disalin!');
+      });
+    }
+
+    function simulatePaymentSuccess() {
+      document.getElementById('qrisModalBody').style.display = 'none';
+      document.getElementById('qrisModalSuccess').style.display = 'block';
+      licenseState.isLifetime = true;
+      localStorage.setItem('autochat_lifetime', 'true');
+      updateLicenseDisplay();
+      showToast('Pembayaran Dongtube Berhasil! 💎');
+    }
+
+    function finishPaymentSuccess() {
+      closeQrisModal();
+      showFloatingWidget(true);
+    }
 
     function handleHeaderAction() {
       if (currentScreen === 'home') {

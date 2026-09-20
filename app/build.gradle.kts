@@ -11,9 +11,9 @@ android {
         applicationId = "com.autochat.floating"
         minSdk = 24
         targetSdk = 34
-        versionCode = 20
-        versionName = "3.3.0"
-        setProperty("archivesBaseName", "TikTokAutoChat-v3.3.0")
+        versionCode = 21
+        versionName = "3.4.0"
+        setProperty("archivesBaseName", "TikTokAutoChat-v3.4.0")
     }
 
     signingConfigs {
