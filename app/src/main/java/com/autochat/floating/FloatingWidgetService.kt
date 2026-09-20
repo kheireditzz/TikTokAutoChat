@@ -166,7 +166,7 @@ class FloatingWidgetService : Service() {
                     }
                     MotionEvent.ACTION_UP -> {
                         if (isClick && v == layoutBubble) {
-                            v.performClick()
+                            v?.performClick()
                         } else {
                             // Tempelkan otomatis ke tepi samping layar (Kiri / Kanan)
                             snapToNearestEdge()
