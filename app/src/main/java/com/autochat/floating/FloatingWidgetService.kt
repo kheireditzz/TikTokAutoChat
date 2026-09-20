@@ -220,6 +220,11 @@ class FloatingWidgetService : Service() {
             addWidgetMessageItem("", true)
         }
 
+        val btnCalibrate = floatingView.findViewById<TextView>(R.id.btnCalibrate)
+        btnCalibrate.setOnClickListener {
+            startOneTouchCalibration()
+        }
+
         etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
@@ -406,8 +411,145 @@ class FloatingWidgetService : Service() {
         } catch (_: Exception) {}
     }
 
+    /**
+     * MODE KALIBRASI 1x SENTUH:
+     * Menampilkan overlay transparan satu layar penuh untuk merekam pixel koordinat asli
+     * saat user menyentuh langsung kolom komentar & tombol kirim di TikTok Live.
+     */
+    private var calibrationOverlayView: View? = null
+
+    private fun startOneTouchCalibration() {
+        if (calibrationOverlayView != null) return
+
+        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val calParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            PixelFormat.TRANSLUCENT
+        )
+
+        val calContainer = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#44000000")) // Semi transparan gelap lembut
+        }
+
+        // Banner petunjuk di atas layar
+        val bannerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            val padH = (16 * resources.displayMetrics.density).toInt()
+            val padV = (12 * resources.displayMetrics.density).toInt()
+            setPadding(padH, padV, padH, padV)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(Color.parseColor("#0F172A"))
+                cornerRadius = 16 * resources.displayMetrics.density
+            }
+            val lp = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                topMargin = (60 * resources.displayMetrics.density).toInt()
+            }
+            layoutParams = lp
+        }
+
+        val tvStepTitle = TextView(this).apply {
+            text = "📍 MODE KALIBRASI 1x SENTUH"
+            setTextColor(Color.parseColor("#FE2C55"))
+            textSize = 14f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+        }
+
+        val tvStepDesc = TextView(this).apply {
+            text = "Langkah 1/2: Sentuh KOLOM KOMENTAR di TikTok Anda"
+            setTextColor(Color.WHITE)
+            textSize = 12.5f
+            gravity = Gravity.CENTER
+            setPadding(0, 4, 0, 8)
+        }
+
+        val btnBatal = TextView(this).apply {
+            text = "✕ Batal Kalibrasi"
+            setTextColor(Color.parseColor("#94A3B8"))
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setPadding(8, 4, 8, 4)
+            setOnClickListener {
+                stopOneTouchCalibration()
+            }
+        }
+
+        bannerLayout.addView(tvStepTitle)
+        bannerLayout.addView(tvStepDesc)
+        bannerLayout.addView(btnBatal)
+        calContainer.addView(bannerLayout)
+
+        var step = 1
+        var recordedChatX = 0f
+        var recordedChatY = 0f
+
+        calContainer.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                if (step == 1) {
+                    recordedChatX = event.rawX
+                    recordedChatY = event.rawY
+                    step = 2
+
+                    // Animasi update teks banner langkah kedua
+                    tvStepDesc.text = "Langkah 2/2: Sentuh TOMBOL KIRIM / PANAH TikTok"
+                    tvStepDesc.setTextColor(Color.parseColor("#10B981"))
+                    Toast.makeText(this, "Kolom Chat terkunci (${recordedChatX.toInt()}, ${recordedChatY.toInt()})", Toast.LENGTH_SHORT).show()
+                } else if (step == 2) {
+                    val recordedSendX = event.rawX
+                    val recordedSendY = event.rawY
+
+                    // Simpan ke SharedPreferences & Accessibility Service
+                    prefs.edit()
+                        .putFloat("calibrated_chat_x", recordedChatX)
+                        .putFloat("calibrated_chat_y", recordedChatY)
+                        .putFloat("calibrated_send_x", recordedSendX)
+                        .putFloat("calibrated_send_y", recordedSendY)
+                        .apply()
+
+                    TikTokAccessibilityService.instance?.setCalibratedCoordinates(
+                        recordedChatX, recordedChatY, recordedSendX, recordedSendY
+                    )
+
+                    Toast.makeText(this, "Kalibrasi Berhasil! Titik chat & kirim terkunci 100% presisi.", Toast.LENGTH_LONG).show()
+                    stopOneTouchCalibration()
+                }
+                return@setOnTouchListener true
+            }
+            false
+        }
+
+        calibrationOverlayView = calContainer
+        windowManager.addView(calContainer, calParams)
+    }
+
+    private fun stopOneTouchCalibration() {
+        calibrationOverlayView?.let {
+            try {
+                windowManager.removeView(it)
+            } catch (_: Exception) {}
+            calibrationOverlayView = null
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        stopOneTouchCalibration()
         TikTokAccessibilityService.instance?.stopAutoChat()
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)

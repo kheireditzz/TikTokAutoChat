@@ -33,12 +33,41 @@ class TikTokAccessibilityService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
     private var isTypingWorkflowRunning = false
 
+    // Kalibrasi 1x Sentuh Coordinates (Disimpan dalam pixel pasti layar user)
+    private var calibratedChatX: Float = -1f
+    private var calibratedChatY: Float = -1f
+    private var calibratedSendX: Float = -1f
+    private var calibratedSendY: Float = -1f
+
     private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
+        loadCalibratedCoordinates()
         Toast.makeText(this, "Aksesibilitas AutoChat Terhubung! Siap digunakan.", Toast.LENGTH_SHORT).show()
+    }
+
+    fun loadCalibratedCoordinates() {
+        val prefs = getSharedPreferences("AutoChatPrefs", Context.MODE_PRIVATE)
+        calibratedChatX = prefs.getFloat("calibrated_chat_x", -1f)
+        calibratedChatY = prefs.getFloat("calibrated_chat_y", -1f)
+        calibratedSendX = prefs.getFloat("calibrated_send_x", -1f)
+        calibratedSendY = prefs.getFloat("calibrated_send_y", -1f)
+    }
+
+    fun setCalibratedCoordinates(chatX: Float, chatY: Float, sendX: Float, sendY: Float) {
+        calibratedChatX = chatX
+        calibratedChatY = chatY
+        calibratedSendX = sendX
+        calibratedSendY = sendY
+        val prefs = getSharedPreferences("AutoChatPrefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putFloat("calibrated_chat_x", chatX)
+            .putFloat("calibrated_chat_y", chatY)
+            .putFloat("calibrated_send_x", sendX)
+            .putFloat("calibrated_send_y", sendY)
+            .apply()
     }
 
     fun setOnChatSentListener(listener: ((Int, String) -> Unit)?) {
@@ -154,6 +183,12 @@ class TikTokAccessibilityService : AccessibilityService() {
     }
 
     private fun triggerCommentBar(root: AccessibilityNodeInfo): Boolean {
+        // Prioritas 0: Jika user sudah melakukan "Kalibrasi 1x Sentuh", gunakan pixel pasti yang dikalibrasi
+        if (calibratedChatX > 0 && calibratedChatY > 0) {
+            simulateTap(calibratedChatX, calibratedChatY)
+            return true
+        }
+
         val allNodes = getAllNodes(root)
         val metrics = resources.displayMetrics
         val screenHeight = metrics.heightPixels
@@ -248,6 +283,15 @@ class TikTokAccessibilityService : AccessibilityService() {
         inputNode: AccessibilityNodeInfo,
         text: String
     ) {
+        // 0. Prioritas Utama jika sudah Kalibrasi 1x Sentuh untuk tombol Kirim
+        if (calibratedSendX > 0 && calibratedSendY > 0) {
+            simulateTap(calibratedSendX, calibratedSendY)
+            dispatchImeSend(inputNode)
+            notifySuccess(text)
+            isTypingWorkflowRunning = false
+            return
+        }
+
         // 1. Coba klik tombol send TikTok resmi
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",

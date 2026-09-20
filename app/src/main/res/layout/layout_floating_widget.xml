@@ -183,18 +183,39 @@
                 android:padding="4dp" />
         </ScrollView>
 
-        <!-- Tombol Tambah Chat -->
-        <TextView
-            android:id="@+id/btnFloatingAddMessage"
+        <!-- Tombol Tambah Chat & Kalibrasi 1x Sentuh -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:text="+ Tambah Pesan Chat"
-            android:textColor="#FE2C55"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:background="@drawable/bg_btn_add"
-            android:layout_marginBottom="8dp" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/btnFloatingAddMessage"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:text="+ Chat"
+                android:textColor="#FE2C55"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/bg_btn_add"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/btnCalibrate"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1.3"
+                android:text="📍 Kalibrasi 1x Sentuh"
+                android:textColor="#3B82F6"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/bg_btn_add"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
 
         <!-- Bottom Controls: Delay & Start Button -->
         <LinearLayout
