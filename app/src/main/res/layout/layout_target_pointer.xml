@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <!-- Label Target Pointer -->
+    <TextView
+        android:id="@+id/tvTargetLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#DD090A0F"
+        android:textColor="#FFFFFF"
+        android:textSize="9.5sp"
+        android:textStyle="bold"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:text="📍 1. KOLOM CHAT"
+        android:layout_marginBottom="2dp" />
+
+    <!-- Lingkaran Target Pembidik Transparan dengan Crosshair -->
+    <FrameLayout
+        android:id="@+id/flTargetCircle"
+        android:layout_width="48dp"
+        android:layout_height="48dp">
+
+        <!-- Outer Ring -->
+        <View
+            android:id="@+id/viewTargetRing"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_target_ring" />
+
+        <!-- Garis Silang Horizontal -->
+        <View
+            android:id="@+id/viewCrossH"
+            android:layout_width="24dp"
+            android:layout_height="2dp"
+            android:layout_gravity="center"
+            android:background="#FE2C55" />
+
+        <!-- Garis Silang Vertikal -->
+        <View
+            android:id="@+id/viewCrossV"
+            android:layout_width="2dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="#FE2C55" />
+
+        <!-- Titik Pusat Presisi (Bullseye) -->
+        <View
+            android:id="@+id/viewTargetCenter"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_target_center" />
+    </FrameLayout>
+
+</LinearLayout>

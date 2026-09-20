@@ -183,18 +183,39 @@
                 android:padding="4dp" />
         </ScrollView>
 
-        <!-- Button Tambah Chat Baru -->
-        <TextView
-            android:id="@+id/btnFloatingAddMessage"
+        <!-- Tombol Tambah Chat & Tombol Geser Koordinat Layar -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="28dp"
-            android:text="+ Tambah Pesan Chat"
-            android:textColor="#FE2C55"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:background="@drawable/bg_btn_add"
-            android:layout_marginBottom="6dp" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/btnFloatingAddMessage"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:text="+ Chat"
+                android:textColor="#FE2C55"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/bg_btn_add"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/btnToggleDraggableTargets"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1.4"
+                android:text="🎯 Geser Titik Layar"
+                android:textColor="#3B82F6"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/bg_btn_add"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
 
         <!-- Quick Coordinate Row (Bisa diatur & disimpan langsung di floating widget) -->
         <LinearLayout

@@ -244,6 +244,12 @@ class FloatingWidgetService : Service() {
         etFloatSendX.setOnTouchListener(coordTouchListener)
         etFloatSendY.setOnTouchListener(coordTouchListener)
 
+        // Tombol Geser Titik Layar (Target Pembidik Visual)
+        val btnToggleTargets = floatingView.findViewById<TextView>(R.id.btnToggleDraggableTargets)
+        btnToggleTargets.setOnClickListener {
+            toggleTargetPointers(etFloatCoordX, etFloatCoordY, etFloatSendX, etFloatSendY)
+        }
+
         etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
@@ -445,8 +451,187 @@ class FloatingWidgetService : Service() {
         } catch (_: Exception) {}
     }
 
+    // Draggable Target Pointer Views
+    private var chatTargetView: View? = null
+    private var sendTargetView: View? = null
+    private var isTargetOverlayVisible = false
+
+    private fun toggleTargetPointers(
+        etCoordX: EditText,
+        etCoordY: EditText,
+        etSendX: EditText,
+        etSendY: EditText
+    ) {
+        if (isTargetOverlayVisible) {
+            removeTargetPointers()
+            Toast.makeText(this, "Target titik layar ditutup & disimpan! ✅", Toast.LENGTH_SHORT).show()
+        } else {
+            showTargetPointers(etCoordX, etCoordY, etSendX, etSendY)
+            Toast.makeText(this, "🎯 Geser target merah ke kolom chat, dan biru ke tombol kirim!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showTargetPointers(
+        etCoordX: EditText,
+        etCoordY: EditText,
+        etSendX: EditText,
+        etSendY: EditText
+    ) {
+        if (isTargetOverlayVisible) return
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+
+        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        // 1. Target Pointer 1: Kolom Chat (Merah)
+        chatTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
+        val tvChatLabel = chatTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
+        tvChatLabel.text = "📍 1. KOLOM CHAT (GESER SAYA)"
+
+        val savedChatXPercent = prefs.getInt("coord_input_x", 25)
+        val savedChatYPercent = prefs.getInt("coord_input_y", 96)
+
+        val chatParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = (screenWidth * (savedChatXPercent / 100f) - 24 * displayMetrics.density).toInt()
+            y = (screenHeight * (savedChatYPercent / 100f) - 48 * displayMetrics.density).toInt()
+        }
+
+        setupDraggablePointer(chatTargetView!!, chatParams, displayMetrics) { newXPercent, newYPercent ->
+            etCoordX.setText(newXPercent.toString())
+            etCoordY.setText(newYPercent.toString())
+            prefs.edit()
+                .putInt("coord_input_x", newXPercent)
+                .putInt("coord_input_y", newYPercent)
+                .apply()
+        }
+
+        windowManager.addView(chatTargetView, chatParams)
+
+        // 2. Target Pointer 2: Tombol Kirim (Biru)
+        sendTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
+        val tvSendLabel = sendTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
+        tvSendLabel.text = "🎯 2. TOMBOL KIRIM (GESER SAYA)"
+        tvSendLabel.setBackgroundColor(Color.parseColor("#DD1E40AF"))
+
+        val ringView = sendTargetView!!.findViewById<View>(R.id.viewTargetRing)
+        val crossH = sendTargetView!!.findViewById<View>(R.id.viewCrossH)
+        val crossV = sendTargetView!!.findViewById<View>(R.id.viewCrossV)
+        val centerDot = sendTargetView!!.findViewById<View>(R.id.viewTargetCenter)
+        ringView.setBackgroundResource(R.drawable.bg_target_ring_blue)
+        crossH.setBackgroundColor(Color.parseColor("#3B82F6"))
+        crossV.setBackgroundColor(Color.parseColor("#3B82F6"))
+        centerDot.setBackgroundResource(R.drawable.bg_target_center_blue)
+
+        val savedSendXPercent = prefs.getInt("coord_send_x", 92)
+        val savedSendYPercent = prefs.getInt("coord_send_y", 94)
+
+        val sendParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = (screenWidth * (savedSendXPercent / 100f) - 24 * displayMetrics.density).toInt()
+            y = (screenHeight * (savedSendYPercent / 100f) - 48 * displayMetrics.density).toInt()
+        }
+
+        setupDraggablePointer(sendTargetView!!, sendParams, displayMetrics) { newXPercent, newYPercent ->
+            etSendX.setText(newXPercent.toString())
+            etSendY.setText(newYPercent.toString())
+            prefs.edit()
+                .putInt("coord_send_x", newXPercent)
+                .putInt("coord_send_y", newYPercent)
+                .apply()
+        }
+
+        windowManager.addView(sendTargetView, sendParams)
+
+        isTargetOverlayVisible = true
+    }
+
+    private fun setupDraggablePointer(
+        targetView: View,
+        targetParams: WindowManager.LayoutParams,
+        metrics: DisplayMetrics,
+        onCoordUpdated: (Int, Int) -> Unit
+    ) {
+        targetView.setOnTouchListener(object : View.OnTouchListener {
+            private var initialX = 0
+            private var initialY = 0
+            private var initialTouchX = 0f
+            private var initialTouchY = 0f
+
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        initialX = targetParams.x
+                        initialY = targetParams.y
+                        initialTouchX = event.rawX
+                        initialTouchY = event.rawY
+                        return true
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        targetParams.x = (initialX + (event.rawX - initialTouchX)).toInt()
+                        targetParams.y = (initialY + (event.rawY - initialTouchY)).toInt()
+                        try {
+                            windowManager.updateViewLayout(targetView, targetParams)
+                        } catch (_: Exception) {}
+
+                        // Hitung titik pusat target ring dalam persen layar
+                        val centerX = targetParams.x + targetView.width / 2
+                        val centerY = targetParams.y + targetView.height - (24 * metrics.density).toInt()
+
+                        val xPercent = ((centerX.toFloat() / metrics.widthPixels.toFloat()) * 100).toInt().coerceIn(1, 99)
+                        val yPercent = ((centerY.toFloat() / metrics.heightPixels.toFloat()) * 100).toInt().coerceIn(1, 99)
+
+                        onCoordUpdated(xPercent, yPercent)
+                        return true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        return true
+                    }
+                }
+                return false
+            }
+        })
+    }
+
+    private fun removeTargetPointers() {
+        if (chatTargetView != null) {
+            try {
+                windowManager.removeView(chatTargetView)
+            } catch (_: Exception) {}
+            chatTargetView = null
+        }
+        if (sendTargetView != null) {
+            try {
+                windowManager.removeView(sendTargetView)
+            } catch (_: Exception) {}
+            sendTargetView = null
+        }
+        isTargetOverlayVisible = false
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        removeTargetPointers()
         TikTokAccessibilityService.instance?.stopAutoChat()
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)
