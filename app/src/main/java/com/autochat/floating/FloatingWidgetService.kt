@@ -148,7 +148,7 @@ class FloatingWidgetService : Service() {
                 val s = (24 * resources.displayMetrics.density).toInt()
                 layoutParams = LinearLayout.LayoutParams(s, s)
                 gravity = Gravity.CENTER
-                text = "✕"
+                setText("✕")
                 setTextColor(Color.parseColor("#94A3B8"))
                 textSize = 11f
                 setOnClickListener {

@@ -166,7 +166,7 @@ class MainActivity : Activity() {
                 marginStart = (8 * resources.displayMetrics.density).toInt()
             }
             gravity = android.view.Gravity.CENTER
-            text = "✕"
+            setText("✕")
             setTextColor(Color.parseColor("#EF4444"))
             textSize = 12f
             setBackgroundResource(R.drawable.bg_circle_btn_white)
@@ -265,13 +265,6 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun loadSavedSettings() {
-        etSettingMsg1.setText(prefs.getString("msg1", "Halo kak, barangnya ready? 🔥"))
-        etSettingMsg2.setText(prefs.getString("msg2", "Spill etalase nomor 1 dong kak 🛍️"))
-        etSettingMsg3.setText(prefs.getString("msg3", "Tap tap layar terus ya guys! ✨"))
-        etSettingDelay.setText(prefs.getInt("delay", 4).toString())
-        switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
-    }
 
     override fun onResume() {
         super.onResume()
