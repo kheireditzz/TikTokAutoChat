@@ -250,6 +250,66 @@ class FloatingWidgetService : Service() {
             toggleTargetPointers(etFloatCoordX, etFloatCoordY, etFloatSendX, etFloatSendY)
         }
 
+        // Setup Template Preset di Widget Melayang
+        val spinnerPreset = floatingView.findViewById<Spinner>(R.id.spinnerFloatingPreset)
+        val btnSavePreset = floatingView.findViewById<TextView>(R.id.btnSaveFloatingPreset)
+
+        var floatingPresetList = PresetManager.getPresets(prefs)
+        var isFloatingSpinnerInit = false
+
+        fun refreshFloatingPresets() {
+            floatingPresetList = PresetManager.getPresets(prefs)
+            val names = floatingPresetList.map { it.name }.toMutableList()
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
+            spinnerPreset.adapter = adapter
+        }
+
+        refreshFloatingPresets()
+
+        spinnerPreset.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!isFloatingSpinnerInit) {
+                    isFloatingSpinnerInit = true
+                    return
+                }
+                if (position in 0 until floatingPresetList.size) {
+                    val p = floatingPresetList[position]
+                    etFloatCoordX.setText(p.chatX.toString())
+                    etFloatCoordY.setText(p.chatY.toString())
+                    etFloatSendX.setText(p.sendX.toString())
+                    etFloatSendY.setText(p.sendY.toString())
+
+                    prefs.edit()
+                        .putInt("coord_input_x", p.chatX)
+                        .putInt("coord_input_y", p.chatY)
+                        .putInt("coord_send_x", p.sendX)
+                        .putInt("coord_send_y", p.sendY)
+                        .apply()
+
+                    Toast.makeText(this@FloatingWidgetService, "Preset '${p.name}' diterapkan!", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        btnSavePreset.setOnClickListener {
+            val chatX = etFloatCoordX.text.toString().toIntOrNull() ?: 25
+            val chatY = etFloatCoordY.text.toString().toIntOrNull() ?: 96
+            val sendX = etFloatSendX.text.toString().toIntOrNull() ?: 92
+            val sendY = etFloatSendY.text.toString().toIntOrNull() ?: 94
+
+            val presetName = "Preset ${floatingPresetList.size + 1}"
+            val newPreset = CoordPreset(presetName, chatX, chatY, sendX, sendY)
+            PresetManager.addOrUpdatePreset(prefs, newPreset)
+            refreshFloatingPresets()
+            val newIndex = floatingPresetList.indexOfFirst { it.name == presetName }
+            if (newIndex >= 0) {
+                spinnerPreset.setSelection(newIndex)
+            }
+            Toast.makeText(this, "Koordinat disimpan ke '$presetName'! ✅", Toast.LENGTH_SHORT).show()
+        }
+
         etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
@@ -496,8 +556,9 @@ class FloatingWidgetService : Service() {
         val tvChatLabel = chatTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
         tvChatLabel.text = "📍 1. CHAT (GESER SAYA)"
 
-        val savedChatXPercent = prefs.getInt("coord_input_x", 25)
-        val savedChatYPercent = prefs.getInt("coord_input_y", 96)
+        // Titik awal target dimunculkan di TENGAH LAYAR agar mudah diraih dan digeser oleh jari
+        val currentChatXPercent = etCoordX.text.toString().toIntOrNull() ?: 50
+        val currentChatYPercent = etCoordY.text.toString().toIntOrNull() ?: 50
 
         val chatParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -507,8 +568,8 @@ class FloatingWidgetService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = (screenWidth * (savedChatXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (savedChatYPercent / 100f) - 24 * displayMetrics.density).toInt()
+            x = (screenWidth * (currentChatXPercent / 100f) - 24 * displayMetrics.density).toInt()
+            y = (screenHeight * (currentChatYPercent / 100f) - 24 * displayMetrics.density).toInt()
         }
 
         setupDraggablePointer(chatTargetView!!, chatParams, displayMetrics, tvChatLabel, "CHAT") { newXPercent, newYPercent ->
@@ -537,8 +598,9 @@ class FloatingWidgetService : Service() {
         crossV.setBackgroundColor(Color.parseColor("#3B82F6"))
         centerDot.setBackgroundResource(R.drawable.bg_target_center_blue)
 
-        val savedSendXPercent = prefs.getInt("coord_send_x", 92)
-        val savedSendYPercent = prefs.getInt("coord_send_y", 94)
+        // Titik awal target kirim dimunculkan berdampingan di tengah
+        val currentSendXPercent = etSendX.text.toString().toIntOrNull() ?: 65
+        val currentSendYPercent = etSendY.text.toString().toIntOrNull() ?: 50
 
         val sendParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -548,8 +610,8 @@ class FloatingWidgetService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = (screenWidth * (savedSendXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (savedSendYPercent / 100f) - 24 * displayMetrics.density).toInt()
+            x = (screenWidth * (currentSendXPercent / 100f) - 24 * displayMetrics.density).toInt()
+            y = (screenHeight * (currentSendYPercent / 100f) - 24 * displayMetrics.density).toInt()
         }
 
         setupDraggablePointer(sendTargetView!!, sendParams, displayMetrics, tvSendLabel, "KIRIM") { newXPercent, newYPercent ->

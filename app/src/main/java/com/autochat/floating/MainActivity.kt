@@ -55,6 +55,10 @@ class MainActivity : Activity() {
     private lateinit var etCoordInputY: EditText
     private lateinit var etCoordSendX: EditText
     private lateinit var etCoordSendY: EditText
+    private lateinit var spinnerMainPreset: Spinner
+    private lateinit var btnSaveMainPreset: Button
+    private var presetList = mutableListOf<CoordPreset>()
+    private var isSpinnerInit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +95,14 @@ class MainActivity : Activity() {
         etCoordInputY = findViewById(R.id.etCoordInputY)
         etCoordSendX = findViewById(R.id.etCoordSendX)
         etCoordSendY = findViewById(R.id.etCoordSendY)
+        spinnerMainPreset = findViewById(R.id.spinnerMainPreset)
+        btnSaveMainPreset = findViewById(R.id.btnSaveMainPreset)
+
+        setupPresetSpinner()
+
+        btnSaveMainPreset.setOnClickListener {
+            showSavePresetDialog()
+        }
 
         btnSettingsAddMessage.setOnClickListener {
             addSettingMessageRow("")
@@ -315,7 +327,76 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun isAccessibilityServiceEnabled(): Boolean {
+    private fun setupPresetSpinner() {
+        presetList = PresetManager.getPresets(prefs)
+        val names = presetList.map { it.name }.toMutableList()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
+        spinnerMainPreset.adapter = adapter
+
+        spinnerMainPreset.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!isSpinnerInit) {
+                    isSpinnerInit = true
+                    return
+                }
+                if (position in 0 until presetList.size) {
+                    val p = presetList[position]
+                    etCoordInputX.setText(p.chatX.toString())
+                    etCoordInputY.setText(p.chatY.toString())
+                    etCoordSendX.setText(p.sendX.toString())
+                    etCoordSendY.setText(p.sendY.toString())
+                    Toast.makeText(this@MainActivity, "Preset '${p.name}' dipilih! Otomatis diterapkan.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun showSavePresetDialog() {
+        val chatX = etCoordInputX.text.toString().toIntOrNull() ?: 25
+        val chatY = etCoordInputY.text.toString().toIntOrNull() ?: 96
+        val sendX = etCoordSendX.text.toString().toIntOrNull() ?: 92
+        val sendY = etCoordSendY.text.toString().toIntOrNull() ?: 94
+
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_save_preset, null)
+        val tvSummary = dialogView.findViewById<TextView>(R.id.tvPresetCoordsSummary)
+        val etName = dialogView.findViewById<EditText>(R.id.etPresetName)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelPreset)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmSavePreset)
+
+        tvSummary.text = "Chat: X:$chatX% Y:$chatY% | Kirim: X:$sendX% Y:$sendY%"
+        etName.setText("Preset ${presetList.size + 1}")
+
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnConfirm.setOnClickListener {
+            val name = etName.text.toString().trim()
+            if (name.isBlank()) {
+                Toast.makeText(this, "Nama preset tidak boleh kosong!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val newPreset = CoordPreset(name, chatX, chatY, sendX, sendY)
+            PresetManager.addOrUpdatePreset(prefs, newPreset)
+            dialog.dismiss()
+            setupPresetSpinner()
+            // Pilih item yang baru disimpan
+            val newIndex = presetList.indexOfFirst { it.name.equals(name, ignoreCase = true) }
+            if (newIndex >= 0) {
+                spinnerMainPreset.setSelection(newIndex)
+            }
+            Toast.makeText(this, "Preset '$name' berhasil disimpan! ✅", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+    }
+
+    override fun isAccessibilityServiceEnabled(): Boolean {
         val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
         val enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
         for (service in enabledServices) {
