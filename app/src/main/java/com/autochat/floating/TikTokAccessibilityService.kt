@@ -253,7 +253,11 @@ class TikTokAccessibilityService : AccessibilityService() {
     }
 
     private fun clickCommentTrigger(root: AccessibilityNodeInfo): Boolean {
-        // Prioritaskan teks pemicu chat Live TikTok
+        val metrics = resources.displayMetrics
+        val screenHeight = metrics.heightPixels
+        val screenWidth = metrics.widthPixels
+
+        // 1. Prioritaskan teks pemicu KHUSUS chat Live TikTok
         val liveTriggers = listOf(
             "Tambahkan komentar...", "Tambahkan komentar",
             "Say something...", "Say something",
@@ -266,12 +270,20 @@ class TikTokAccessibilityService : AccessibilityService() {
             val nodes = root.findAccessibilityNodeInfosByText(triggerText)
             for (node in nodes) {
                 val pkg = node.packageName?.toString() ?: ""
-                if (!pkg.contains("autochat") && performSafeClick(node)) return true
+                if (pkg.contains("autochat")) continue
+
+                val rect = Rect()
+                node.getBoundsInScreen(rect)
+                // Pastikan posisi node memang berada di BAGIAN BAWAH LAYAR (Live chat bar)
+                // dan BUKAN di panel kanan (ikon komentar video biasa)
+                if (rect.centerY() > screenHeight * 0.70f && rect.left < screenWidth * 0.75f) {
+                    if (performSafeClick(node)) return true
+                }
             }
         }
 
         val allNodes = getAllNodes(root)
-        // 1. Scan berdasarkan id atau desc yang mengandung live chat
+        // 2. Scan berdasarkan View ID atau deskripsi yang KHUSUS LIVE CHAT dan terletak di bawah layar
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
             if (pkg.contains("autochat")) continue
@@ -280,37 +292,37 @@ class TikTokAccessibilityService : AccessibilityService() {
             val idName = node.viewIdResourceName?.lowercase() ?: ""
             val nodeText = node.text?.toString()?.lowercase() ?: ""
 
-            // JANGAN klik tombol komentar video reguler jika ada alternatif live
-            if (idName.contains("live_chat") || idName.contains("comment_et") ||
-                idName.contains("et_comment") || idName.contains("input_box") ||
-                desc.contains("say something") || desc.contains("katakan sesuatu") ||
-                nodeText.contains("say something") || nodeText.contains("katakan sesuatu") ||
-                desc.contains("obrolan") || desc.contains("tambahkan komentar")) {
-                if (performSafeClick(node)) return true
+            // HARAMKAN klik tombol komentar video biasa:
+            // Tombol video biasa biasanya punya id comment_icon, comment_list, icon_comment di sebelah kanan layar
+            val rect = Rect()
+            node.getBoundsInScreen(rect)
+
+            // Pastikan posisi berada di area bawah kiri/tengah (X < 75% layar dan Y > 75% layar)
+            val isBottomBarArea = (rect.centerY() > screenHeight * 0.75f) && (rect.centerX() < screenWidth * 0.75f)
+
+            if (isBottomBarArea) {
+                if (idName.contains("live") || idName.contains("bottom") ||
+                    idName.contains("input") || idName.contains("comment_et") ||
+                    desc.contains("say something") || desc.contains("katakan sesuatu") ||
+                    nodeText.contains("say something") || nodeText.contains("katakan sesuatu") ||
+                    desc.contains("obrolan") || desc.contains("tambahkan komentar") ||
+                    nodeText.contains("tambahkan komentar")) {
+                    if (performSafeClick(node)) return true
+                }
             }
         }
 
-        // 2. Scan fallback jika belum ketemu
-        for (node in allNodes) {
-            val pkg = node.packageName?.toString() ?: ""
-            if (pkg.contains("autochat")) continue
-
-            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            val idName = node.viewIdResourceName?.lowercase() ?: ""
-            if (desc.contains("komentar") || desc.contains("comment") || idName.contains("comment")) {
-                if (performSafeClick(node)) return true
-            }
-        }
-
+        // 3. Fallback: jika belum ketemu lewat node, lakukan tap langsung di koordinat bar chat Live (kiri bawah)
         return false
     }
 
     private fun fallbackTapBottomInput(text: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
-            // Tap area bawah layar kiri tempat input bar TikTok Live biasanya berada
-            val tapX = metrics.widthPixels * 0.28f
-            val tapY = metrics.heightPixels * 0.955f
+            // Tap presisi area bar komentar TikTok Live:
+            // Di TikTok Live, bar "Katakan sesuatu..." selalu berada di pojok kiri bawah (X: ~25%, Y: ~96%)
+            val tapX = metrics.widthPixels * 0.25f
+            val tapY = metrics.heightPixels * 0.96f
             simulateTap(tapX, tapY)
 
             handler.postDelayed({
@@ -319,7 +331,7 @@ class TikTokAccessibilityService : AccessibilityService() {
                 if (inputs.isNotEmpty()) {
                     typeAndSend(inputs.last(), text)
                 }
-            }, 550)
+            }, 600)
         }
     }
 
