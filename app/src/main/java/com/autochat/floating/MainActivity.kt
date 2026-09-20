@@ -9,8 +9,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 
@@ -19,8 +21,9 @@ class MainActivity : Activity() {
     private val REQUEST_OVERLAY_CODE = 2001
 
     private lateinit var tvSystemStatus: TextView
-    private lateinit var tvOverlayBadge: TextView
-    private lateinit var tvAccessibilityBadge: TextView
+    private lateinit var mainStatusDot: View
+    private lateinit var switchOverlay: Switch
+    private lateinit var switchAccessibility: Switch
     private lateinit var btnGrantOverlay: Button
     private lateinit var btnGrantAccessibility: Button
     private lateinit var btnLaunch: Button
@@ -30,13 +33,14 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
 
         tvSystemStatus = findViewById(R.id.tvSystemStatus)
-        tvOverlayBadge = findViewById(R.id.tvOverlayBadge)
-        tvAccessibilityBadge = findViewById(R.id.tvAccessibilityBadge)
+        mainStatusDot = findViewById(R.id.mainStatusDot)
+        switchOverlay = findViewById(R.id.switchOverlay)
+        switchAccessibility = findViewById(R.id.switchAccessibility)
         btnGrantOverlay = findViewById(R.id.btnGrantOverlay)
         btnGrantAccessibility = findViewById(R.id.btnGrantAccessibility)
         btnLaunch = findViewById(R.id.btnLaunchFloating)
 
-        btnGrantOverlay.setOnClickListener {
+        val overlayAction = View.OnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
                     val intent = Intent(
@@ -49,12 +53,16 @@ class MainActivity : Activity() {
                 }
             }
         }
+        btnGrantOverlay.setOnClickListener(overlayAction)
+        switchOverlay.setOnClickListener(overlayAction)
 
-        btnGrantAccessibility.setOnClickListener {
+        val accessibilityAction = View.OnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
             Toast.makeText(this, "Cari dan aktifkan 'AutoChat'", Toast.LENGTH_LONG).show()
         }
+        btnGrantAccessibility.setOnClickListener(accessibilityAction)
+        switchAccessibility.setOnClickListener(accessibilityAction)
 
         btnLaunch.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
@@ -63,7 +71,7 @@ class MainActivity : Activity() {
             }
 
             if (!isAccessibilityServiceEnabled()) {
-                Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa ngetik otomatis!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Penting: Aktifkan izin Aksesibilitas agar bisa mengetik otomatis!", Toast.LENGTH_LONG).show()
             }
 
             // Luncurkan widget melayang
@@ -73,7 +81,7 @@ class MainActivity : Activity() {
             } else {
                 startService(serviceIntent)
             }
-            Toast.makeText(this, "Widget melayang aktif! Buka TikTok dan gass!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Widget melayang aktif!", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
@@ -90,32 +98,33 @@ class MainActivity : Activity() {
 
         val hasAccessibility = isAccessibilityServiceEnabled()
 
+        switchOverlay.isChecked = hasOverlay
+        switchAccessibility.isChecked = hasAccessibility
+
         if (hasOverlay) {
-            tvOverlayBadge.text = "AKTIF ✓"
-            tvOverlayBadge.setTextColor(Color.parseColor("#7EE787"))
             btnGrantOverlay.text = "Izin Overlay Sudah Aktif"
+            btnGrantOverlay.setTextColor(Color.parseColor("#10B981"))
         } else {
-            tvOverlayBadge.text = "Belum Aktif"
-            tvOverlayBadge.setTextColor(Color.parseColor("#FFA726"))
             btnGrantOverlay.text = "Buka Izin Overlay"
+            btnGrantOverlay.setTextColor(Color.parseColor("#EF4444"))
         }
 
         if (hasAccessibility) {
-            tvAccessibilityBadge.text = "AKTIF ✓"
-            tvAccessibilityBadge.setTextColor(Color.parseColor("#7EE787"))
             btnGrantAccessibility.text = "Aksesibilitas Sudah Aktif"
+            btnGrantAccessibility.setTextColor(Color.parseColor("#10B981"))
         } else {
-            tvAccessibilityBadge.text = "Belum Aktif"
-            tvAccessibilityBadge.setTextColor(Color.parseColor("#FFA726"))
             btnGrantAccessibility.text = "Buka Pengaturan Aksesibilitas"
+            btnGrantAccessibility.setTextColor(Color.parseColor("#EF4444"))
         }
 
         if (hasOverlay && hasAccessibility) {
-            tvSystemStatus.text = "Semua Sistem Siap Beroperasi! 🚀"
-            tvSystemStatus.setTextColor(Color.parseColor("#00E676"))
+            tvSystemStatus.text = "Semua Sistem Siap Beroperasi!"
+            tvSystemStatus.setTextColor(Color.parseColor("#10B981"))
+            mainStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
         } else {
-            tvSystemStatus.text = "Izin Diperlukan Sebelum Memulai"
-            tvSystemStatus.setTextColor(Color.parseColor("#FFA726"))
+            tvSystemStatus.text = "Periksa Izin Di Bawah"
+            tvSystemStatus.setTextColor(Color.parseColor("#F59E0B"))
+            mainStatusDot.setBackgroundColor(Color.parseColor("#F59E0B"))
         }
     }
 

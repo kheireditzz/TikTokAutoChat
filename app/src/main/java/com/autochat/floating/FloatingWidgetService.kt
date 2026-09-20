@@ -50,8 +50,8 @@ class FloatingWidgetService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 60
-            y = 160
+            x = 40
+            y = 200
         }
 
         windowManager.addView(floatingView, params)
@@ -70,7 +70,7 @@ class FloatingWidgetService : Service() {
 
             val notification: Notification = Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle("TikTok AutoChat Aktif")
-                .setContentText("Widget melayang siap digunakan.")
+                .setContentText("Widget melayang siap mengontrol obrolan.")
                 .setSmallIcon(android.R.drawable.ic_menu_send)
                 .build()
 
@@ -200,7 +200,7 @@ class FloatingWidgetService : Service() {
                 // Verifikasi apakah Layanan Aksesibilitas aktif
                 val service = TikTokAccessibilityService.instance
                 if (service == null) {
-                    Toast.makeText(this, "Layanan Aksesibilitas belum AKTIF!\nBuka pengaturan dan aktifkan AutoChat.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Aksesibilitas belum aktif! Aktifkan 'AutoChat' di pengaturan.", Toast.LENGTH_LONG).show()
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     }
@@ -214,7 +214,7 @@ class FloatingWidgetService : Service() {
                 if (cb3.isChecked && et3.text.isNotBlank()) activeList.add(et3.text.toString().trim())
 
                 if (activeList.isEmpty()) {
-                    Toast.makeText(this, "Centang minimal 1 pesan untuk dikirim!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Centang minimal 1 pesan!", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
@@ -224,28 +224,31 @@ class FloatingWidgetService : Service() {
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 windowManager.updateViewLayout(floatingView, params)
 
-                // Panggil langsung instance service
+                // Panggil service
                 service.startAutoChat(activeList, delay)
 
                 isRunning = true
                 btnToggle.text = "STOP"
-                btnToggle.setBackgroundColor(Color.parseColor("#DA3633"))
-                statusIndicator.setBackgroundColor(Color.parseColor("#00E676"))
-                bubbleStatusDot.setBackgroundColor(Color.parseColor("#00E676"))
-                tvStatusText.text = "Mengetik tiap ${delay}s"
-                tvStatusText.setTextColor(Color.parseColor("#00E676"))
+                btnToggle.setBackgroundColor(Color.parseColor("#EF4444"))
+                statusIndicator.setBackgroundColor(Color.parseColor("#10B981"))
+                bubbleStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
+                tvStatusText.text = "Berjalan (Tiap ${delay}s)"
+                tvStatusText.setTextColor(Color.parseColor("#10B981"))
                 tvBubbleLabel.text = "RUNNING"
                 Toast.makeText(this, "Auto Chat Mulai Berjalan!", Toast.LENGTH_SHORT).show()
+
+                // Otomatis minimize ke bubble samping agar tidak menghalangi live
+                setMinimizeState(true)
             } else {
                 TikTokAccessibilityService.instance?.stopAutoChat()
 
                 isRunning = false
                 btnToggle.text = "MULAI"
-                btnToggle.setBackgroundColor(Color.parseColor("#0066FF"))
-                statusIndicator.setBackgroundColor(Color.parseColor("#8B949E"))
-                bubbleStatusDot.setBackgroundColor(Color.parseColor("#8B949E"))
+                btnToggle.setBackgroundColor(Color.parseColor("#FE2C55"))
+                statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
+                bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
                 tvStatusText.text = "Berhenti"
-                tvStatusText.setTextColor(Color.parseColor("#8B949E"))
+                tvStatusText.setTextColor(Color.parseColor("#64748B"))
                 tvBubbleLabel.text = "AutoChat"
                 Toast.makeText(this, "Auto Chat Dihentikan.", Toast.LENGTH_SHORT).show()
             }
@@ -261,9 +264,9 @@ class FloatingWidgetService : Service() {
         val middleX = screenWidth / 2
 
         params.x = if (params.x + viewWidth / 2 < middleX) {
-            20
+            16
         } else {
-            screenWidth - viewWidth - 20
+            screenWidth - viewWidth - 16
         }
         try {
             windowManager.updateViewLayout(floatingView, params)
