@@ -31,12 +31,7 @@ class TikTokAccessibilityService : AccessibilityService() {
     private var sentCount = 0
     private var onChatSentListener: ((Int, String) -> Unit)? = null
     private val handler = Handler(Looper.getMainLooper())
-
-    // Koordinat Manual (dalam persentase layar 0.0 - 1.0)
-    private var coordInputXPercent = 0.13f
-    private var coordInputYPercent = 0.96f
-    private var coordSendXPercent = 0.85f
-    private var coordSendYPercent = 0.63f
+    private var isTypingWorkflowRunning = false
 
     private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
 
@@ -50,39 +45,26 @@ class TikTokAccessibilityService : AccessibilityService() {
         onChatSentListener = listener
     }
 
-    fun setManualCoordinates(inputX: Float, inputY: Float, sendX: Float, sendY: Float) {
-        coordInputXPercent = inputX
-        coordInputYPercent = inputY
-        coordSendXPercent = sendX
-        coordSendYPercent = sendY
-    }
-
     fun startAutoChat(
         messages: ArrayList<String>,
         delay: Long,
-        antiSpam: Boolean = true,
-        inputX: Float = 0.25f,
-        inputY: Float = 0.96f,
-        sendX: Float = 0.92f,
-        sendY: Float = 0.94f
+        antiSpam: Boolean = true
     ) {
         if (messages.isEmpty()) return
         activeMessages = messages
         delaySeconds = delay
         enableAntiSpam = antiSpam
-        coordInputXPercent = inputX
-        coordInputYPercent = inputY
-        coordSendXPercent = sendX
-        coordSendYPercent = sendY
         currentMessageIndex = 0
         sentCount = 0
         isRunning = true
+        isTypingWorkflowRunning = false
         handler.removeCallbacks(actionRunnable)
         handler.post(actionRunnable)
     }
 
     fun stopAutoChat() {
         isRunning = false
+        isTypingWorkflowRunning = false
         handler.removeCallbacks(actionRunnable)
     }
 
@@ -90,61 +72,143 @@ class TikTokAccessibilityService : AccessibilityService() {
         override fun run() {
             if (!isRunning || activeMessages.isEmpty()) return
 
+            if (isTypingWorkflowRunning) {
+                // Tunggu jika siklus sebelumnya masih berlangsung
+                handler.postDelayed(this, 1000)
+                return
+            }
+
             var messageToSend = activeMessages[currentMessageIndex % activeMessages.size]
             currentMessageIndex++
 
-            // Proteksi Anti-Spam: Beri variasi halus jika diaktifkan
             if (enableAntiSpam) {
                 val suffix = safeVariations[Random.nextInt(safeVariations.size)]
                 messageToSend = "$messageToSend $suffix"
             }
 
+            isTypingWorkflowRunning = true
             try {
-                executeCommentWorkflow(messageToSend)
+                executeSmartKeyboardWorkflow(messageToSend)
             } catch (e: Exception) {
                 e.printStackTrace()
+                isTypingWorkflowRunning = false
             }
 
             handler.postDelayed(this, delaySeconds * 1000)
         }
     }
 
-    private fun executeCommentWorkflow(textToType: String) {
-        val rootNode = rootInActiveWindow ?: return
-
-        // Perintah User: "KETIKA MASUK KE LIVE UNTUK MAU KITA KOMEN TATALETAK KOMEN ADA DI BAWAH KIRI KLIK ITU DULU"
-        // Selalu prioritaskan klik bar komentar di pojok bawah kiri terlebih dahulu!
-        val clicked = clickCommentTrigger(rootNode)
-
-        if (clicked) {
-            handler.postDelayed({
-                val updatedRoot = rootInActiveWindow ?: return@postDelayed
-                val inputs = findTikTokInputs(updatedRoot)
-                if (inputs.isNotEmpty()) {
-                    typeAndSend(inputs.last(), textToType)
-                } else {
-                    fallbackTapBottomInput(textToType)
-                }
-            }, 350)
-        } else {
-            // Jika trigger belum tertekan, langsung fallback tap presisi di pojok bawah kiri layar
-            fallbackTapBottomInput(textToType)
+    /**
+     * ALUR CERDAS (SMART KEYBOARD WORKFLOW):
+     * 1. Klik kolom komentar bawah kiri di TikTok Live (via Accessibility Node / Tap presisi).
+     * 2. Tunggu sampai Keyboard/EditText aktif muncul (polling hingga muncul).
+     * 3. Setelah keyboard/input benar-benar ADA di layar, masukkan teks komentar & copy ke clipboard.
+     * 4. Tekan tombol Kirim / Enter (IME Action atau Tombol Send TikTok).
+     */
+    private fun executeSmartKeyboardWorkflow(textToType: String) {
+        val rootNode = rootInActiveWindow
+        if (rootNode == null) {
+            isTypingWorkflowRunning = false
+            return
         }
+
+        // Cek apakah input chat sudah terbuka saat ini
+        val existingInput = findActiveTikTokInput(rootNode)
+        if (existingInput != null) {
+            // Input sudah siap di layar, langsung isi teks dan kirim
+            fillAndSend(existingInput, textToType)
+            return
+        }
+
+        // TAHAP 1: Klik kolom komentar di TikTok Live untuk memunculkan keyboard
+        val clicked = triggerCommentBar(rootNode)
+
+        // TAHAP 2: Polling tunggu keyboard/input box muncul di layar (maksimal 2.5 detik)
+        waitForKeyboardInputAndProceed(textToType, attempt = 0, maxAttempts = 5)
     }
 
-    private fun findTikTokInputs(root: AccessibilityNodeInfo): List<AccessibilityNodeInfo> {
-        val result = mutableListOf<AccessibilityNodeInfo>()
+    private fun waitForKeyboardInputAndProceed(textToType: String, attempt: Int, maxAttempts: Int) {
+        if (!isRunning) {
+            isTypingWorkflowRunning = false
+            return
+        }
+
+        handler.postDelayed({
+            val root = rootInActiveWindow
+            val activeInput = if (root != null) findActiveTikTokInput(root) else null
+
+            if (activeInput != null) {
+                // KEYBOARD & INPUT MUNCUL! Lanjut ke TAHAP 3 & 4
+                fillAndSend(activeInput, textToType)
+            } else if (attempt < maxAttempts) {
+                // Belum muncul, coba picu tap sekali lagi jika di attempt ke-2
+                if (attempt == 2 && root != null) {
+                    triggerCommentBar(root)
+                }
+                waitForKeyboardInputAndProceed(textToType, attempt + 1, maxAttempts)
+            } else {
+                // Fallback terakhir jika Accessibility terhalang: lakukan paste & trigger IME
+                fallbackClipboardAndEnter(textToType)
+            }
+        }, 300)
+    }
+
+    private fun triggerCommentBar(root: AccessibilityNodeInfo): Boolean {
+        val allNodes = getAllNodes(root)
+        val metrics = resources.displayMetrics
+        val screenHeight = metrics.heightPixels
+        val screenWidth = metrics.widthPixels
+
+        // 1. Cari node trigger komentar TikTok (biasanya di bawah, teks "Katakan sesuatu", "Comment", "Tambah komentar", dsb)
+        for (node in allNodes) {
+            val pkg = node.packageName?.toString() ?: ""
+            if (pkg.contains("autochat")) continue
+
+            val text = node.text?.toString()?.lowercase() ?: ""
+            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
+            val viewId = node.viewIdResourceName?.lowercase() ?: ""
+
+            val isCommentText = text.contains("komentar") || text.contains("comment") ||
+                    text.contains("katakan") || text.contains("say something") ||
+                    desc.contains("komentar") || desc.contains("comment") ||
+                    viewId.contains("comment") || viewId.contains("input") || viewId.contains("edit")
+
+            if (isCommentText) {
+                val rect = Rect()
+                node.getBoundsInScreen(rect)
+                // Pastikan berada di 25% area bawah layar (bottom bar live)
+                if (rect.bottom > screenHeight * 0.75f && rect.width() > 0 && rect.height() > 0) {
+                    if (performSafeClick(node)) return true
+                }
+            }
+        }
+
+        // 2. Jika tidak ada ID khusus, tap presisi area komentar default TikTok Live (Pojok Bawah Kiri: X: 15%, Y: 96%)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val tapX = screenWidth * 0.15f
+            val tapY = screenHeight * 0.96f
+            simulateTap(tapX, tapY)
+            return true
+        }
+
+        return false
+    }
+
+    private fun findActiveTikTokInput(root: AccessibilityNodeInfo): AccessibilityNodeInfo? {
         val allNodes = getAllNodes(root)
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
-            if (node.className == "android.widget.EditText" && !pkg.contains("autochat")) {
-                result.add(node)
+            if (pkg.contains("autochat")) continue
+
+            if (node.className == "android.widget.EditText") {
+                return node
             }
         }
-        return result
+        return null
     }
 
-    private fun typeAndSend(inputNode: AccessibilityNodeInfo, text: String) {
+    private fun fillAndSend(inputNode: AccessibilityNodeInfo, text: String) {
+        // TAHAP 3: Isi Teks Komentar
         inputNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
         inputNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
 
@@ -162,31 +226,29 @@ class TikTokAccessibilityService : AccessibilityService() {
             inputNode.performAction(AccessibilityNodeInfo.ACTION_PASTE)
         }
 
-        // Ambil posisi persis kolom input di layar
         val inputRect = Rect()
         inputNode.getBoundsInScreen(inputRect)
 
-        // Coba kirim via IME Action (Enter / Send pada software keyboard)
-        inputNode.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            inputNode.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.id)
-        }
-
+        // Berikan jeda stabil sebelum kirim (250ms) agar TikTok memvalidasi teks di input box
         handler.postDelayed({
-            val root = rootInActiveWindow ?: return@postDelayed
-            sendComment(root, inputRect, text)
-        }, 300)
+            val root = rootInActiveWindow
+            if (root != null) {
+                dispatchSend(root, inputRect, inputNode, text)
+            } else {
+                dispatchImeSend(inputNode)
+                notifySuccess(text)
+                isTypingWorkflowRunning = false
+            }
+        }, 250)
     }
 
-    private fun notifySuccess(sentText: String = "") {
-        sentCount++
-        handler.post {
-            onChatSentListener?.invoke(sentCount, sentText)
-        }
-    }
-
-    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null, sentText: String = "") {
-        // 1. Cek tombol send berdasarkan resource ID TikTok
+    private fun dispatchSend(
+        root: AccessibilityNodeInfo,
+        inputRect: Rect,
+        inputNode: AccessibilityNodeInfo,
+        text: String
+    ) {
+        // 1. Coba klik tombol send TikTok resmi
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",
             "com.zhiliaoapp.musically:id/send_btn",
@@ -204,113 +266,101 @@ class TikTokAccessibilityService : AccessibilityService() {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             for (node in nodes) {
                 if (performSafeClick(node)) {
-                    notifySuccess()
+                    notifySuccess(text)
+                    isTypingWorkflowRunning = false
                     return
                 }
             }
         }
 
-        // 2. Cek tombol atau icon yang sejajar / di sebelah kanan kolom chat (inputRect)
-        if (inputRect != null && inputRect.width() > 0) {
-            val allNodes = getAllNodes(root)
+        // 2. Cari view yang berada di sebelah kanan kolom teks chat
+        val allNodes = getAllNodes(root)
+        if (inputRect.width() > 0) {
             for (node in allNodes) {
                 val pkg = node.packageName?.toString() ?: ""
                 if (pkg.contains("autochat")) continue
 
                 val rect = Rect()
                 node.getBoundsInScreen(rect)
-                // Jika node berada di sebelah kanan input box dan memiliki ketinggian vertikal sejajar
                 if (rect.left >= inputRect.right - 20 &&
-                    rect.centerY() >= inputRect.top - 50 &&
-                    rect.centerY() <= inputRect.bottom + 50 &&
-                    rect.width() > 0 && rect.height() > 0) {
+                    rect.centerY() >= inputRect.top - 60 &&
+                    rect.centerY() <= inputRect.bottom + 60 &&
+                    rect.width() > 0 && rect.height() > 0
+                ) {
                     if (performSafeClick(node)) {
-                        notifySuccess()
+                        notifySuccess(text)
+                        isTypingWorkflowRunning = false
                         return
                     }
                 }
             }
         }
 
-        // 3. Scan node berdasarkan deskripsi teks pengiriman
-        val allNodes = getAllNodes(root)
+        // 3. Cari tombol kirim berdasarkan teks / deskripsi
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
             if (pkg.contains("autochat")) continue
 
             val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            val text = node.text?.toString()?.lowercase() ?: ""
+            val t = node.text?.toString()?.lowercase() ?: ""
             val viewId = node.viewIdResourceName?.lowercase() ?: ""
 
             if (desc.contains("kirim") || desc.contains("send") ||
-                text.contains("kirim") || text.contains("send") ||
-                viewId.contains("send") || viewId.contains("submit") || viewId.contains("enter")) {
+                t.contains("kirim") || t.contains("send") ||
+                viewId.contains("send") || viewId.contains("submit") || viewId.contains("enter")
+            ) {
                 if (performSafeClick(node)) {
-                    notifySuccess()
+                    notifySuccess(text)
+                    isTypingWorkflowRunning = false
                     return
                 }
             }
         }
 
-        // 4. Fallback Tap Layar:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val metrics = resources.displayMetrics
+        // 4. Trigger IME Enter keyboard
+        dispatchImeSend(inputNode)
 
-            // Posisi A: Tombol kirim persis di titik yang ditentukan pengguna
-            val sendTapX = metrics.widthPixels * (coordSendXPercent / 100f)
-            val sendTapY = metrics.heightPixels * (coordSendYPercent / 100f)
-            simulateTap(sendTapX, sendTapY)
-
-            // Posisi B: Sekaligus jalankan IME enter
-            handler.postDelayed({
-                simulateTap(sendTapX, sendTapY)
-            }, 180)
-
-            notifySuccess()
-        }
-    }
-
-    private fun clickCommentTrigger(root: AccessibilityNodeInfo): Boolean {
-        // PERINTAH USER: Ketuk tepat di koordinat yang sudah digeser dan ditentukan oleh pengguna!
-        tapUserCommentTarget()
-        return true
-    }
-
-    private fun tapUserCommentTarget() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val metrics = resources.displayMetrics
-            // Ketuk persis 100% di titik pusat target merah yang ditentukan oleh pengguna
-            val tapX = metrics.widthPixels * (coordInputXPercent / 100f)
-            val tapY = metrics.heightPixels * (coordInputYPercent / 100f)
+        // 5. Fallback Tap kanan kolom input
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && inputRect.width() > 0) {
+            val tapX = (inputRect.right + 40).toFloat().coerceAtMost(resources.displayMetrics.widthPixels - 30f)
+            val tapY = inputRect.centerY().toFloat()
             simulateTap(tapX, tapY)
         }
+
+        notifySuccess(text)
+        isTypingWorkflowRunning = false
     }
 
-    private fun fallbackTapBottomInput(text: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            tapUserCommentTarget()
+    private fun dispatchImeSend(inputNode: AccessibilityNodeInfo) {
+        inputNode.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            inputNode.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.id)
+        }
+    }
 
-            handler.postDelayed({
-                val updatedRoot = rootInActiveWindow ?: return@postDelayed
-                val inputs = findTikTokInputs(updatedRoot)
-                if (inputs.isNotEmpty()) {
-                    typeAndSend(inputs.last(), text)
-                } else {
-                    // Jika elemen accessibility tidak muncul, paste clipboard langsung lalu ketuk tombol kirim
-                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                    if (clipboard != null) {
-                        val clip = ClipData.newPlainText("AutoChat", text)
-                        clipboard.setPrimaryClip(clip)
-                    }
-                    val metrics = resources.displayMetrics
-                    val sendTapX = metrics.widthPixels * (coordSendXPercent / 100f)
-                    val sendTapY = metrics.heightPixels * (coordSendYPercent / 100f)
-                    handler.postDelayed({
-                        simulateTap(sendTapX, sendTapY)
-                        notifySuccess()
-                    }, 400)
-                }
-            }, 550)
+    private fun fallbackClipboardAndEnter(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        if (clipboard != null) {
+            val clip = ClipData.newPlainText("AutoChat", text)
+            clipboard.setPrimaryClip(clip)
+        }
+
+        val metrics = resources.displayMetrics
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Tap tombol enter di keyboard (kanan bawah)
+            val tapEnterX = metrics.widthPixels * 0.90f
+            val tapEnterY = metrics.heightPixels * 0.92f
+            simulateTap(tapEnterX, tapEnterY)
+        }
+
+        notifySuccess(text)
+        isTypingWorkflowRunning = false
+    }
+
+    private fun notifySuccess(sentText: String = "") {
+        sentCount++
+        handler.post {
+            onChatSentListener?.invoke(sentCount, sentText)
         }
     }
 
@@ -340,7 +390,7 @@ class TikTokAccessibilityService : AccessibilityService() {
                 moveTo(x, y)
             }
             val gesture = GestureDescription.Builder()
-                .addStroke(GestureDescription.StrokeDescription(path, 0, 70))
+                .addStroke(GestureDescription.StrokeDescription(path, 0, 80))
                 .build()
             dispatchGesture(gesture, null, null)
         }

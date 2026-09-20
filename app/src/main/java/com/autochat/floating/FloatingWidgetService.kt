@@ -220,96 +220,6 @@ class FloatingWidgetService : Service() {
             addWidgetMessageItem("", true)
         }
 
-        // Bind quick coordinate inputs
-        val etFloatCoordX = floatingView.findViewById<EditText>(R.id.etFloatCoordX)
-        val etFloatCoordY = floatingView.findViewById<EditText>(R.id.etFloatCoordY)
-        val etFloatSendX = floatingView.findViewById<EditText>(R.id.etFloatSendX)
-        val etFloatSendY = floatingView.findViewById<EditText>(R.id.etFloatSendY)
-
-        etFloatCoordX.setText(prefs.getInt("coord_input_x", 13).toString())
-        etFloatCoordY.setText(prefs.getInt("coord_input_y", 96).toString())
-        etFloatSendX.setText(prefs.getInt("coord_send_x", 85).toString())
-        etFloatSendY.setText(prefs.getInt("coord_send_y", 63).toString())
-
-        // Focus handling untuk coordinate input agar keyboard muncul saat ditekan
-        val coordTouchListener = View.OnTouchListener { _, _ ->
-            params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-            try {
-                windowManager.updateViewLayout(floatingView, params)
-            } catch (_: Exception) {}
-            false
-        }
-        etFloatCoordX.setOnTouchListener(coordTouchListener)
-        etFloatCoordY.setOnTouchListener(coordTouchListener)
-        etFloatSendX.setOnTouchListener(coordTouchListener)
-        etFloatSendY.setOnTouchListener(coordTouchListener)
-
-        // Tombol Geser Titik Layar (Target Pembidik Visual)
-        val btnToggleTargets = floatingView.findViewById<TextView>(R.id.btnToggleDraggableTargets)
-        btnToggleTargets.setOnClickListener {
-            toggleTargetPointers(etFloatCoordX, etFloatCoordY, etFloatSendX, etFloatSendY)
-        }
-
-        // Setup Template Preset di Widget Melayang
-        val spinnerPreset = floatingView.findViewById<Spinner>(R.id.spinnerFloatingPreset)
-        val btnSavePreset = floatingView.findViewById<TextView>(R.id.btnSaveFloatingPreset)
-
-        var floatingPresetList = PresetManager.getPresets(prefs)
-        var isFloatingSpinnerInit = false
-
-        fun refreshFloatingPresets() {
-            floatingPresetList = PresetManager.getPresets(prefs)
-            val names = floatingPresetList.map { it.name }.toMutableList()
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
-            spinnerPreset.adapter = adapter
-        }
-
-        refreshFloatingPresets()
-
-        spinnerPreset.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!isFloatingSpinnerInit) {
-                    isFloatingSpinnerInit = true
-                    return
-                }
-                if (position in 0 until floatingPresetList.size) {
-                    val p = floatingPresetList[position]
-                    etFloatCoordX.setText(p.chatX.toString())
-                    etFloatCoordY.setText(p.chatY.toString())
-                    etFloatSendX.setText(p.sendX.toString())
-                    etFloatSendY.setText(p.sendY.toString())
-
-                    prefs.edit()
-                        .putInt("coord_input_x", p.chatX)
-                        .putInt("coord_input_y", p.chatY)
-                        .putInt("coord_send_x", p.sendX)
-                        .putInt("coord_send_y", p.sendY)
-                        .apply()
-
-                    Toast.makeText(this@FloatingWidgetService, "Preset '${p.name}' diterapkan!", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        btnSavePreset.setOnClickListener {
-            val chatX = etFloatCoordX.text.toString().toIntOrNull() ?: 13
-            val chatY = etFloatCoordY.text.toString().toIntOrNull() ?: 96
-            val sendX = etFloatSendX.text.toString().toIntOrNull() ?: 85
-            val sendY = etFloatSendY.text.toString().toIntOrNull() ?: 63
-
-            val presetName = "Preset ${floatingPresetList.size + 1}"
-            val newPreset = CoordPreset(presetName, chatX, chatY, sendX, sendY)
-            PresetManager.addOrUpdatePreset(prefs, newPreset)
-            refreshFloatingPresets()
-            val newIndex = floatingPresetList.indexOfFirst { it.name == presetName }
-            if (newIndex >= 0) {
-                spinnerPreset.setSelection(newIndex)
-            }
-            Toast.makeText(this, "Koordinat disimpan ke '$presetName'! ✅", Toast.LENGTH_SHORT).show()
-        }
-
         etDelay.setText(prefs.getInt("delay", 4).toString())
 
         fun setMinimizeState(minimized: Boolean) {
@@ -359,14 +269,16 @@ class FloatingWidgetService : Service() {
                         }
                         params.x = initialX + dx.toInt()
                         params.y = initialY + dy.toInt()
-                        windowManager.updateViewLayout(floatingView, params)
+                        try {
+                            windowManager.updateViewLayout(floatingView, params)
+                        } catch (_: Exception) {}
                         return true
                     }
                     MotionEvent.ACTION_UP -> {
-                        if (isClick && v == layoutBubble) {
-                            v?.performClick()
-                        } else {
-                            snapToNearestEdge()
+                        if (!isClick) {
+                            if (isMinimized) {
+                                snapToNearestEdge()
+                            }
                         }
                         return true
                     }
@@ -423,19 +335,10 @@ class FloatingWidgetService : Service() {
                 val delay = etDelay.text.toString().toLongOrNull() ?: 4L
                 val antiSpam = prefs.getBoolean("anti_spam", true)
 
-                val coordInputX = etFloatCoordX.text.toString().toIntOrNull() ?: 25
-                val coordInputY = etFloatCoordY.text.toString().toIntOrNull() ?: 96
-                val coordSendX = etFloatSendX.text.toString().toIntOrNull() ?: 92
-                val coordSendY = etFloatSendY.text.toString().toIntOrNull() ?: 94
-
-                // Simpan perubahan pesan & koordinat saat ini ke SharedPreferences secara otomatis
+                // Simpan perubahan pesan saat ini ke SharedPreferences secara otomatis
                 prefs.edit()
                     .putString("messages_json", allListJson.toString())
                     .putInt("delay", delay.toInt())
-                    .putInt("coord_input_x", coordInputX)
-                    .putInt("coord_input_y", coordInputY)
-                    .putInt("coord_send_x", coordSendX)
-                    .putInt("coord_send_y", coordSendY)
                     .apply()
 
                 // Lepas fokus keyboard agar TikTok tidak terhalangi
@@ -450,16 +353,8 @@ class FloatingWidgetService : Service() {
                     tvStatusText.setText("Terkirim $count pesan ✓")
                 }
 
-                // Panggil service dengan koordinat persentase
-                service.startAutoChat(
-                    activeList,
-                    delay,
-                    antiSpam,
-                    coordInputX / 100f,
-                    coordInputY / 100f,
-                    coordSendX / 100f,
-                    coordSendY / 100f
-                )
+                // Panggil service AutoChat cerdas (Smart Keyboard Flow)
+                service.startAutoChat(activeList, delay, antiSpam)
 
                 totalSentCount = 0
                 tvSentCountStatus.setText("0 Terkirim")
@@ -511,195 +406,8 @@ class FloatingWidgetService : Service() {
         } catch (_: Exception) {}
     }
 
-    // Draggable Target Pointer Views
-    private var chatTargetView: View? = null
-    private var sendTargetView: View? = null
-    private var isTargetOverlayVisible = false
-
-    private fun toggleTargetPointers(
-        etCoordX: EditText,
-        etCoordY: EditText,
-        etSendX: EditText,
-        etSendY: EditText
-    ) {
-        if (isTargetOverlayVisible) {
-            removeTargetPointers()
-            Toast.makeText(this, "Target titik layar ditutup & disimpan! ✅", Toast.LENGTH_SHORT).show()
-        } else {
-            showTargetPointers(etCoordX, etCoordY, etSendX, etSendY)
-            Toast.makeText(this, "🎯 Geser target merah ke kolom chat, dan biru ke tombol kirim!", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun showTargetPointers(
-        etCoordX: EditText,
-        etCoordY: EditText,
-        etSendX: EditText,
-        etSendY: EditText
-    ) {
-        if (isTargetOverlayVisible) return
-
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-
-        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            @Suppress("DEPRECATION")
-            WindowManager.LayoutParams.TYPE_PHONE
-        }
-
-        // 1. Target Pointer 1: Kolom Chat (Merah)
-        chatTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
-        val tvChatLabel = chatTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
-        tvChatLabel.text = "📍 1. CHAT (GESER SAYA)"
-
-        // Titik awal target dimunculkan di TENGAH LAYAR agar mudah diraih dan digeser oleh jari
-        val currentChatXPercent = etCoordX.text.toString().toIntOrNull() ?: 50
-        val currentChatYPercent = etCoordY.text.toString().toIntOrNull() ?: 50
-
-        val chatParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = (screenWidth * (currentChatXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (currentChatYPercent / 100f) - 24 * displayMetrics.density).toInt()
-        }
-
-        setupDraggablePointer(chatTargetView!!, chatParams, displayMetrics, tvChatLabel, "CHAT") { newXPercent, newYPercent ->
-            etCoordX.setText(newXPercent.toString())
-            etCoordY.setText(newYPercent.toString())
-            prefs.edit()
-                .putInt("coord_input_x", newXPercent)
-                .putInt("coord_input_y", newYPercent)
-                .apply()
-        }
-
-        windowManager.addView(chatTargetView, chatParams)
-
-        // 2. Target Pointer 2: Tombol Kirim (Biru)
-        sendTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
-        val tvSendLabel = sendTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
-        tvSendLabel.text = "🎯 2. KIRIM (GESER SAYA)"
-        tvSendLabel.setBackgroundColor(Color.parseColor("#DD1E40AF"))
-
-        val ringView = sendTargetView!!.findViewById<View>(R.id.viewTargetRing)
-        val crossH = sendTargetView!!.findViewById<View>(R.id.viewCrossH)
-        val crossV = sendTargetView!!.findViewById<View>(R.id.viewCrossV)
-        val centerDot = sendTargetView!!.findViewById<View>(R.id.viewTargetCenter)
-        ringView.setBackgroundResource(R.drawable.bg_target_ring_blue)
-        crossH.setBackgroundColor(Color.parseColor("#3B82F6"))
-        crossV.setBackgroundColor(Color.parseColor("#3B82F6"))
-        centerDot.setBackgroundResource(R.drawable.bg_target_center_blue)
-
-        // Titik awal target kirim dimunculkan berdampingan di tengah
-        val currentSendXPercent = etSendX.text.toString().toIntOrNull() ?: 65
-        val currentSendYPercent = etSendY.text.toString().toIntOrNull() ?: 50
-
-        val sendParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = (screenWidth * (currentSendXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (currentSendYPercent / 100f) - 24 * displayMetrics.density).toInt()
-        }
-
-        setupDraggablePointer(sendTargetView!!, sendParams, displayMetrics, tvSendLabel, "KIRIM") { newXPercent, newYPercent ->
-            etSendX.setText(newXPercent.toString())
-            etSendY.setText(newYPercent.toString())
-            prefs.edit()
-                .putInt("coord_send_x", newXPercent)
-                .putInt("coord_send_y", newYPercent)
-                .apply()
-        }
-
-        windowManager.addView(sendTargetView, sendParams)
-
-        isTargetOverlayVisible = true
-    }
-
-    private fun setupDraggablePointer(
-        targetView: View,
-        targetParams: WindowManager.LayoutParams,
-        metrics: DisplayMetrics,
-        labelView: TextView,
-        tag: String,
-        onCoordUpdated: (Int, Int) -> Unit
-    ) {
-        targetView.setOnTouchListener(object : View.OnTouchListener {
-            private var initialX = 0
-            private var initialY = 0
-            private var initialTouchX = 0f
-            private var initialTouchY = 0f
-
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        initialX = targetParams.x
-                        initialY = targetParams.y
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
-                        return true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        // Pergerakan bebas tanpa batas ke seluruh sudut layar
-                        targetParams.x = (initialX + (event.rawX - initialTouchX)).toInt()
-                        targetParams.y = (initialY + (event.rawY - initialTouchY)).toInt()
-                        try {
-                            windowManager.updateViewLayout(targetView, targetParams)
-                        } catch (_: Exception) {}
-
-                        // Hitung titik pusat presisi (center bullseye):
-                        // Lingkaran berukuran 48dp x 48dp, titik pusat tepat di tengah +24dp
-                        val halfSize = (24 * metrics.density).toInt()
-                        val bullseyeX = targetParams.x + halfSize
-                        val bullseyeY = targetParams.y + halfSize
-
-                        val xPercent = ((bullseyeX.toFloat() / metrics.widthPixels.toFloat()) * 100).toInt().coerceIn(0, 100)
-                        val yPercent = ((bullseyeY.toFloat() / metrics.heightPixels.toFloat()) * 100).toInt().coerceIn(0, 100)
-
-                        labelView.text = "$tag: X:$xPercent% Y:$yPercent%"
-                        onCoordUpdated(xPercent, yPercent)
-                        return true
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        return true
-                    }
-                }
-                return false
-            }
-        })
-    }
-
-    private fun removeTargetPointers() {
-        if (chatTargetView != null) {
-            try {
-                windowManager.removeView(chatTargetView)
-            } catch (_: Exception) {}
-            chatTargetView = null
-        }
-        if (sendTargetView != null) {
-            try {
-                windowManager.removeView(sendTargetView)
-            } catch (_: Exception) {}
-            sendTargetView = null
-        }
-        isTargetOverlayVisible = false
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        removeTargetPointers()
         TikTokAccessibilityService.instance?.stopAutoChat()
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)
