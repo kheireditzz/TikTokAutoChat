@@ -33,10 +33,10 @@ class TikTokAccessibilityService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
 
     // Koordinat Manual (dalam persentase layar 0.0 - 1.0)
-    private var coordInputXPercent = 0.25f
+    private var coordInputXPercent = 0.13f
     private var coordInputYPercent = 0.96f
-    private var coordSendXPercent = 0.92f
-    private var coordSendYPercent = 0.94f
+    private var coordSendXPercent = 0.85f
+    private var coordSendYPercent = 0.63f
 
     private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
 

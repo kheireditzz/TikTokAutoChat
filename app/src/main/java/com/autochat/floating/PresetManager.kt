@@ -26,10 +26,10 @@ object PresetManager {
                     list.add(
                         CoordPreset(
                             name = obj.optString("name", "Preset $i"),
-                            chatX = obj.optInt("chatX", 25),
+                            chatX = obj.optInt("chatX", 13),
                             chatY = obj.optInt("chatY", 96),
-                            sendX = obj.optInt("sendX", 92),
-                            sendY = obj.optInt("sendY", 94)
+                            sendX = obj.optInt("sendX", 85),
+                            sendY = obj.optInt("sendY", 63)
                         )
                     )
                 }
@@ -37,8 +37,8 @@ object PresetManager {
         }
 
         if (list.isEmpty()) {
-            // Default bawaan yang praktis
-            list.add(CoordPreset("TikTok Live Biasa", 25, 96, 92, 94))
+            // Default bawaan yang praktis sesuai posisi TikTok Live pengguna
+            list.add(CoordPreset("TikTok Live Default (13,96 - 85,63)", 13, 96, 85, 63))
             list.add(CoordPreset("TikTok Live PK / Shop", 28, 95, 94, 95))
             list.add(CoordPreset("Posisi Tengah (Testing)", 50, 50, 60, 50))
             savePresets(prefs, list)

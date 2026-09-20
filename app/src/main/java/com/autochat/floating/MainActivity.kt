@@ -224,10 +224,10 @@ class MainActivity : Activity() {
         val d = etSettingDelay.text.toString().toIntOrNull() ?: 4
         val anti = switchAntiSpam.isChecked
 
-        val coordInputX = etCoordInputX.text.toString().toIntOrNull() ?: 25
+        val coordInputX = etCoordInputX.text.toString().toIntOrNull() ?: 13
         val coordInputY = etCoordInputY.text.toString().toIntOrNull() ?: 96
-        val coordSendX = etCoordSendX.text.toString().toIntOrNull() ?: 92
-        val coordSendY = etCoordSendY.text.toString().toIntOrNull() ?: 94
+        val coordSendX = etCoordSendX.text.toString().toIntOrNull() ?: 85
+        val coordSendY = etCoordSendY.text.toString().toIntOrNull() ?: 63
 
         prefs.edit()
             .putString("messages_json", messages.toString())
@@ -275,10 +275,10 @@ class MainActivity : Activity() {
         etSettingDelay.setText(prefs.getInt("delay", 4).toString())
         switchAntiSpam.isChecked = prefs.getBoolean("anti_spam", true)
 
-        etCoordInputX.setText(prefs.getInt("coord_input_x", 25).toString())
+        etCoordInputX.setText(prefs.getInt("coord_input_x", 13).toString())
         etCoordInputY.setText(prefs.getInt("coord_input_y", 96).toString())
-        etCoordSendX.setText(prefs.getInt("coord_send_x", 92).toString())
-        etCoordSendY.setText(prefs.getInt("coord_send_y", 94).toString())
+        etCoordSendX.setText(prefs.getInt("coord_send_x", 85).toString())
+        etCoordSendY.setText(prefs.getInt("coord_send_y", 63).toString())
     }
 
     private fun toggleScreen(toSettings: Boolean) {
@@ -358,10 +358,10 @@ class MainActivity : Activity() {
     }
 
     private fun showSavePresetDialog() {
-        val chatX = etCoordInputX.text.toString().toIntOrNull() ?: 25
+        val chatX = etCoordInputX.text.toString().toIntOrNull() ?: 13
         val chatY = etCoordInputY.text.toString().toIntOrNull() ?: 96
-        val sendX = etCoordSendX.text.toString().toIntOrNull() ?: 92
-        val sendY = etCoordSendY.text.toString().toIntOrNull() ?: 94
+        val sendX = etCoordSendX.text.toString().toIntOrNull() ?: 85
+        val sendY = etCoordSendY.text.toString().toIntOrNull() ?: 63
 
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_save_preset, null)
         val tvSummary = dialogView.findViewById<TextView>(R.id.tvPresetCoordsSummary)

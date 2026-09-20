@@ -226,10 +226,10 @@ class FloatingWidgetService : Service() {
         val etFloatSendX = floatingView.findViewById<EditText>(R.id.etFloatSendX)
         val etFloatSendY = floatingView.findViewById<EditText>(R.id.etFloatSendY)
 
-        etFloatCoordX.setText(prefs.getInt("coord_input_x", 25).toString())
+        etFloatCoordX.setText(prefs.getInt("coord_input_x", 13).toString())
         etFloatCoordY.setText(prefs.getInt("coord_input_y", 96).toString())
-        etFloatSendX.setText(prefs.getInt("coord_send_x", 92).toString())
-        etFloatSendY.setText(prefs.getInt("coord_send_y", 94).toString())
+        etFloatSendX.setText(prefs.getInt("coord_send_x", 85).toString())
+        etFloatSendY.setText(prefs.getInt("coord_send_y", 63).toString())
 
         // Focus handling untuk coordinate input agar keyboard muncul saat ditekan
         val coordTouchListener = View.OnTouchListener { _, _ ->
@@ -294,10 +294,10 @@ class FloatingWidgetService : Service() {
         }
 
         btnSavePreset.setOnClickListener {
-            val chatX = etFloatCoordX.text.toString().toIntOrNull() ?: 25
+            val chatX = etFloatCoordX.text.toString().toIntOrNull() ?: 13
             val chatY = etFloatCoordY.text.toString().toIntOrNull() ?: 96
-            val sendX = etFloatSendX.text.toString().toIntOrNull() ?: 92
-            val sendY = etFloatSendY.text.toString().toIntOrNull() ?: 94
+            val sendX = etFloatSendX.text.toString().toIntOrNull() ?: 85
+            val sendY = etFloatSendY.text.toString().toIntOrNull() ?: 63
 
             val presetName = "Preset ${floatingPresetList.size + 1}"
             val newPreset = CoordPreset(presetName, chatX, chatY, sendX, sendY)
