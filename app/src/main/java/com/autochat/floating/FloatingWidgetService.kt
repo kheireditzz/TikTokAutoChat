@@ -96,9 +96,21 @@ class FloatingWidgetService : Service() {
         val bubbleStatusDot = floatingView.findViewById<View>(R.id.bubbleStatusDot)
         val tvStatusText = floatingView.findViewById<TextView>(R.id.tvStatusText)
         val tvBubbleLabel = floatingView.findViewById<TextView>(R.id.tvBubbleLabel)
+        val tvBubbleSentCount = floatingView.findViewById<TextView>(R.id.tvBubbleSentCount)
         val tvActiveCount = floatingView.findViewById<TextView>(R.id.tvActiveCount)
+        val tvSentCountStatus = floatingView.findViewById<TextView>(R.id.tvSentCountStatus)
         val containerMessages = floatingView.findViewById<LinearLayout>(R.id.containerFloatingMessages)
         val btnAddMessage = floatingView.findViewById<TextView>(R.id.btnFloatingAddMessage)
+
+        var totalSentCount = 0
+
+        // Pasang listener status kirim chat valid
+        TikTokAccessibilityService.instance?.setOnChatSentListener { count, _ ->
+            totalSentCount = count
+            tvSentCountStatus.setText("$count Terkirim")
+            tvBubbleSentCount.setText("$count kirim")
+            tvStatusText.setText("Terkirim $count pesan ✓")
+        }
 
         val widgetMessageItems = mutableListOf<Pair<CheckBox, EditText>>()
 
@@ -331,8 +343,20 @@ class FloatingWidgetService : Service() {
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 windowManager.updateViewLayout(floatingView, params)
 
+                // Pasang listener status kirim chat valid
+                service.setOnChatSentListener { count, _ ->
+                    totalSentCount = count
+                    tvSentCountStatus.setText("$count Terkirim")
+                    tvBubbleSentCount.setText("$count kirim")
+                    tvStatusText.setText("Terkirim $count pesan ✓")
+                }
+
                 // Panggil service dengan proteksi anti-spam
                 service.startAutoChat(activeList, delay, antiSpam)
+
+                totalSentCount = 0
+                tvSentCountStatus.setText("0 Terkirim")
+                tvBubbleSentCount.setText("0 kirim")
 
                 isRunning = true
                 btnToggle.text = "STOP"

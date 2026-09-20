@@ -28,6 +28,8 @@ class TikTokAccessibilityService : AccessibilityService() {
     private var currentMessageIndex = 0
     private var delaySeconds: Long = 4
     private var enableAntiSpam = true
+    private var sentCount = 0
+    private var onChatSentListener: ((Int, String) -> Unit)? = null
     private val handler = Handler(Looper.getMainLooper())
 
     private val safeVariations = listOf("✨", "🔥", "⚡", "👍", "🛍️", "✓", "💯", "🙌", "😊")
@@ -38,12 +40,17 @@ class TikTokAccessibilityService : AccessibilityService() {
         Toast.makeText(this, "Aksesibilitas AutoChat Terhubung! Siap digunakan.", Toast.LENGTH_SHORT).show()
     }
 
+    fun setOnChatSentListener(listener: ((Int, String) -> Unit)?) {
+        onChatSentListener = listener
+    }
+
     fun startAutoChat(messages: ArrayList<String>, delay: Long, antiSpam: Boolean = true) {
         if (messages.isEmpty()) return
         activeMessages = messages
         delaySeconds = delay
         enableAntiSpam = antiSpam
         currentMessageIndex = 0
+        sentCount = 0
         isRunning = true
         handler.removeCallbacks(actionRunnable)
         handler.post(actionRunnable)
@@ -80,27 +87,22 @@ class TikTokAccessibilityService : AccessibilityService() {
     private fun executeCommentWorkflow(textToType: String) {
         val rootNode = rootInActiveWindow ?: return
 
-        // 1. Filter: Cari EditText yang HANYA milik TikTok (Bukan milik widget AutoChat sendiri)
-        val tikTokEditTexts = findTikTokInputs(rootNode)
-        if (tikTokEditTexts.isNotEmpty()) {
-            val targetInput = tikTokEditTexts.last()
-            typeAndSend(targetInput, textToType)
-            return
-        }
-
-        // 2. Jika kolom chat TikTok Live belum terbuka, buka dengan klik bar komentar TikTok Live
+        // Perintah User: "KETIKA MASUK KE LIVE UNTUK MAU KITA KOMEN TATALETAK KOMEN ADA DI BAWAH KIRI KLIK ITU DULU"
+        // Selalu prioritaskan klik bar komentar di pojok bawah kiri terlebih dahulu!
         val clicked = clickCommentTrigger(rootNode)
+
         if (clicked) {
             handler.postDelayed({
                 val updatedRoot = rootInActiveWindow ?: return@postDelayed
-                val newInputs = findTikTokInputs(updatedRoot)
-                if (newInputs.isNotEmpty()) {
-                    typeAndSend(newInputs.last(), textToType)
+                val inputs = findTikTokInputs(updatedRoot)
+                if (inputs.isNotEmpty()) {
+                    typeAndSend(inputs.last(), textToType)
                 } else {
                     fallbackTapBottomInput(textToType)
                 }
             }, 350)
         } else {
+            // Jika trigger belum tertekan, langsung fallback tap presisi di pojok bawah kiri layar
             fallbackTapBottomInput(textToType)
         }
     }
@@ -147,11 +149,17 @@ class TikTokAccessibilityService : AccessibilityService() {
 
         handler.postDelayed({
             val root = rootInActiveWindow ?: return@postDelayed
-            sendComment(root, inputRect)
+            sendComment(root, inputRect, text)
         }, 300)
     }
 
-    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null) {
+    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null, sentText: String = "") {
+        fun notifySuccess() {
+            sentCount++
+            handler.post {
+                onChatSentListener?.invoke(sentCount, sentText)
+            }
+        }
         // 1. Cek tombol send berdasarkan resource ID TikTok
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",
@@ -169,7 +177,10 @@ class TikTokAccessibilityService : AccessibilityService() {
         for (id in knownSendIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             for (node in nodes) {
-                if (performSafeClick(node)) return
+                if (performSafeClick(node)) {
+                    notifySuccess()
+                    return
+                }
             }
         }
 
@@ -187,7 +198,10 @@ class TikTokAccessibilityService : AccessibilityService() {
                     rect.centerY() >= inputRect.top - 50 &&
                     rect.centerY() <= inputRect.bottom + 50 &&
                     rect.width() > 0 && rect.height() > 0) {
-                    if (performSafeClick(node)) return
+                    if (performSafeClick(node)) {
+                        notifySuccess()
+                        return
+                    }
                 }
             }
         }
@@ -205,7 +219,10 @@ class TikTokAccessibilityService : AccessibilityService() {
             if (desc.contains("kirim") || desc.contains("send") ||
                 text.contains("kirim") || text.contains("send") ||
                 viewId.contains("send") || viewId.contains("submit") || viewId.contains("enter")) {
-                if (performSafeClick(node)) return
+                if (performSafeClick(node)) {
+                    notifySuccess()
+                    return
+                }
             }
         }
 
@@ -230,6 +247,8 @@ class TikTokAccessibilityService : AccessibilityService() {
                 val keyboardEnterY = metrics.heightPixels * 0.94f
                 simulateTap(keyboardEnterX, keyboardEnterY)
             }, 180)
+
+            notifySuccess()
         }
     }
 
