@@ -118,47 +118,100 @@
                     android:background="@drawable/bg_indicator_dot" />
             </LinearLayout>
 
-            <!-- CARD PERINGATAN RESMI / DISCLAIMER ADMIN -->
+            <!-- CARD PERINGATAN RESMI & PENAFIAN TANGGUNG JAWAB (DISCLAIMER) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/bg_warning_card"
-                android:padding="14dp"
+                android:padding="16dp"
                 android:elevation="1dp"
                 android:layout_marginBottom="20dp">
 
+                <!-- Header Warning -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="6dp">
+                    android:layout_marginBottom="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="⚠️"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PERINGATAN &amp; PENAFIAN RESMI"
+                            android:textSize="11.5sp"
+                            android:textStyle="bold"
+                            android:textColor="#C2410C"
+                            android:letterSpacing="0.04" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Harap dibaca dan dipahami sebelum menggunakan aplikasi"
+                            android:textSize="9.5sp"
+                            android:textColor="#9A3412" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#FED7AA"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Poin-Poin Ketentuan Sopan & Tegas -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1. Batasan Layanan Penjual:\nAdmin/Penjual semata-mata hanya menyediakan dan mendistribusikan lisensi aplikasi ini murni sebagai alat bantu teknis pengetikan otomatis (accessibility assistant tool) untuk kemudahan operasional pengguna.\n\n2. Pelepasan Tanggung Jawab Mutlak:\nAdmin/Penjual TIDAK BERTANGGUNG JAWAB dalam bentuk apa pun atas segala perbuatan, maksud penggunaan, materi obrolan yang dikirimkan, frekuensi pengiriman, maupun akibat hukum yang timbul dari pemakaian aplikasi ini.\n\n3. Risiko Akun &amp; Sanksi Platform (Banned):\nSegala risiko terhadap akun Anda—termasuk peringatan sistem, pembatasan live, mute obrolan, shadowban, hingga penutupan/pemblokiran akun secara permanen (banned) oleh pihak platform TikTok—sepenuhnya berada di luar kendali, wewenang, dan tanggung jawab Admin.\n\n4. Tanggung Jawab Mandiri (Use at Your Own Risk):\nSeluruh operasional merupakan kesadaran dan tanggung jawab pribadi pembeli/pengguna. Sangat disarankan selalu menyetel jeda waktu wajar (minimal 4–8 detik), mengaktifkan fitur Anti-Spam, serta mematuhi norma dan panduan komunitas yang berlaku.\n\n5. Klausul Persetujuan:\nDengan menginstal, mengaktifkan izin, dan menjalankan aplikasi ini, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan ini tanpa syarat, serta membebaskan Admin dari segala bentuk tuntutan di kemudian hari."
+                    android:textSize="10.5sp"
+                    android:textColor="#7C2D12"
+                    android:lineSpacingExtra="3.5dp" />
+
+                <!-- Badge Indikator Persetujuan -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="#FFEDD5"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✓"
+                        android:textColor="#C2410C"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
                         android:layout_marginEnd="6dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PERINGATAN &amp; KETENTUAN PENGGUNA"
-                        android:textSize="11sp"
+                        android:text="Saya memahami dan menyetujui seluruh ketentuan ini."
+                        android:textSize="10sp"
                         android:textStyle="bold"
-                        android:textColor="#C2410C"
-                        android:letterSpacing="0.04" />
+                        android:textColor="#9A3412" />
                 </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="1. Pengembang/Admin hanya menyediakan dan mendistribusikan lisensi perangkat lunak ini sebagai alat bantu pengetikan otomatis mandiri.\n2. Admin TIDAK BERTANGGUNG JAWAB atas segala tindakan maupun akibat hukum/teknis yang timbul, termasuk risiko sanksi akun, shadowban, atau pemblokiran (banned) dari platform terkait.\n3. Seluruh risiko operasional sepenuhnya merupakan tanggung jawab pribadi masing-masing pengguna. Gunakan jeda waktu wajar dan fitur Anti-Spam dengan bijak."
-                    android:textSize="10.5sp"
-                    android:textColor="#9A3412"
-                    android:lineSpacingExtra="3dp" />
             </LinearLayout>
 
             <TextView
@@ -360,18 +413,18 @@
 
                         <TextView
                             android:id="@+id/btnSettingDelayMinus"
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
-                            android:background="@drawable/bg_circle_btn_white"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_stepper_btn"
                             android:gravity="center"
-                            android:text="—"
+                            android:text="−"
                             android:textColor="#090A0F"
-                            android:textSize="11sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <EditText
                             android:id="@+id/etSettingDelay"
-                            android:layout_width="38dp"
+                            android:layout_width="42dp"
                             android:layout_height="match_parent"
                             android:text="4"
                             android:gravity="center"
@@ -383,13 +436,13 @@
 
                         <TextView
                             android:id="@+id/btnSettingDelayPlus"
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
-                            android:background="@drawable/bg_circle_btn_white"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_stepper_btn"
                             android:gravity="center"
                             android:text="+"
                             android:textColor="#090A0F"
-                            android:textSize="13sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -442,13 +495,13 @@
 
                         <TextView
                             android:id="@+id/btnSettingMaxMinus"
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
-                            android:background="@drawable/bg_circle_btn_white"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_stepper_btn"
                             android:gravity="center"
-                            android:text="—"
+                            android:text="−"
                             android:textColor="#090A0F"
-                            android:textSize="11sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <EditText
@@ -465,13 +518,13 @@
 
                         <TextView
                             android:id="@+id/btnSettingMaxPlus"
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
-                            android:background="@drawable/bg_circle_btn_white"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_stepper_btn"
                             android:gravity="center"
                             android:text="+"
                             android:textColor="#090A0F"
-                            android:textSize="13sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>

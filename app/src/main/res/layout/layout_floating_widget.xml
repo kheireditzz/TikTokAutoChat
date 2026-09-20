@@ -228,7 +228,7 @@
             <!-- Stepper Jeda Waktu (Detik) -->
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_input_white"
                 android:gravity="center_vertical"
@@ -241,18 +241,19 @@
                     android:layout_height="wrap_content"
                     android:text="Jeda:"
                     android:textColor="#64748B"
-                    android:textSize="9.5sp"
-                    android:layout_marginEnd="2dp" />
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="3dp" />
 
                 <TextView
                     android:id="@+id/btnDelayMinus"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:background="@drawable/bg_circle_btn_white"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_stepper_btn"
                     android:gravity="center"
-                    android:text="—"
+                    android:text="−"
                     android:textColor="#0F172A"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <EditText
@@ -264,26 +265,26 @@
                     android:gravity="center"
                     android:textColor="#0F172A"
                     android:background="@null"
-                    android:textSize="11.5sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:inputType="number" />
 
                 <TextView
                     android:id="@+id/btnDelayPlus"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:background="@drawable/bg_circle_btn_white"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_stepper_btn"
                     android:gravity="center"
                     android:text="+"
                     android:textColor="#0F172A"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Stepper Target Limit (Jumlah Pesan) -->
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_input_white"
                 android:gravity="center_vertical"
@@ -296,18 +297,19 @@
                     android:layout_height="wrap_content"
                     android:text="Target:"
                     android:textColor="#64748B"
-                    android:textSize="9.5sp"
-                    android:layout_marginEnd="2dp" />
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="3dp" />
 
                 <TextView
                     android:id="@+id/btnTargetMinus"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:background="@drawable/bg_circle_btn_white"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_stepper_btn"
                     android:gravity="center"
-                    android:text="—"
+                    android:text="−"
                     android:textColor="#0F172A"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <EditText
@@ -320,19 +322,19 @@
                     android:gravity="center"
                     android:textColor="#0F172A"
                     android:background="@null"
-                    android:textSize="11.5sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:inputType="number" />
 
                 <TextView
                     android:id="@+id/btnTargetPlus"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:background="@drawable/bg_circle_btn_white"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_stepper_btn"
                     android:gravity="center"
                     android:text="+"
                     android:textColor="#0F172A"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

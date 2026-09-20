@@ -120,12 +120,26 @@ class FloatingWidgetService : Service() {
             etDelay.setText(next.toString())
             prefs.edit().putInt("delay", next).apply()
         }
+        btnDelayMinus.setOnLongClickListener {
+            val current = etDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current - 5).coerceAtLeast(1)
+            etDelay.setText(next.toString())
+            prefs.edit().putInt("delay", next).apply()
+            true
+        }
 
         btnDelayPlus.setOnClickListener {
             val current = etDelay.text.toString().toIntOrNull() ?: 4
             val next = (current + 1).coerceAtMost(999)
             etDelay.setText(next.toString())
             prefs.edit().putInt("delay", next).apply()
+        }
+        btnDelayPlus.setOnLongClickListener {
+            val current = etDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current + 5).coerceAtMost(999)
+            etDelay.setText(next.toString())
+            prefs.edit().putInt("delay", next).apply()
+            true
         }
 
         btnTargetMinus.setOnClickListener {
@@ -134,12 +148,26 @@ class FloatingWidgetService : Service() {
             etTargetLimit.setText(next.toString())
             prefs.edit().putInt("max_count", next).apply()
         }
+        btnTargetMinus.setOnLongClickListener {
+            val current = etTargetLimit.text.toString().toIntOrNull() ?: 0
+            val next = (current - 10).coerceAtLeast(0)
+            etTargetLimit.setText(next.toString())
+            prefs.edit().putInt("max_count", next).apply()
+            true
+        }
 
         btnTargetPlus.setOnClickListener {
             val current = etTargetLimit.text.toString().toIntOrNull() ?: 0
             val next = if (current < 5) (current + 1) else (current + 5).coerceAtMost(99999)
             etTargetLimit.setText(next.toString())
             prefs.edit().putInt("max_count", next).apply()
+        }
+        btnTargetPlus.setOnLongClickListener {
+            val current = etTargetLimit.text.toString().toIntOrNull() ?: 0
+            val next = (current + 10).coerceAtMost(99999)
+            etTargetLimit.setText(next.toString())
+            prefs.edit().putInt("max_count", next).apply()
+            true
         }
 
         var totalSentCount = 0
