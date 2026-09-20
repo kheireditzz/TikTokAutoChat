@@ -229,6 +229,10 @@ class FloatingWidgetService : Service() {
 
         fun setMinimizeState(minimized: Boolean) {
             isMinimized = minimized
+            val displayMetrics = DisplayMetrics()
+            windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val screenWidth = displayMetrics.widthPixels
+
             if (minimized) {
                 layoutExpanded.visibility = View.GONE
                 layoutBubble.visibility = View.VISIBLE
@@ -236,8 +240,15 @@ class FloatingWidgetService : Service() {
             } else {
                 layoutBubble.visibility = View.GONE
                 layoutExpanded.visibility = View.VISIBLE
+                // Pastikan saat diperbesar, widget tidak terpotong di tepi kanan layar
+                val expandedWidth = (270 * resources.displayMetrics.density).toInt()
+                if (params.x + expandedWidth > screenWidth) {
+                    params.x = (screenWidth - expandedWidth - 16).coerceAtLeast(16)
+                }
             }
-            windowManager.updateViewLayout(floatingView, params)
+            try {
+                windowManager.updateViewLayout(floatingView, params)
+            } catch (_: Exception) {}
         }
 
         btnMinimize.setOnClickListener {
@@ -248,7 +259,7 @@ class FloatingWidgetService : Service() {
             setMinimizeState(false)
         }
 
-        // Drag Handler dengan Auto Snap ke Samping Layar
+        // Drag Handler dengan Auto Snap ke Samping Layar & Deteksi Klik
         val dragTouchListener = object : View.OnTouchListener {
             private var initialX = 0
             private var initialY = 0
@@ -280,7 +291,13 @@ class FloatingWidgetService : Service() {
                         return true
                     }
                     MotionEvent.ACTION_UP -> {
-                        if (!isClick) {
+                        if (isClick) {
+                            if (v == layoutBubble || isMinimized) {
+                                setMinimizeState(false)
+                            } else {
+                                v?.performClick()
+                            }
+                        } else {
                             if (isMinimized) {
                                 snapToNearestEdge()
                             }
