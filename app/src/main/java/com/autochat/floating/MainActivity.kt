@@ -14,6 +14,7 @@ import android.view.View
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
@@ -24,18 +25,17 @@ class MainActivity : Activity() {
     private val REQUEST_OVERLAY_CODE = 2001
     private lateinit var prefs: SharedPreferences
 
-    // Tabs
-    private lateinit var tabHome: TextView
-    private lateinit var tabSettings: TextView
-    private lateinit var viewHome: ScrollView
-    private lateinit var viewSettings: ScrollView
+    // Navigation Header Button (Gear saat di Beranda, Back saat di Pengaturan)
+    private lateinit var btnHeaderAction: ImageView
+    private lateinit var tvHeaderTitle: TextView
+    private lateinit var tvHeaderSub: TextView
+    private lateinit var viewHome: View
+    private lateinit var viewSettings: View
+    private var isSettingsOpen = false
 
     // Home views
     private lateinit var tvStatusTitle: TextView
     private lateinit var tvStatusSub: TextView
-    private lateinit var mainStatusDot: View
-    private lateinit var dotOverlay: View
-    private lateinit var dotAccessibility: View
     private lateinit var switchOverlay: Switch
     private lateinit var switchAccessibility: Switch
     private lateinit var btnLaunch: Button
@@ -54,21 +54,20 @@ class MainActivity : Activity() {
 
         prefs = getSharedPreferences("AutoChatPrefs", Context.MODE_PRIVATE)
 
-        // Init Tabs
-        tabHome = findViewById(R.id.tabHome)
-        tabSettings = findViewById(R.id.tabSettings)
+        // Init Header & Navigation
+        btnHeaderAction = findViewById(R.id.btnHeaderAction)
+        tvHeaderTitle = findViewById(R.id.tvHeaderTitle)
+        tvHeaderSub = findViewById(R.id.tvHeaderSub)
         viewHome = findViewById(R.id.viewHome)
         viewSettings = findViewById(R.id.viewSettings)
 
-        tabHome.setOnClickListener { switchTab(true) }
-        tabSettings.setOnClickListener { switchTab(false) }
+        btnHeaderAction.setOnClickListener {
+            toggleScreen(!isSettingsOpen)
+        }
 
         // Init Home
         tvStatusTitle = findViewById(R.id.tvStatusTitle)
         tvStatusSub = findViewById(R.id.tvStatusSub)
-        mainStatusDot = findViewById(R.id.mainStatusDot)
-        dotOverlay = findViewById(R.id.dotOverlay)
-        dotAccessibility = findViewById(R.id.dotAccessibility)
         switchOverlay = findViewById(R.id.switchOverlay)
         switchAccessibility = findViewById(R.id.switchAccessibility)
         btnLaunch = findViewById(R.id.btnLaunchFloating)
@@ -146,21 +145,28 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun switchTab(showHome: Boolean) {
-        if (showHome) {
-            viewHome.visibility = View.VISIBLE
-            viewSettings.visibility = View.GONE
-            tabHome.setBackgroundResource(R.drawable.bg_tab_active)
-            tabHome.setTextColor(Color.WHITE)
-            tabSettings.setBackgroundResource(R.drawable.bg_tab_inactive)
-            tabSettings.setTextColor(Color.parseColor("#64748B"))
-        } else {
+    private fun toggleScreen(toSettings: Boolean) {
+        isSettingsOpen = toSettings
+        if (toSettings) {
             viewHome.visibility = View.GONE
             viewSettings.visibility = View.VISIBLE
-            tabSettings.setBackgroundResource(R.drawable.bg_tab_active)
-            tabSettings.setTextColor(Color.WHITE)
-            tabHome.setBackgroundResource(R.drawable.bg_tab_inactive)
-            tabHome.setTextColor(Color.parseColor("#64748B"))
+            tvHeaderTitle.text = "Pengaturan"
+            tvHeaderSub.text = "KUSTOMISASI CHAT"
+            btnHeaderAction.setImageResource(R.drawable.ic_arrow_back)
+        } else {
+            viewHome.visibility = View.VISIBLE
+            viewSettings.visibility = View.GONE
+            tvHeaderTitle.text = "AutoChat"
+            tvHeaderSub.text = "TIKTOK ASSISTANT"
+            btnHeaderAction.setImageResource(R.drawable.ic_tab_settings)
+        }
+    }
+
+    override fun onBackPressed() {
+        if (isSettingsOpen) {
+            toggleScreen(false)
+        } else {
+            super.onBackPressed()
         }
     }
 
@@ -187,26 +193,12 @@ class MainActivity : Activity() {
         switchOverlay.isChecked = hasOverlay
         switchAccessibility.isChecked = hasAccessibility
 
-        if (hasOverlay) {
-            dotOverlay.setBackgroundColor(Color.parseColor("#10B981"))
-        } else {
-            dotOverlay.setBackgroundColor(Color.parseColor("#EF4444"))
-        }
-
-        if (hasAccessibility) {
-            dotAccessibility.setBackgroundColor(Color.parseColor("#10B981"))
-        } else {
-            dotAccessibility.setBackgroundColor(Color.parseColor("#EF4444"))
-        }
-
         if (hasOverlay && hasAccessibility) {
-            tvStatusTitle.text = "Sistem Siap Beroperasi"
-            tvStatusSub.text = "Semua izin sistem telah terhubung"
-            mainStatusDot.setBackgroundColor(Color.parseColor("#10B981"))
+            tvStatusTitle.text = "Sistem Siap"
+            tvStatusSub.text = "Semua izin terhubung"
         } else {
-            tvStatusTitle.text = "Izin Belum Lengkap"
-            tvStatusSub.text = "Aktifkan izin bertanda merah"
-            mainStatusDot.setBackgroundColor(Color.parseColor("#EF4444"))
+            tvStatusTitle.text = "Izin Kurang"
+            tvStatusSub.text = "Aktifkan tanda merah"
         }
     }
 

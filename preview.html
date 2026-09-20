@@ -3,549 +3,861 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TikTok AutoChat - Ultra Clean Premium Design</title>
+  <title>TikTok AutoChat - Sleek Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #FFFFFF;
-      --card-bg: #F8FAFC;
-      --card-hover: #F1F5F9;
-      --text-main: #090A0F;
+      --bg-body: #090B10;
+      --surface: #FFFFFF;
+      --surface-secondary: #F8FAFC;
+      --surface-tertiary: #F1F5F9;
+      --border-subtle: #F1F5F9;
+      --border-default: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --text-main: #0F172A;
       --text-muted: #64748B;
-      --border: #E2E8F0;
-      --border-subtle: #EEF2F6;
+      --text-faint: #94A3B8;
+      --primary: #0F172A;
       --success: #10B981;
       --danger: #EF4444;
-      --tiktok-black: #000000;
+      --tiktok-accent: #FE2C55;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
-    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
     body {
-      background: #090B10;
+      background: var(--bg-body);
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 16px;
+      padding: 24px 16px;
+      color: #FFFFFF;
+    }
+
+    .preview-banner {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #E2E8F0;
     }
 
     /* Device Mockup */
-    .phone {
-      width: 375px;
-      height: 750px;
+    .device-frame {
+      width: 388px;
+      height: 770px;
       background: #FFFFFF;
       border-radius: 46px;
-      border: 9px solid #1E293B;
-      box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+      border: 10px solid #1E293B;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    /* Clean Content Screen */
-    .screen {
+    /* SCROLLABLE VIEWPORT (SELURUH HALAMAN TERMASUK HEADER IKUT TERSCROLL) */
+    .viewport {
       flex: 1;
-      background: var(--bg);
       overflow-y: auto;
-      padding: 36px 20px 24px 20px;
-      display: flex;
-      flex-direction: column;
+      background: #FFFFFF;
+    }
+    .viewport::-webkit-scrollbar {
+      display: none;
     }
 
-    /* Ultra Clean Minimal Header */
-    .header {
+    /* Status Bar */
+    .status-bar {
+      height: 28px;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      background: #FFFFFF;
     }
-    .header-left {
+    .notch {
+      width: 90px;
+      height: 18px;
+      background: #0F172A;
+      border-radius: 0 0 12px 12px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar (BERADA DI DALAM VIEWPORT SEHINGGA IKUT TERSCROLL KE BAWAH) */
+    .top-bar {
+      padding: 12px 20px 14px 20px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    .official-icon {
-      width: 40px;
-      height: 40px;
+
+    .brand-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon-box {
+      width: 36px;
+      height: 36px;
       background: #000000;
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     }
-    .official-icon svg {
-      width: 22px;
-      height: 22px;
+    .brand-icon-box svg {
+      width: 19px;
+      height: 19px;
       fill: #FFFFFF;
     }
-    .header-title {
-      font-size: 19px;
+    .brand-text h1 {
+      font-size: 16px;
       font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.4px;
+      line-height: 1.1;
     }
-    .header-tag {
-      font-size: 11px;
+    .brand-text span {
+      font-size: 9px;
       font-weight: 700;
-      color: #94A3B8;
-      letter-spacing: 0.5px;
+      color: var(--text-faint);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
 
-    /* Status Banner - Minimalist */
-    .status-banner {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
+    /* Header Action Button di Pojok Kanan Atas */
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border-default);
+      background: var(--surface-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .header-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    .header-btn:hover {
+      background: #000000;
+      color: #FFFFFF;
+      border-color: #000000;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+    }
+    .header-btn:hover svg {
+      fill: #FFFFFF;
+    }
+    .header-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* CONTENT PADDING */
+    .content-body {
+      padding: 18px 20px;
+    }
+
+    /* SLEEK MINIMAL CARDS (BEBAS BULATAN KECIL) */
+    .sleek-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s ease;
+    }
+
+    .card-flex {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      gap: 12px;
     }
-    .status-info h4 {
-      font-size: 14.5px;
+    .card-title {
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.2px;
     }
-    .status-info p {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    .status-dot-indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-      transition: all 0.3s ease;
-    }
-
-    /* Control Cards (Minimal, Clean, No Clutter Text) */
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .control-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.2s ease;
-    }
-    .card-text h5 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-    .card-text p {
-      font-size: 11.5px;
+    .card-subtitle {
+      font-size: 11px;
+      font-weight: 500;
       color: var(--text-muted);
       margin-top: 2px;
     }
 
-    .card-action {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* Pure Visual Color Indicator */
-    .color-pill {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-      transition: all 0.3s ease;
-    }
-    .color-pill.off {
-      background: var(--danger);
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-    }
-
-    /* Modern iOS/Android Switch */
+    /* MODERN SWITCH (WARNA HIJAU AKTIF / MERAH NONAKTIF LANGSUNG PADA SWITCH) */
     .switch {
       position: relative;
       display: inline-block;
       width: 44px;
-      height: 24px;
+      height: 25px;
+      flex-shrink: 0;
     }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #E2E8F0;
-      transition: .3s;
-      border-radius: 24px;
+      background-color: var(--danger);
+      transition: .24s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 25px;
     }
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
+      height: 19px;
+      width: 19px;
       left: 3px;
       bottom: 3px;
       background-color: white;
-      transition: .3s;
+      transition: .24s cubic-bezier(0.16, 1, 0.3, 1);
       border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
     input:checked + .slider {
-      background-color: var(--tiktok-black);
+      background-color: var(--success);
     }
     input:checked + .slider:before {
-      transform: translateX(20px);
+      transform: translateX(19px);
     }
 
-    /* Primary Action Button (Pure Black/White High-End) */
-    .btn-main {
+    /* PRIMARY ACTION BUTTON */
+    .btn-action-black {
       width: 100%;
-      height: 52px;
+      height: 48px;
       background: #000000;
       color: #FFFFFF;
       border: none;
-      border-radius: 16px;
-      font-size: 14px;
+      border-radius: 14px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: -0.2px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-      transition: transform 0.1s ease;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+      transition: all 0.2s ease;
+      margin-top: 10px;
     }
-    .btn-main:active { transform: scale(0.98); }
+    .btn-action-black svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    .btn-action-black:hover {
+      background: #1E293B;
+    }
+    .btn-action-black:active {
+      transform: scale(0.99);
+    }
 
-    /* ========================================================
-       FLOATING WIDGET - PURE MINIMAL & NO SCREEN BLOCK
-       ======================================================== */
-    .floating-container {
+    /* SECTION LABELS */
+    .section-eyebrow {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--text-faint);
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      margin-top: 6px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-eyebrow svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* CHAT TEMPLATE ROWS */
+    .chat-item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
+    }
+    .chat-item-row:focus-within {
+      border-color: #0F172A;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.06);
+    }
+    .chat-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      outline: none;
+    }
+    .chat-delete-btn {
+      color: var(--text-faint);
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-delete-btn svg { width: 13px; height: 13px; fill: currentColor; }
+    .chat-delete-btn:hover {
+      color: var(--danger);
+      background: #FEE2E2;
+    }
+
+    .btn-ghost-add {
+      width: 100%;
+      height: 38px;
+      background: var(--surface-secondary);
+      border: 1px dashed var(--border-strong);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .btn-ghost-add svg { width: 13px; height: 13px; fill: currentColor; }
+    .btn-ghost-add:hover {
+      background: var(--surface-tertiary);
+      border-color: #0F172A;
+    }
+
+    .number-pill-input {
+      width: 48px;
+      height: 34px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* FLOATING WIDGET */
+    .floating-layer {
       position: absolute;
-      top: 140px;
+      top: 130px;
       right: 14px;
       z-index: 100;
     }
 
-    /* Minimized Micro Capsule (Hanya 32px - Sangat Tipis di Tepi Layar) */
-    .floating-capsule {
-      height: 34px;
+    .capsule-mini {
+      height: 36px;
       background: #000000;
       color: #FFFFFF;
-      border-radius: 20px;
-      padding: 0 12px;
+      border-radius: 9999px;
+      padding: 0 13px;
       display: flex;
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-      border: 1.5px solid rgba(255,255,255,0.15);
-    }
-    .capsule-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--success);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .capsule-label {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.2px;
     }
-    .capsule-icon svg {
-      width: 12px;
-      height: 12px;
-      fill: #FFF;
+    .capsule-expand-icon {
+      color: var(--tiktok-accent);
+      font-size: 11px;
     }
 
-    /* Expanded Clean Controller */
-    .floating-card {
-      width: 260px;
+    .floating-card-full {
+      width: 264px;
       background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      padding: 12px 14px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 18px;
+      border: 1px solid var(--border-default);
+      padding: 12px;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.2);
       display: none;
     }
+
     .f-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 8px;
     }
-    .f-title-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .f-brand-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
     }
     .f-actions {
       display: flex;
+      align-items: center;
       gap: 4px;
     }
-    .f-btn {
-      width: 24px;
-      height: 24px;
-      background: #F1F5F9;
+    .f-circle-btn {
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      border: 1px solid var(--border);
+      background: var(--surface-tertiary);
+      border: 1px solid var(--border-default);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
-      font-weight: bold;
-      color: #475569;
       cursor: pointer;
+      color: var(--text-main);
     }
-    .f-btn.close { color: var(--danger); }
+    .f-circle-btn svg { width: 11px; height: 11px; fill: currentColor; }
+    .f-circle-btn.close:hover {
+      background: #FEE2E2;
+      color: var(--danger);
+    }
 
-    .f-chat-list {
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 12px;
+    .f-items-container {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
       padding: 4px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .f-chat-item {
+    .f-preset-row {
       display: flex;
       align-items: center;
       gap: 6px;
       padding: 5px 6px;
-      border-bottom: 1px solid var(--border-subtle);
-      font-size: 11px;
-      color: var(--text-main);
+      border-bottom: 1px solid #EDF2F7;
     }
-    .f-chat-item:last-child { border-bottom: none; }
-    .f-chat-item input[type="checkbox"] {
-      accent-color: #000000;
-    }
-    .f-chat-item input[type="text"] {
+    .f-preset-row:last-child { border-bottom: none; }
+    .f-preset-row input[type="checkbox"] { accent-color: #000; }
+    .f-preset-row span {
       flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 11px;
-      outline: none;
+      font-size: 10.5px;
       color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .f-bottom {
+    .f-bottom-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .f-delay-pill {
-      background: #F1F5F9;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 10.5px;
+      font-size: 10px;
+      font-weight: 700;
       color: var(--text-muted);
-      font-weight: 600;
+      background: var(--surface-tertiary);
+      padding: 3px 6px;
+      border-radius: 5px;
     }
-    .btn-f-start {
+    .btn-f-toggle {
+      height: 30px;
+      padding: 0 14px;
       background: #000000;
       color: #FFFFFF;
       border: none;
-      border-radius: 10px;
-      padding: 6px 14px;
+      border-radius: 8px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+    }
+    .btn-f-toggle.running { background: var(--danger); }
+
+    .toast-msg {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      background: #0F172A;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 200;
+    }
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
-<div class="phone">
-  <div class="screen">
-    
-    <!-- HEADER RESMI SIMPLE-ICONS TIKTOK -->
-    <div class="header">
-      <div class="header-left">
-        <div class="official-icon">
-          <!-- Official Simple Icons TikTok Path -->
-          <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+  <div class="preview-banner">
+    <div class="preview-badge">
+      <span>Header Ikut Terscroll • Tanpa Bulatan</span>
+    </div>
+  </div>
+
+  <div class="device-frame">
+
+    <!-- VIEWPORT SCROLLABLE (HEADER DI DALAM VIEWPORT SEHINGGA IKUT TERSCROLL KE BAWAH) -->
+    <div class="viewport">
+
+      <!-- Phone Status Bar -->
+      <div class="status-bar">
+        <span>09:41</span>
+        <div class="notch"></div>
+        <div style="display: flex; gap: 4px; align-items: center; font-size: 10px;">
+          <span>5G</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <!-- Top Bar (IKUT TERSCROLL KE ATAS/BAWAH BERSAMA KONTEN) -->
+      <div class="top-bar">
+        <div class="brand-meta">
+          <div class="brand-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+          </div>
+          <div class="brand-text">
+            <h1 id="topBarTitle">AutoChat</h1>
+            <span id="topBarSubtitle">TikTok Assistant</span>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi Kanan Atas: Gear saat di Beranda, Back saat di Pengaturan -->
+        <button class="header-btn" id="btnHeaderAction" title="Pengaturan" onclick="handleHeaderAction()">
+          <!-- Gear Icon (Menuju Pengaturan) -->
+          <svg id="iconHeaderGear" viewBox="0 0 24 24">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
           </svg>
+          <!-- Back Icon (Kembali ke Beranda) -->
+          <svg id="iconHeaderBack" viewBox="0 0 24 24" style="display: none;">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- KONTEN BERANDA -->
+      <div class="content-body" id="tabContentHome">
+        <!-- Status Card (Bersih tanpa bulatan kecil) -->
+        <div class="sleek-card" style="margin-bottom: 12px;">
+          <div class="card-flex">
+            <div>
+              <div class="card-title" id="statusHeaderTitle">Sistem Siap</div>
+              <div class="card-subtitle" id="statusHeaderSub">Semua izin terhubung</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 class="header-title">AutoChat</h2>
-          <span class="header-tag">TIKTOK LIVE ASSISTANT</span>
+
+        <div class="section-eyebrow">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span>Izin Sistem</span>
+        </div>
+
+        <!-- Overlay Switch Card (Tanpa bulatan kecil) -->
+        <div class="sleek-card">
+          <div class="card-flex">
+            <div>
+              <div class="card-title">Layar Melayang</div>
+              <div class="card-subtitle">Widget overlay TikTok</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="switchOverlay" checked onchange="onPermissionChange()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Aksesibilitas Switch Card (Tanpa bulatan kecil) -->
+        <div class="sleek-card" style="margin-bottom: 20px;">
+          <div class="card-flex">
+            <div>
+              <div class="card-title">Aksesibilitas</div>
+              <div class="card-subtitle">Auto-ketik &amp; kirim komentar</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="switchAccess" checked onchange="onPermissionChange()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tombol Launch -->
+        <button class="btn-action-black" onclick="showFloatingWidget(true)">
+          <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          <span>Buka Widget Melayang</span>
+        </button>
+      </div>
+
+      <!-- KONTEN PENGATURAN -->
+      <div class="content-body" id="tabContentSettings" style="display: none;">
+        <div class="section-eyebrow">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <span>Pesan Rotasi</span>
+        </div>
+        
+        <div id="messagesWrapper">
+          <div class="chat-item-row">
+            <svg style="width: 15px; height: 15px; fill: var(--text-muted); flex-shrink: 0;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            <input type="text" class="chat-input" value="Halo kak, barangnya ready? 🔥">
+            <div class="chat-delete-btn" onclick="removeChatRow(this)">
+              <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </div>
+          </div>
+          <div class="chat-item-row">
+            <svg style="width: 15px; height: 15px; fill: var(--text-muted); flex-shrink: 0;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            <input type="text" class="chat-input" value="Spill etalase nomor 1 dong kak 🛍️">
+            <div class="chat-delete-btn" onclick="removeChatRow(this)">
+              <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </div>
+          </div>
+          <div class="chat-item-row">
+            <svg style="width: 15px; height: 15px; fill: var(--text-muted); flex-shrink: 0;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            <input type="text" class="chat-input" value="Tap tap layar terus ya guys! ✨">
+            <div class="chat-delete-btn" onclick="removeChatRow(this)">
+              <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-ghost-add" onclick="addNewMessageRow()">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Tambah Pesan</span>
+        </button>
+
+        <div class="section-eyebrow">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+          <span>Jeda &amp; Keamanan</span>
+        </div>
+
+        <div class="sleek-card">
+          <div class="card-flex" style="margin-bottom: 12px;">
+            <div>
+              <div class="card-title">Jeda Pengiriman</div>
+              <div class="card-subtitle">Interval antar pesan</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" class="number-pill-input" id="settingDelayInput" value="4">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">dtk</span>
+            </div>
+          </div>
+
+          <div style="height: 1px; background: var(--border-subtle); margin-bottom: 12px;"></div>
+
+          <div class="card-flex">
+            <div>
+              <div class="card-title">Anti-Deteksi Bot</div>
+              <div class="card-subtitle">Emoji &amp; jeda acak</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="switchAntiSpam" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-action-black" onclick="saveSettings()">
+          <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+          <span>Simpan Pengaturan</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- FLOATING WIDGET -->
+    <div class="floating-layer" id="floatingWidgetContainer">
+      <div class="capsule-mini" id="widgetCapsule" onclick="setWidgetExpanded(true)">
+        <span class="capsule-label" id="capsuleStatusLabel">AutoChat</span>
+        <div class="capsule-expand-icon">⛶</div>
+      </div>
+
+      <div class="floating-card-full" id="widgetExpandedCard">
+        <div class="f-header">
+          <div class="f-brand-title">
+            <span>AutoChat</span>
+          </div>
+          <div class="f-actions">
+            <div class="f-circle-btn" title="Perkecil" onclick="setWidgetExpanded(false)">
+              <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+            </div>
+            <div class="f-circle-btn close" title="Tutup" onclick="showFloatingWidget(false)">
+              <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="f-items-container">
+          <div class="f-preset-row">
+            <input type="checkbox" checked>
+            <span>Halo kak, barangnya ready? 🔥</span>
+          </div>
+          <div class="f-preset-row">
+            <input type="checkbox" checked>
+            <span>Spill etalase nomor 1 dong kak 🛍️</span>
+          </div>
+          <div class="f-preset-row">
+            <input type="checkbox" checked>
+            <span>Tap tap layar terus ya guys! ✨</span>
+          </div>
+        </div>
+
+        <div class="f-bottom-bar">
+          <span class="f-delay-pill" id="fDisplayDelay">Jeda: 4s</span>
+          <button class="btn-f-toggle" id="btnWidgetToggle" onclick="toggleChatEngine()">MULAI</button>
         </div>
       </div>
     </div>
 
-    <!-- STATUS BANNER -->
-    <div class="status-banner">
-      <div class="status-info">
-        <h4 id="statusText">Sistem Siap Beroperasi</h4>
-        <p id="statusSub">Semua izin sistem telah terhubung</p>
-      </div>
-      <div class="status-dot-indicator" id="statusDot"></div>
-    </div>
-
-    <!-- CONTROLS: HANYA WARNA (HIJAU/MERAH), TANPA TEKS BERLEBIHAN -->
-    <div class="card-list">
-      
-      <!-- 1. Overlay -->
-      <div class="control-card">
-        <div class="card-text">
-          <h5>Layar Melayang (Overlay)</h5>
-          <p>Kontroler mengambang di atas TikTok</p>
-        </div>
-        <div class="card-action">
-          <div class="color-pill" id="pillOverlay"></div>
-          <label class="switch">
-            <input type="checkbox" id="swOverlay" checked onchange="handleToggle('overlay')">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <!-- 2. Aksesibilitas -->
-      <div class="control-card">
-        <div class="card-text">
-          <h5>Aksesibilitas Auto-Ketik</h5>
-          <p>Ketik &amp; kirim komentar otomatis</p>
-        </div>
-        <div class="card-action">
-          <div class="color-pill" id="pillAccess"></div>
-          <label class="switch">
-            <input type="checkbox" id="swAccess" checked onchange="handleToggle('access')">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TOMBOL UTAMA -->
-    <button class="btn-main" onclick="openFloating(true)">
-      <span>Buka Widget Melayang</span>
-      <span>→</span>
-    </button>
+    <div class="toast-msg" id="toastBox">Pengaturan tersimpan!</div>
 
   </div>
 
-  <!-- FLOATING SIMULATOR (TIDAK MENGHALANGI LAYAR) -->
-  <div class="floating-container" id="fContainer">
-    
-    <!-- 1. CAPSULE TIPIS (MINIMIZED) -->
-    <div class="floating-capsule" id="fCapsule" onclick="expandFloating(true)">
-      <div class="capsule-dot" id="cDot"></div>
-      <span class="capsule-label" id="cLabel">AutoChat</span>
-      <div class="capsule-icon">
-        <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-      </div>
-    </div>
+  <script>
+    let isRunning = false;
+    let currentScreen = 'home';
 
-    <!-- 2. EXPANDED CONTROLLER -->
-    <div class="floating-card" id="fCard">
-      <div class="f-header">
-        <div class="f-title-group">
-          <div class="capsule-dot" id="fDot"></div>
-          <span style="font-size: 12px; font-weight: 700;">TikTok AutoChat</span>
-        </div>
-        <div class="f-actions">
-          <div class="f-btn" onclick="expandFloating(false)">—</div>
-          <div class="f-btn close" onclick="openFloating(false)">✕</div>
-        </div>
-      </div>
-
-      <div class="f-chat-list">
-        <div class="f-chat-item">
-          <input type="checkbox" checked>
-          <input type="text" value="Halo kak, barangnya ready? 🔥">
-        </div>
-        <div class="f-chat-item">
-          <input type="checkbox" checked>
-          <input type="text" value="Spill etalase nomor 1 dong kak 🛍️">
-        </div>
-        <div class="f-chat-item">
-          <input type="checkbox" checked>
-          <input type="text" value="Tap tap layar terus ya guys! ✨">
-        </div>
-      </div>
-
-      <div class="f-bottom">
-        <div class="f-delay-pill">Jeda: <b>4s</b></div>
-        <button class="btn-f-start" id="btnRun" onclick="toggleRun()">MULAI</button>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-  let isRunning = false;
-
-  function handleToggle(type) {
-    const swO = document.getElementById('swOverlay').checked;
-    const swA = document.getElementById('swAccess').checked;
-    
-    document.getElementById('pillOverlay').className = 'color-pill ' + (swO ? '' : 'off');
-    document.getElementById('pillAccess').className = 'color-pill ' + (swA ? '' : 'off');
-
-    const dot = document.getElementById('statusDot');
-    const title = document.getElementById('statusText');
-    const sub = document.getElementById('statusSub');
-
-    if (swO && swA) {
-      dot.style.background = '#10B981';
-      title.innerText = 'Sistem Siap Beroperasi';
-      sub.innerText = 'Semua izin sistem telah terhubung';
-    } else {
-      dot.style.background = '#EF4444';
-      title.innerText = 'Izin Belum Lengkap';
-      sub.innerText = 'Aktifkan izin berwarna merah';
+    function handleHeaderAction() {
+      if (currentScreen === 'home') {
+        currentScreen = 'settings';
+        document.getElementById('tabContentHome').style.display = 'none';
+        document.getElementById('tabContentSettings').style.display = 'block';
+        document.getElementById('topBarTitle').innerText = 'Pengaturan';
+        document.getElementById('topBarSubtitle').innerText = 'Kustomisasi Chat';
+        document.getElementById('iconHeaderGear').style.display = 'none';
+        document.getElementById('iconHeaderBack').style.display = 'block';
+        document.getElementById('btnHeaderAction').title = 'Kembali';
+      } else {
+        currentScreen = 'home';
+        document.getElementById('tabContentHome').style.display = 'block';
+        document.getElementById('tabContentSettings').style.display = 'none';
+        document.getElementById('topBarTitle').innerText = 'AutoChat';
+        document.getElementById('topBarSubtitle').innerText = 'TikTok Assistant';
+        document.getElementById('iconHeaderGear').style.display = 'block';
+        document.getElementById('iconHeaderBack').style.display = 'none';
+        document.getElementById('btnHeaderAction').title = 'Pengaturan';
+      }
     }
-  }
 
-  function openFloating(show) {
-    document.getElementById('fContainer').style.display = show ? 'block' : 'none';
-    if (show) expandFloating(false);
-  }
+    function onPermissionChange() {
+      const swOverlay = document.getElementById('switchOverlay').checked;
+      const swAccess = document.getElementById('switchAccess').checked;
+      const title = document.getElementById('statusHeaderTitle');
+      const sub = document.getElementById('statusHeaderSub');
 
-  function expandFloating(expand) {
-    document.getElementById('fCard').style.display = expand ? 'block' : 'none';
-    document.getElementById('fCapsule').style.display = expand ? 'none' : 'flex';
-  }
-
-  function toggleRun() {
-    isRunning = !isRunning;
-    const btn = document.getElementById('btnRun');
-    const cLabel = document.getElementById('cLabel');
-    const cDot = document.getElementById('cDot');
-    const fDot = document.getElementById('fDot');
-
-    if (isRunning) {
-      btn.innerText = 'STOP';
-      btn.style.background = '#EF4444';
-      cLabel.innerText = 'RUNNING';
-      cDot.style.background = '#10B981';
-      fDot.style.background = '#10B981';
-      // Auto minimize agar tidak menutupi layar TikTok
-      setTimeout(() => expandFloating(false), 500);
-    } else {
-      btn.innerText = 'MULAI';
-      btn.style.background = '#000000';
-      cLabel.innerText = 'AutoChat';
-      cDot.style.background = '#94A3B8';
-      fDot.style.background = '#94A3B8';
+      if (swOverlay && swAccess) {
+        title.innerText = 'Sistem Siap';
+        sub.innerText = 'Semua izin terhubung';
+      } else {
+        title.innerText = 'Izin Kurang';
+        sub.innerText = 'Aktifkan switch merah';
+      }
     }
-  }
-</script>
+
+    function addNewMessageRow() {
+      const wrapper = document.getElementById('messagesWrapper');
+      const div = document.createElement('div');
+      div.className = 'chat-item-row';
+      div.innerHTML = `
+        <svg style="width: 15px; height: 15px; fill: var(--text-muted); flex-shrink: 0;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <input type="text" class="chat-input" placeholder="Tulis template pesan...">
+        <div class="chat-delete-btn" onclick="removeChatRow(this)">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </div>
+      `;
+      wrapper.appendChild(div);
+    }
+
+    function removeChatRow(btn) {
+      btn.parentElement.remove();
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toastBox');
+      toast.innerText = text;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function saveSettings() {
+      const delay = document.getElementById('settingDelayInput').value || 4;
+      document.getElementById('fDisplayDelay').innerText = `Jeda: ${delay}s`;
+      showToast('Pengaturan tersimpan! 💾');
+    }
+
+    function showFloatingWidget(show) {
+      const container = document.getElementById('floatingWidgetContainer');
+      container.style.display = show ? 'block' : 'none';
+      if (show) setWidgetExpanded(false);
+    }
+
+    function setWidgetExpanded(expanded) {
+      document.getElementById('widgetExpandedCard').style.display = expanded ? 'block' : 'none';
+      document.getElementById('widgetCapsule').style.display = expanded ? 'none' : 'flex';
+    }
+
+    function toggleChatEngine() {
+      isRunning = !isRunning;
+      const btn = document.getElementById('btnWidgetToggle');
+      const label = document.getElementById('capsuleStatusLabel');
+
+      if (isRunning) {
+        btn.innerText = 'STOP';
+        btn.classList.add('running');
+        label.innerText = 'RUNNING';
+        showToast('Dimulai! Auto-minimize ke tepi.');
+        setTimeout(() => setWidgetExpanded(false), 350);
+      } else {
+        btn.innerText = 'MULAI';
+        btn.classList.remove('running');
+        label.innerText = 'AutoChat';
+        showToast('Dihentikan.');
+      }
+    }
+  </script>
 </body>
 </html>
