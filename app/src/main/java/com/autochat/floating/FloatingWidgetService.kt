@@ -109,6 +109,38 @@ class FloatingWidgetService : Service() {
         val containerMessages = floatingView.findViewById<LinearLayout>(R.id.containerFloatingMessages)
         val btnAddMessage = floatingView.findViewById<TextView>(R.id.btnFloatingAddMessage)
         val btnCalibrate = floatingView.findViewById<TextView>(R.id.btnCalibrate)
+        val btnDelayMinus = floatingView.findViewById<TextView>(R.id.btnDelayMinus)
+        val btnDelayPlus = floatingView.findViewById<TextView>(R.id.btnDelayPlus)
+        val btnTargetMinus = floatingView.findViewById<TextView>(R.id.btnTargetMinus)
+        val btnTargetPlus = floatingView.findViewById<TextView>(R.id.btnTargetPlus)
+
+        btnDelayMinus.setOnClickListener {
+            val current = etDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current - 1).coerceAtLeast(1)
+            etDelay.setText(next.toString())
+            prefs.edit().putInt("delay", next).apply()
+        }
+
+        btnDelayPlus.setOnClickListener {
+            val current = etDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current + 1).coerceAtMost(999)
+            etDelay.setText(next.toString())
+            prefs.edit().putInt("delay", next).apply()
+        }
+
+        btnTargetMinus.setOnClickListener {
+            val current = etTargetLimit.text.toString().toIntOrNull() ?: 0
+            val next = if (current <= 5) (current - 1).coerceAtLeast(0) else (current - 5).coerceAtLeast(0)
+            etTargetLimit.setText(next.toString())
+            prefs.edit().putInt("max_count", next).apply()
+        }
+
+        btnTargetPlus.setOnClickListener {
+            val current = etTargetLimit.text.toString().toIntOrNull() ?: 0
+            val next = if (current < 5) (current + 1) else (current + 5).coerceAtMost(99999)
+            etTargetLimit.setText(next.toString())
+            prefs.edit().putInt("max_count", next).apply()
+        }
 
         var totalSentCount = 0
 

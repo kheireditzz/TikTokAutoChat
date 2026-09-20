@@ -80,6 +80,35 @@ class MainActivity : Activity() {
         btnSettingsResetCoords = findViewById(R.id.btnSettingsResetCoords)
         btnSaveSettings = findViewById(R.id.btnSaveSettings)
 
+        val btnSettingDelayMinus = findViewById<TextView>(R.id.btnSettingDelayMinus)
+        val btnSettingDelayPlus = findViewById<TextView>(R.id.btnSettingDelayPlus)
+        val btnSettingMaxMinus = findViewById<TextView>(R.id.btnSettingMaxMinus)
+        val btnSettingMaxPlus = findViewById<TextView>(R.id.btnSettingMaxPlus)
+
+        btnSettingDelayMinus.setOnClickListener {
+            val current = etSettingDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current - 1).coerceAtLeast(1)
+            etSettingDelay.setText(next.toString())
+        }
+
+        btnSettingDelayPlus.setOnClickListener {
+            val current = etSettingDelay.text.toString().toIntOrNull() ?: 4
+            val next = (current + 1).coerceAtMost(999)
+            etSettingDelay.setText(next.toString())
+        }
+
+        btnSettingMaxMinus.setOnClickListener {
+            val current = etSettingMaxCount.text.toString().toIntOrNull() ?: 0
+            val next = if (current <= 5) (current - 1).coerceAtLeast(0) else (current - 5).coerceAtLeast(0)
+            etSettingMaxCount.setText(next.toString())
+        }
+
+        btnSettingMaxPlus.setOnClickListener {
+            val current = etSettingMaxCount.text.toString().toIntOrNull() ?: 0
+            val next = if (current < 5) (current + 1) else (current + 5).coerceAtMost(99999)
+            etSettingMaxCount.setText(next.toString())
+        }
+
         btnSettingsAddMessage.setOnClickListener {
             addSettingMessageRow("")
         }

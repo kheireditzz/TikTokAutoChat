@@ -41,7 +41,7 @@
                     android:id="@+id/tvHeaderSub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TIKTOK ASSISTANT"
+                    android:text="TIKTOK ASSISTANT PRO"
                     android:textSize="9.5sp"
                     android:textStyle="bold"
                     android:textColor="#94A3B8"
@@ -60,7 +60,7 @@
                 android:contentDescription="Pengaturan" />
         </LinearLayout>
 
-        <!-- LAYAR 1: BERANDA STATUS & IZIN -->
+        <!-- LAYAR 1: BERANDA STATUS, IZIN & DISCLAIMER -->
         <LinearLayout
             android:id="@+id/viewHome"
             android:layout_width="match_parent"
@@ -75,9 +75,9 @@
                 android:background="@drawable/bg_white_card"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="18dp"
+                android:padding="16dp"
                 android:elevation="1dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
                 <ImageView
                     android:layout_width="44dp"
@@ -116,6 +116,49 @@
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:background="@drawable/bg_indicator_dot" />
+            </LinearLayout>
+
+            <!-- CARD PERINGATAN RESMI / DISCLAIMER ADMIN -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_warning_card"
+                android:padding="14dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="6dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PERINGATAN &amp; KETENTUAN PENGGUNA"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#C2410C"
+                        android:letterSpacing="0.04" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1. Pengembang/Admin hanya menyediakan dan mendistribusikan lisensi perangkat lunak ini sebagai alat bantu pengetikan otomatis mandiri.\n2. Admin TIDAK BERTANGGUNG JAWAB atas segala tindakan maupun akibat hukum/teknis yang timbul, termasuk risiko sanksi akun, shadowban, atau pemblokiran (banned) dari platform terkait.\n3. Seluruh risiko operasional sepenuhnya merupakan tanggung jawab pribadi masing-masing pengguna. Gunakan jeda waktu wajar dan fitur Anti-Spam dengan bijak."
+                    android:textSize="10.5sp"
+                    android:textColor="#9A3412"
+                    android:lineSpacingExtra="3dp" />
             </LinearLayout>
 
             <TextView
@@ -289,7 +332,7 @@
                 android:elevation="1dp"
                 android:layout_marginBottom="16dp">
 
-                <!-- Jeda Waktu -->
+                <!-- Jeda Waktu with Plus & Minus Stepper -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -301,22 +344,54 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Jeda Antar Pesan (Detik)"
+                        android:text="Jeda Pengiriman (Detik)"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textColor="#090A0F" />
 
-                    <EditText
-                        android:id="@+id/etSettingDelay"
-                        android:layout_width="54dp"
+                    <!-- Stepper Delay -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="36dp"
-                        android:text="4"
-                        android:gravity="center"
-                        android:textColor="#090A0F"
                         android:background="@drawable/bg_input_white"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:inputType="number" />
+                        android:gravity="center_vertical"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp">
+
+                        <TextView
+                            android:id="@+id/btnSettingDelayMinus"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:background="@drawable/bg_circle_btn_white"
+                            android:gravity="center"
+                            android:text="—"
+                            android:textColor="#090A0F"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/etSettingDelay"
+                            android:layout_width="38dp"
+                            android:layout_height="match_parent"
+                            android:text="4"
+                            android:gravity="center"
+                            android:textColor="#090A0F"
+                            android:background="@null"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:inputType="number" />
+
+                        <TextView
+                            android:id="@+id/btnSettingDelayPlus"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:background="@drawable/bg_circle_btn_white"
+                            android:gravity="center"
+                            android:text="+"
+                            android:textColor="#090A0F"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <View
@@ -325,7 +400,7 @@
                     android:background="#F1F5F9"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Target Batas Jumlah Pesan -->
+                <!-- Target Batas Jumlah Pesan with Plus & Minus Stepper -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -350,23 +425,55 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 = Tanpa batas (Stop otomatis saat tercapai)"
+                            android:text="0 = Tanpa batas (Stop otomatis)"
                             android:textSize="10.5sp"
                             android:textColor="#64748B"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
-                    <EditText
-                        android:id="@+id/etSettingMaxCount"
-                        android:layout_width="54dp"
+                    <!-- Stepper Target -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="36dp"
-                        android:text="0"
-                        android:gravity="center"
-                        android:textColor="#090A0F"
                         android:background="@drawable/bg_input_white"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:inputType="number" />
+                        android:gravity="center_vertical"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp">
+
+                        <TextView
+                            android:id="@+id/btnSettingMaxMinus"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:background="@drawable/bg_circle_btn_white"
+                            android:gravity="center"
+                            android:text="—"
+                            android:textColor="#090A0F"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/etSettingMaxCount"
+                            android:layout_width="44dp"
+                            android:layout_height="match_parent"
+                            android:text="0"
+                            android:gravity="center"
+                            android:textColor="#090A0F"
+                            android:background="@null"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:inputType="number" />
+
+                        <TextView
+                            android:id="@+id/btnSettingMaxPlus"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:background="@drawable/bg_circle_btn_white"
+                            android:gravity="center"
+                            android:text="+"
+                            android:textColor="#090A0F"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <View

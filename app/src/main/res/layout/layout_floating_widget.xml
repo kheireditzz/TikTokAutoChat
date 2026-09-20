@@ -56,7 +56,7 @@
     <!-- 2. CARD LENGKAP - TEMA WHITE CLEAN DENGAN AKSEN TIKTOK -->
     <LinearLayout
         android:id="@+id/layoutExpanded"
-        android:layout_width="275dp"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_floating_glass"
@@ -170,7 +170,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="150dp"
+            android:maxHeight="140dp"
             android:scrollbars="vertical"
             android:layout_marginBottom="6dp">
 
@@ -193,7 +193,7 @@
             <TextView
                 android:id="@+id/btnFloatingAddMessage"
                 android:layout_width="0dp"
-                android:layout_height="30dp"
+                android:layout_height="28dp"
                 android:layout_weight="1"
                 android:text="+ Chat"
                 android:textColor="#FE2C55"
@@ -206,7 +206,7 @@
             <TextView
                 android:id="@+id/btnCalibrate"
                 android:layout_width="0dp"
-                android:layout_height="30dp"
+                android:layout_height="28dp"
                 android:layout_weight="1.4"
                 android:text="📍 Kalibrasi Pin"
                 android:textColor="#3B82F6"
@@ -217,71 +217,104 @@
                 android:layout_marginStart="4dp" />
         </LinearLayout>
 
-        <!-- Controls Row: Jeda Detik, Target Limit, dan Tombol Start -->
+        <!-- Stepper Controls Row: Jeda & Target Limit -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
 
-            <!-- Delay Input -->
+            <!-- Stepper Jeda Waktu (Detik) -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="32dp"
+                android:layout_weight="1"
                 android:background="@drawable/bg_input_white"
                 android:gravity="center_vertical"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp">
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:layout_marginEnd="3dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jeda:"
                     android:textColor="#64748B"
-                    android:textSize="9.5sp" />
+                    android:textSize="9.5sp"
+                    android:layout_marginEnd="2dp" />
+
+                <TextView
+                    android:id="@+id/btnDelayMinus"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_circle_btn_white"
+                    android:gravity="center"
+                    android:text="—"
+                    android:textColor="#0F172A"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/etDelayInput"
-                    android:layout_width="26dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:text="4"
                     android:gravity="center"
                     android:textColor="#0F172A"
                     android:background="@null"
                     android:textSize="11.5sp"
                     android:textStyle="bold"
-                    android:inputType="number"
-                    android:layout_marginStart="2dp" />
+                    android:inputType="number" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="s"
-                    android:textColor="#64748B"
-                    android:textSize="9.5sp" />
+                    android:id="@+id/btnDelayPlus"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_circle_btn_white"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="#0F172A"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Target Limit Input -->
+            <!-- Stepper Target Limit (Jumlah Pesan) -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="32dp"
+                android:layout_weight="1"
                 android:background="@drawable/bg_input_white"
                 android:gravity="center_vertical"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:layout_marginStart="4dp">
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:layout_marginStart="3dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Target:"
                     android:textColor="#64748B"
-                    android:textSize="9.5sp" />
+                    android:textSize="9.5sp"
+                    android:layout_marginEnd="2dp" />
+
+                <TextView
+                    android:id="@+id/btnTargetMinus"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_circle_btn_white"
+                    android:gravity="center"
+                    android:text="—"
+                    android:textColor="#0F172A"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/etTargetLimitInput"
-                    android:layout_width="30dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:text="0"
                     android:hint="0"
                     android:gravity="center"
@@ -289,33 +322,32 @@
                     android:background="@null"
                     android:textSize="11.5sp"
                     android:textStyle="bold"
-                    android:inputType="number"
-                    android:layout_marginStart="2dp" />
+                    android:inputType="number" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="x"
-                    android:textColor="#64748B"
-                    android:textSize="9.5sp" />
+                    android:id="@+id/btnTargetPlus"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_circle_btn_white"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="#0F172A"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btnToggleStart"
-                android:layout_width="78dp"
-                android:layout_height="32dp"
-                android:text="MULAI"
-                android:textSize="11.5sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/bg_tiktok_gradient"
-                android:stateListAnimator="@null" />
         </LinearLayout>
+
+        <!-- Start / Stop Button -->
+        <Button
+            android:id="@+id/btnToggleStart"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:text="▶  MULAI AUTO CHAT"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_tiktok_gradient"
+            android:stateListAnimator="@null" />
 
     </LinearLayout>
 
