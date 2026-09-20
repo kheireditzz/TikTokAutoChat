@@ -494,7 +494,7 @@ class FloatingWidgetService : Service() {
         // 1. Target Pointer 1: Kolom Chat (Merah)
         chatTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
         val tvChatLabel = chatTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
-        tvChatLabel.text = "📍 1. KOLOM CHAT (GESER SAYA)"
+        tvChatLabel.text = "📍 1. CHAT (GESER SAYA)"
 
         val savedChatXPercent = prefs.getInt("coord_input_x", 25)
         val savedChatYPercent = prefs.getInt("coord_input_y", 96)
@@ -503,15 +503,15 @@ class FloatingWidgetService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = (screenWidth * (savedChatXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (savedChatYPercent / 100f) - 48 * displayMetrics.density).toInt()
+            y = (screenHeight * (savedChatYPercent / 100f) - 24 * displayMetrics.density).toInt()
         }
 
-        setupDraggablePointer(chatTargetView!!, chatParams, displayMetrics) { newXPercent, newYPercent ->
+        setupDraggablePointer(chatTargetView!!, chatParams, displayMetrics, tvChatLabel, "CHAT") { newXPercent, newYPercent ->
             etCoordX.setText(newXPercent.toString())
             etCoordY.setText(newYPercent.toString())
             prefs.edit()
@@ -525,7 +525,7 @@ class FloatingWidgetService : Service() {
         // 2. Target Pointer 2: Tombol Kirim (Biru)
         sendTargetView = LayoutInflater.from(this).inflate(R.layout.layout_target_pointer, null)
         val tvSendLabel = sendTargetView!!.findViewById<TextView>(R.id.tvTargetLabel)
-        tvSendLabel.text = "🎯 2. TOMBOL KIRIM (GESER SAYA)"
+        tvSendLabel.text = "🎯 2. KIRIM (GESER SAYA)"
         tvSendLabel.setBackgroundColor(Color.parseColor("#DD1E40AF"))
 
         val ringView = sendTargetView!!.findViewById<View>(R.id.viewTargetRing)
@@ -544,15 +544,15 @@ class FloatingWidgetService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = (screenWidth * (savedSendXPercent / 100f) - 24 * displayMetrics.density).toInt()
-            y = (screenHeight * (savedSendYPercent / 100f) - 48 * displayMetrics.density).toInt()
+            y = (screenHeight * (savedSendYPercent / 100f) - 24 * displayMetrics.density).toInt()
         }
 
-        setupDraggablePointer(sendTargetView!!, sendParams, displayMetrics) { newXPercent, newYPercent ->
+        setupDraggablePointer(sendTargetView!!, sendParams, displayMetrics, tvSendLabel, "KIRIM") { newXPercent, newYPercent ->
             etSendX.setText(newXPercent.toString())
             etSendY.setText(newYPercent.toString())
             prefs.edit()
@@ -570,6 +570,8 @@ class FloatingWidgetService : Service() {
         targetView: View,
         targetParams: WindowManager.LayoutParams,
         metrics: DisplayMetrics,
+        labelView: TextView,
+        tag: String,
         onCoordUpdated: (Int, Int) -> Unit
     ) {
         targetView.setOnTouchListener(object : View.OnTouchListener {
@@ -588,19 +590,23 @@ class FloatingWidgetService : Service() {
                         return true
                     }
                     MotionEvent.ACTION_MOVE -> {
+                        // Pergerakan bebas tanpa batas ke seluruh sudut layar
                         targetParams.x = (initialX + (event.rawX - initialTouchX)).toInt()
                         targetParams.y = (initialY + (event.rawY - initialTouchY)).toInt()
                         try {
                             windowManager.updateViewLayout(targetView, targetParams)
                         } catch (_: Exception) {}
 
-                        // Hitung titik pusat target ring dalam persen layar
-                        val centerX = targetParams.x + targetView.width / 2
-                        val centerY = targetParams.y + targetView.height - (24 * metrics.density).toInt()
+                        // Hitung titik pusat presisi (center bullseye):
+                        // Lingkaran berukuran 48dp x 48dp, titik pusat tepat di tengah +24dp
+                        val halfSize = (24 * metrics.density).toInt()
+                        val bullseyeX = targetParams.x + halfSize
+                        val bullseyeY = targetParams.y + halfSize
 
-                        val xPercent = ((centerX.toFloat() / metrics.widthPixels.toFloat()) * 100).toInt().coerceIn(1, 99)
-                        val yPercent = ((centerY.toFloat() / metrics.heightPixels.toFloat()) * 100).toInt().coerceIn(1, 99)
+                        val xPercent = ((bullseyeX.toFloat() / metrics.widthPixels.toFloat()) * 100).toInt().coerceIn(0, 100)
+                        val yPercent = ((bullseyeY.toFloat() / metrics.heightPixels.toFloat()) * 100).toInt().coerceIn(0, 100)
 
+                        labelView.text = "$tag: X:$xPercent% Y:$yPercent%"
                         onCoordUpdated(xPercent, yPercent)
                         return true
                     }

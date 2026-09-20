@@ -255,22 +255,14 @@ class TikTokAccessibilityService : AccessibilityService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
 
-            // Posisi A: Tombol kirim di samping kanan kolom chat
-            if (inputRect != null && inputRect.width() > 0) {
-                val rightOfChatX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
-                val chatY = inputRect.centerY().toFloat()
-                simulateTap(rightOfChatX, chatY)
-            } else {
-                val rightOfChatX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
-                val chatY = metrics.heightPixels * coordSendYPercent.coerceIn(0.5f, 0.98f)
-                simulateTap(rightOfChatX, chatY)
-            }
+            // Posisi A: Tombol kirim persis di titik yang ditentukan pengguna
+            val sendTapX = metrics.widthPixels * (coordSendXPercent / 100f)
+            val sendTapY = metrics.heightPixels * (coordSendYPercent / 100f)
+            simulateTap(sendTapX, sendTapY)
 
-            // Posisi B: Tombol Enter / Centang di pojok kanan paling bawah keyboard
+            // Posisi B: Sekaligus jalankan IME enter
             handler.postDelayed({
-                val keyboardEnterX = metrics.widthPixels * coordSendXPercent.coerceIn(0.5f, 0.98f)
-                val keyboardEnterY = metrics.heightPixels * coordSendYPercent.coerceIn(0.5f, 0.98f)
-                simulateTap(keyboardEnterX, keyboardEnterY)
+                simulateTap(sendTapX, sendTapY)
             }, 180)
 
             notifySuccess()
@@ -278,83 +270,46 @@ class TikTokAccessibilityService : AccessibilityService() {
     }
 
     private fun clickCommentTrigger(root: AccessibilityNodeInfo): Boolean {
-        val metrics = resources.displayMetrics
-        val screenHeight = metrics.heightPixels
-        val screenWidth = metrics.widthPixels
+        // PERINTAH USER: Ketuk tepat di koordinat yang sudah digeser dan ditentukan oleh pengguna!
+        tapUserCommentTarget()
+        return true
+    }
 
-        // 1. Prioritaskan teks pemicu KHUSUS chat Live TikTok
-        val liveTriggers = listOf(
-            "Tambahkan komentar...", "Tambahkan komentar",
-            "Say something...", "Say something",
-            "Katakan sesuatu...", "Katakan sesuatu",
-            "Send a comment...", "Send a comment",
-            "Chat...", "Chat", "Obrolan...", "Obrolan"
-        )
-
-        for (triggerText in liveTriggers) {
-            val nodes = root.findAccessibilityNodeInfosByText(triggerText)
-            for (node in nodes) {
-                val pkg = node.packageName?.toString() ?: ""
-                if (pkg.contains("autochat")) continue
-
-                val rect = Rect()
-                node.getBoundsInScreen(rect)
-                // Pastikan posisi node memang berada di BAGIAN BAWAH LAYAR (Live chat bar)
-                // dan BUKAN di panel kanan (ikon komentar video biasa)
-                if (rect.centerY() > screenHeight * 0.70f && rect.left < screenWidth * 0.75f) {
-                    if (performSafeClick(node)) return true
-                }
-            }
+    private fun tapUserCommentTarget() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val metrics = resources.displayMetrics
+            // Ketuk persis 100% di titik pusat target merah yang ditentukan oleh pengguna
+            val tapX = metrics.widthPixels * (coordInputXPercent / 100f)
+            val tapY = metrics.heightPixels * (coordInputYPercent / 100f)
+            simulateTap(tapX, tapY)
         }
-
-        val allNodes = getAllNodes(root)
-        // 2. Scan berdasarkan View ID atau deskripsi yang KHUSUS LIVE CHAT dan terletak di bawah layar
-        for (node in allNodes) {
-            val pkg = node.packageName?.toString() ?: ""
-            if (pkg.contains("autochat")) continue
-
-            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            val idName = node.viewIdResourceName?.lowercase() ?: ""
-            val nodeText = node.text?.toString()?.lowercase() ?: ""
-
-            // HARAMKAN klik tombol komentar video biasa:
-            val rect = Rect()
-            node.getBoundsInScreen(rect)
-
-            // Pastikan posisi berada di area bawah kiri/tengah (X < 75% layar dan Y > 75% layar)
-            val isBottomBarArea = (rect.centerY() > screenHeight * 0.75f) && (rect.centerX() < screenWidth * 0.75f)
-
-            if (isBottomBarArea) {
-                if (idName.contains("live") || idName.contains("bottom") ||
-                    idName.contains("input") || idName.contains("comment_et") ||
-                    desc.contains("say something") || desc.contains("katakan sesuatu") ||
-                    nodeText.contains("say something") || nodeText.contains("katakan sesuatu") ||
-                    desc.contains("obrolan") || desc.contains("tambahkan komentar") ||
-                    nodeText.contains("tambahkan komentar")) {
-                    if (performSafeClick(node)) return true
-                }
-            }
-        }
-
-        // 3. Fallback: jika belum ketemu lewat node, lakukan tap langsung di koordinat bar chat Live (kiri bawah)
-        return false
     }
 
     private fun fallbackTapBottomInput(text: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val metrics = resources.displayMetrics
-            // Gunakan koordinat yang dapat disetel pengguna secara manual
-            val tapX = metrics.widthPixels * coordInputXPercent.coerceIn(0.05f, 0.95f)
-            val tapY = metrics.heightPixels * coordInputYPercent.coerceIn(0.05f, 0.99f)
-            simulateTap(tapX, tapY)
+            tapUserCommentTarget()
 
             handler.postDelayed({
                 val updatedRoot = rootInActiveWindow ?: return@postDelayed
                 val inputs = findTikTokInputs(updatedRoot)
                 if (inputs.isNotEmpty()) {
                     typeAndSend(inputs.last(), text)
+                } else {
+                    // Jika elemen accessibility tidak muncul, paste clipboard langsung lalu ketuk tombol kirim
+                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                    if (clipboard != null) {
+                        val clip = ClipData.newPlainText("AutoChat", text)
+                        clipboard.setPrimaryClip(clip)
+                    }
+                    val metrics = resources.displayMetrics
+                    val sendTapX = metrics.widthPixels * (coordSendXPercent / 100f)
+                    val sendTapY = metrics.heightPixels * (coordSendYPercent / 100f)
+                    handler.postDelayed({
+                        simulateTap(sendTapX, sendTapY)
+                        notifySuccess()
+                    }, 400)
                 }
-            }, 600)
+            }, 550)
         }
     }
 

@@ -1,31 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:layout_height="wrap_content">
 
-    <!-- Label Target Pointer -->
-    <TextView
-        android:id="@+id/tvTargetLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#DD090A0F"
-        android:textColor="#FFFFFF"
-        android:textSize="9.5sp"
-        android:textStyle="bold"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
-        android:text="📍 1. KOLOM CHAT"
-        android:layout_marginBottom="2dp" />
-
-    <!-- Lingkaran Target Pembidik Transparan dengan Crosshair -->
+    <!-- Area Target Pembidik Transparan 48dp x 48dp -->
     <FrameLayout
         android:id="@+id/flTargetCircle"
         android:layout_width="48dp"
-        android:layout_height="48dp">
+        android:layout_height="48dp"
+        android:layout_gravity="center">
 
         <!-- Outer Ring -->
         <View
@@ -37,7 +20,7 @@
         <!-- Garis Silang Horizontal -->
         <View
             android:id="@+id/viewCrossH"
-            android:layout_width="24dp"
+            android:layout_width="28dp"
             android:layout_height="2dp"
             android:layout_gravity="center"
             android:background="#FE2C55" />
@@ -46,11 +29,11 @@
         <View
             android:id="@+id/viewCrossV"
             android:layout_width="2dp"
-            android:layout_height="24dp"
+            android:layout_height="28dp"
             android:layout_gravity="center"
             android:background="#FE2C55" />
 
-        <!-- Titik Pusat Presisi (Bullseye) -->
+        <!-- Titik Pusat Presisi 8dp (Bullseye persis di tengah) -->
         <View
             android:id="@+id/viewTargetCenter"
             android:layout_width="8dp"
@@ -59,4 +42,21 @@
             android:background="@drawable/bg_target_center" />
     </FrameLayout>
 
-</LinearLayout>
+    <!-- Badge Info Posisi Melayang di atas lingkaran -->
+    <TextView
+        android:id="@+id/tvTargetLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:background="#DD090A0F"
+        android:textColor="#FFFFFF"
+        android:textSize="9.5sp"
+        android:textStyle="bold"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:text="📍 1. CHAT"
+        android:translationY="-20dp" />
+
+</FrameLayout>
