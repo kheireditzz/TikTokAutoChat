@@ -11,17 +11,40 @@ android {
         applicationId = "com.autochat.floating"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0.0"
+        setProperty("archivesBaseName", "TikTokAutoChat-v2.0.0")
+    }
+
+    signingConfigs {
+        create("release") {
+            val ksFile = file("../release.keystore")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "autochatrelease"
+                keyAlias = "autochat"
+                keyPassword = "autochatrelease"
+            }
+        }
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val ksFile = file("../release.keystore")
+            if (ksFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
+        }
+        getByName("debug") {
+            applicationIdSuffix = ""
+            versionNameSuffix = ""
         }
     }
     compileOptions {
