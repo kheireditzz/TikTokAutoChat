@@ -88,7 +88,7 @@ class TikTokAccessibilityService : AccessibilityService() {
             return
         }
 
-        // 2. Jika kolom komentar TikTok belum terbuka, buka dengan klik bar komentar TikTok
+        // 2. Jika kolom chat TikTok Live belum terbuka, buka dengan klik bar komentar TikTok Live
         val clicked = clickCommentTrigger(rootNode)
         if (clicked) {
             handler.postDelayed({
@@ -99,7 +99,7 @@ class TikTokAccessibilityService : AccessibilityService() {
                 } else {
                     fallbackTapBottomInput(textToType)
                 }
-            }, 550)
+            }, 350)
         } else {
             fallbackTapBottomInput(textToType)
         }
@@ -131,18 +131,28 @@ class TikTokAccessibilityService : AccessibilityService() {
             putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
         }
         val textSet = inputNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
-
         if (!textSet) {
             inputNode.performAction(AccessibilityNodeInfo.ACTION_PASTE)
         }
 
+        // Ambil posisi persis kolom input di layar
+        val inputRect = Rect()
+        inputNode.getBoundsInScreen(inputRect)
+
+        // Coba kirim via IME Action (Enter / Send pada software keyboard)
+        inputNode.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            inputNode.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.id)
+        }
+
         handler.postDelayed({
             val root = rootInActiveWindow ?: return@postDelayed
-            sendComment(root)
-        }, 350)
+            sendComment(root, inputRect)
+        }, 300)
     }
 
-    private fun sendComment(root: AccessibilityNodeInfo) {
+    private fun sendComment(root: AccessibilityNodeInfo, inputRect: Rect? = null) {
+        // 1. Cek tombol send berdasarkan resource ID TikTok
         val knownSendIds = listOf(
             "com.zhiliaoapp.musically:id/btn_send",
             "com.zhiliaoapp.musically:id/send_btn",
@@ -150,9 +160,11 @@ class TikTokAccessibilityService : AccessibilityService() {
             "com.zhiliaoapp.musically:id/live_send_btn",
             "com.zhiliaoapp.musically:id/live_btn_send",
             "com.zhiliaoapp.musically:id/live_comment_send",
+            "com.zhiliaoapp.musically:id/send_icon",
             "com.zhiliaoapp.musically.go:id/send",
             "com.ss.android.ugc.trill:id/btn_send",
-            "com.ss.android.ugc.trill:id/live_send_btn"
+            "com.ss.android.ugc.trill:id/live_send_btn",
+            "com.ss.android.ugc.trill:id/live_btn_send"
         )
         for (id in knownSendIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
@@ -161,6 +173,26 @@ class TikTokAccessibilityService : AccessibilityService() {
             }
         }
 
+        // 2. Cek tombol atau icon yang sejajar / di sebelah kanan kolom chat (inputRect)
+        if (inputRect != null && inputRect.width() > 0) {
+            val allNodes = getAllNodes(root)
+            for (node in allNodes) {
+                val pkg = node.packageName?.toString() ?: ""
+                if (pkg.contains("autochat")) continue
+
+                val rect = Rect()
+                node.getBoundsInScreen(rect)
+                // Jika node berada di sebelah kanan input box dan memiliki ketinggian vertikal sejajar
+                if (rect.left >= inputRect.right - 20 &&
+                    rect.centerY() >= inputRect.top - 50 &&
+                    rect.centerY() <= inputRect.bottom + 50 &&
+                    rect.width() > 0 && rect.height() > 0) {
+                    if (performSafeClick(node)) return
+                }
+            }
+        }
+
+        // 3. Scan node berdasarkan deskripsi teks pengiriman
         val allNodes = getAllNodes(root)
         for (node in allNodes) {
             val pkg = node.packageName?.toString() ?: ""
@@ -177,12 +209,27 @@ class TikTokAccessibilityService : AccessibilityService() {
             }
         }
 
-        // Fallback Gesture Tap: Area tombol kirim di atas keyboard (kanan bawah)
+        // 4. Fallback Tap Layar:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val metrics = resources.displayMetrics
-            val x = metrics.widthPixels * 0.92f
-            val y = metrics.heightPixels * 0.58f
-            simulateTap(x, y)
+
+            // Posisi A: Tombol kirim di samping kanan kolom chat
+            if (inputRect != null && inputRect.width() > 0) {
+                val rightOfChatX = metrics.widthPixels * 0.93f
+                val chatY = inputRect.centerY().toFloat()
+                simulateTap(rightOfChatX, chatY)
+            } else {
+                val rightOfChatX = metrics.widthPixels * 0.93f
+                val chatY = metrics.heightPixels * 0.58f
+                simulateTap(rightOfChatX, chatY)
+            }
+
+            // Posisi B: Tombol Enter / Centang di pojok kanan paling bawah keyboard
+            handler.postDelayed({
+                val keyboardEnterX = metrics.widthPixels * 0.90f
+                val keyboardEnterY = metrics.heightPixels * 0.94f
+                simulateTap(keyboardEnterX, keyboardEnterY)
+            }, 180)
         }
     }
 
