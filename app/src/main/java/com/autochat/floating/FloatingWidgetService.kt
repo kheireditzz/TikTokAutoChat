@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
@@ -69,7 +70,7 @@ class FloatingWidgetService : Service() {
 
             val notification: Notification = Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle("TikTok AutoChat Aktif")
-                .setContentText("Widget melayang siap mengontrol obrolan.")
+                .setContentText("Widget melayang siap digunakan.")
                 .setSmallIcon(android.R.drawable.ic_menu_send)
                 .build()
 
@@ -112,7 +113,6 @@ class FloatingWidgetService : Service() {
         cb2.setOnCheckedChangeListener { _, _ -> updateCountText() }
         cb3.setOnCheckedChangeListener { _, _ -> updateCountText() }
 
-        // Fitur Minimize & Maximize (Perkecil & Perbesar)
         fun setMinimizeState(minimized: Boolean) {
             isMinimized = minimized
             if (minimized) {
@@ -130,7 +130,6 @@ class FloatingWidgetService : Service() {
             setMinimizeState(true)
         }
 
-        // Klik bubble kecil untuk memperbesar kembali (Maximize)
         layoutBubble.setOnClickListener {
             setMinimizeState(false)
         }
@@ -168,7 +167,6 @@ class FloatingWidgetService : Service() {
                         if (isClick && v == layoutBubble) {
                             v?.performClick()
                         } else {
-                            // Tempelkan otomatis ke tepi samping layar (Kiri / Kanan)
                             snapToNearestEdge()
                         }
                         return true
@@ -181,7 +179,7 @@ class FloatingWidgetService : Service() {
         header.setOnTouchListener(dragTouchListener)
         layoutBubble.setOnTouchListener(dragTouchListener)
 
-        // Izinkan EditText menerima input keyboard saat disentuh
+        // Buka keyboard saat edit text diklik
         val textTouchListener = View.OnTouchListener { _, _ ->
             params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
             windowManager.updateViewLayout(floatingView, params)
@@ -193,13 +191,23 @@ class FloatingWidgetService : Service() {
         etDelay.setOnTouchListener(textTouchListener)
 
         btnClose.setOnClickListener {
-            val intent = Intent(TikTokAccessibilityService.ACTION_STOP_AUTOTYPE)
-            sendBroadcast(intent)
+            TikTokAccessibilityService.instance?.stopAutoChat()
             stopSelf()
         }
 
         btnToggle.setOnClickListener {
             if (!isRunning) {
+                // Verifikasi apakah Layanan Aksesibilitas aktif
+                val service = TikTokAccessibilityService.instance
+                if (service == null) {
+                    Toast.makeText(this, "Layanan Aksesibilitas belum AKTIF!\nBuka pengaturan dan aktifkan AutoChat.", Toast.LENGTH_LONG).show()
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    startActivity(intent)
+                    return@setOnClickListener
+                }
+
                 val activeList = arrayListOf<String>()
                 if (cb1.isChecked && et1.text.isNotBlank()) activeList.add(et1.text.toString().trim())
                 if (cb2.isChecked && et2.text.isNotBlank()) activeList.add(et2.text.toString().trim())
@@ -210,18 +218,14 @@ class FloatingWidgetService : Service() {
                     return@setOnClickListener
                 }
 
-                val delay = etDelay.text.toString().toIntOrNull() ?: 4
+                val delay = etDelay.text.toString().toLongOrNull() ?: 4L
 
                 // Lepas fokus keyboard agar TikTok tidak terhalangi
                 params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 windowManager.updateViewLayout(floatingView, params)
 
-                // Kirim perintah mulai ke Aksesibilitas
-                val intent = Intent(TikTokAccessibilityService.ACTION_START_AUTOTYPE).apply {
-                    putStringArrayListExtra(TikTokAccessibilityService.EXTRA_MESSAGES_LIST, activeList)
-                    putExtra(TikTokAccessibilityService.EXTRA_DELAY_SEC, delay)
-                }
-                sendBroadcast(intent)
+                // Panggil langsung instance service
+                service.startAutoChat(activeList, delay)
 
                 isRunning = true
                 btnToggle.text = "STOP"
@@ -231,9 +235,9 @@ class FloatingWidgetService : Service() {
                 tvStatusText.text = "Mengetik tiap ${delay}s"
                 tvStatusText.setTextColor(Color.parseColor("#00E676"))
                 tvBubbleLabel.text = "RUNNING"
+                Toast.makeText(this, "Auto Chat Mulai Berjalan!", Toast.LENGTH_SHORT).show()
             } else {
-                val intent = Intent(TikTokAccessibilityService.ACTION_STOP_AUTOTYPE)
-                sendBroadcast(intent)
+                TikTokAccessibilityService.instance?.stopAutoChat()
 
                 isRunning = false
                 btnToggle.text = "MULAI"
@@ -243,6 +247,7 @@ class FloatingWidgetService : Service() {
                 tvStatusText.text = "Berhenti"
                 tvStatusText.setTextColor(Color.parseColor("#8B949E"))
                 tvBubbleLabel.text = "AutoChat"
+                Toast.makeText(this, "Auto Chat Dihentikan.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -256,9 +261,9 @@ class FloatingWidgetService : Service() {
         val middleX = screenWidth / 2
 
         params.x = if (params.x + viewWidth / 2 < middleX) {
-            20 // Lekat ke tepi kiri
+            20
         } else {
-            screenWidth - viewWidth - 20 // Lekat ke tepi kanan
+            screenWidth - viewWidth - 20
         }
         try {
             windowManager.updateViewLayout(floatingView, params)
@@ -267,6 +272,7 @@ class FloatingWidgetService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        TikTokAccessibilityService.instance?.stopAutoChat()
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)
         }
