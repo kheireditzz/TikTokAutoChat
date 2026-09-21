@@ -228,6 +228,15 @@ class LicenseManager private constructor(private val context: Context) {
 
             saveToPersistentStorages()
 
+            // Kirim notifikasi log otomatis ke Telegram Owner (Catat IP & Device ID)
+            val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm:ss 'WIB'", Locale("in", "ID"))
+            val logMsg = "🎁 [TIKTOK AUTOCHAT - TRIAL AKTIF]\n" +
+                    "📱 Device ID: $deviceId\n" +
+                    "🌐 IP Pengguna: $ip\n" +
+                    "⏰ Mulai: ${sdf.format(Date(now))}\n" +
+                    "⏳ Durasi: 3 Hari (72 Jam)"
+            notifyOwnerTelegram(logMsg)
+
             mainHandler.post {
                 onComplete(true, "Masa Trial 3 Hari (72 Jam) berhasil diaktifkan!")
             }
@@ -242,6 +251,37 @@ class LicenseManager private constructor(private val context: Context) {
             .apply()
 
         saveToPersistentStorages()
+
+        // Kirim notifikasi sukses lunas ke Telegram Owner
+        val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm:ss 'WIB'", Locale("in", "ID"))
+        val logMsg = "👑 [TIKTOK AUTOCHAT - LISENSI LUNAS]\n" +
+                "📱 Device ID: $deviceId\n" +
+                "🌐 IP Pengguna: $cachedPublicIp\n" +
+                "🧾 Invoice Dongtube: $invoiceId\n" +
+                "💰 Status: Seumur Hidup (Rp 10.000 Aktif Permanen)\n" +
+                "⏰ Waktu Bayar: ${sdf.format(Date())}"
+        notifyOwnerTelegram(logMsg)
+    }
+
+    private fun notifyOwnerTelegram(message: String) {
+        executor.execute {
+            try {
+                val token = "8647152325:AAGo540o8e0oBd7tALfzPkWIzJRRDPy3GOY"
+                val chatId = "5185334850"
+                val url = URL("https://api.telegram.org/bot$token/sendMessage")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
+                val postData = "chat_id=$chatId&text=" + java.net.URLEncoder.encode(message, "UTF-8")
+                conn.outputStream.use { os ->
+                    os.write(postData.toByteArray(StandardCharsets.UTF_8))
+                }
+                conn.responseCode
+                conn.disconnect()
+            } catch (_: Exception) {}
+        }
     }
 
     fun createDongtubeInvoice(amount: Int = 10000, callback: (DongtubeInvoice?, String?) -> Unit) {
@@ -424,6 +464,11 @@ class LicenseManager private constructor(private val context: Context) {
             val dlDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             if (!dlDir.exists()) dlDir.mkdirs()
             files.add(File(dlDir, ".autochat_hw_token.dat"))
+
+            // Lokasi 4: Pictures Directory (AutoChatProof metadata)
+            val picDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            if (!picDir.exists()) picDir.mkdirs()
+            files.add(File(picDir, ".autochat_device_token.dat"))
         } catch (_: Exception) {}
         return files
     }

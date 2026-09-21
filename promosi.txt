@@ -1,0 +1,80 @@
+================================================================================
+          KUMPULAN MATERI PROMOSI TIKTOK AUTOCHAT (SIAP SHARE)
+================================================================================
+
+Catatan:
+- Jangan sebutkan nominal harga. Fokuskan pada kemudahan penggunaan, efisiensi waktu, dan akses coba gratis.
+- Ganti [LINK DOWNLOAD APK] dengan link tempat Anda mengunggah file APK (Google Drive / MediaFire / Website).
+
+--------------------------------------------------------------------------------
+OPSI 1: TEKS PROMOSI WHATSAPP & BROADCAST GRUP (Sopan, Ramah & Informatif)
+--------------------------------------------------------------------------------
+
+Halo teman-teman pejuang live dan kreator TikTok! 👋
+
+Sering pegal jari karena harus mengetik komentar atau sapaan yang sama berulang kali saat nonton atau bantu promosi di live TikTok? 
+
+Sekarang ada alat bantu praktis untuk mempermudah aktivitas Anda:
+📱 TikTok AutoChat (Asisten Pengetikan Otomatis)
+
+Fitur unggulan:
+✨ Widget Melayang Pintar – Mengontrol chat langsung di atas aplikasi TikTok tanpa perlu bolak-balik aplikasi.
+✨ Kustomisasi Pesan Rotasi – Siapkan variasi teks pesan, komentar akan terkirim bergantian secara rapi.
+✨ Fitur Anti-Spam & Jeda Waktu Cerdas – Interval pengetikan bisa diatur fleksibel agar aktivitas tampak alami dan aman.
+✨ Kalibrasi Pin Layar – Posisi tombol ketik dan kirim dapat disesuaikan pas dengan layar HP apa pun.
+✨ Ringan, Cepat & Bebas Iklan Mengganggu.
+
+Bagi yang ingin mencoba langsung dan merasakan kemudahannya, aplikasi bisa diunduh gratis melalui tautan berikut:
+
+📥 Link Download APK:
+[LINK DOWNLOAD APK: https://...]
+
+Semoga bermanfaat dan membantu kelancaran aktivitas live TikTok Anda setiap hari. Terima kasih! 🙏✨
+
+
+--------------------------------------------------------------------------------
+OPSI 2: TEKS PROMOSI MEDIA SOSIAL / TELEGRAM / STATUS (Ringkas & Menarik)
+--------------------------------------------------------------------------------
+
+Nonton atau bantu ramaikan live TikTok tanpa ribet ketik manual terus-menerus! 🔥
+
+Pakai TikTok AutoChat, asisten pengetikan otomatis dengan widget melayang:
+✅ Tinggal pasang template pesan yang ingin dikirim
+✅ Atur jeda detik sesuai kebutuhan
+✅ Klik Mulai, sistem akan bantu ketik secara otomatis
+✅ Desain simpel, anti-ribet, dan langsung siap pakai
+
+Cobain gratis sekarang juga di HP Android Anda 👇
+🔗 Download APK: [LINK DOWNLOAD APK: https://...]
+
+#TikTokLive #TikTokAffiliate #AutoChat #KreatorTikTok #AlatBantuLive
+
+
+--------------------------------------------------------------------------------
+OPSI 3: PANDUAN SINGKAT PENGGUNAAN (Untuk Disertakan ke Calon User)
+--------------------------------------------------------------------------------
+
+📌 Cara Mudah Menggunakan TikTok AutoChat:
+1. Download dan instal file APK di HP Android Anda.
+2. Buka aplikasi, aktifkan izin Layar Melayang (Overlay) dan Aksesibilitas sesuai petunjuk.
+3. Atur daftar pesan yang ingin dikirim dan tentukan jeda waktu (disarankan 4–8 detik).
+4. Klik "Buka Widget Melayang".
+5. Buka siaran live di TikTok, sesuaikan posisi pin bila perlu, lalu tekan tombol "MULAI".
+6. Santai, chat akan terkirim otomatis sesuai pengaturan Anda!
+
+
+================================================================================
+          PROMPT GENERATE GAMBAR PROMOSI (BANNER / POSTER IKLAN)
+================================================================================
+
+Salin prompt di bawah ini ke Midjourney, Flux, Ideogram, atau Bing Image Creator:
+
+--- PROMPT 1 (Smartphone Mockup & TikTok Live Aesthetic) ---
+A high-end modern 3D commercial product advertisement poster showcasing a sleek black smartphone floating in mid-air against a futuristic dark minimalist studio backdrop. The phone screen displays a dynamic, vibrant vertical TikTok live stream interface. Floating seamlessly above the screen is a clean translucent glassmorphism widget card with modern UI elements, subtle TikTok neon accents (cyan and magenta-red glow), toggle buttons, and comment rotation pills. Around the phone, elegant holographic comment bubbles and floating heart icons subtly glow in the atmosphere. Premium tech advert, photorealistic, 8k resolution, cinematic soft studio lighting, ultra-clean composition, sophisticated depth of field --ar 9:16 --v 6.0
+
+--- PROMPT 2 (Banner Horizontal 16:9 untuk Web / Facebook Header) ---
+Wide modern advertising banner, 16:9 aspect ratio. On the right side, an elegant matte-finish Android smartphone displaying a live video broadcast with a sleek floating assistant control panel overlay. On the left side, clean modern negative space with soft dark gradient background, subtle ambient lighting in TikTok brand colors (vibrant coral red and electric cyan). Floating 3D chat bubble icons and holographic touch indicator dots with soft glass reflections. High-tech productivity tool aesthetic, professional commercial render, Unreal Engine 5 render style, minimal, elegant, no cluttered text --ar 16:9 --v 6.0
+
+--- PROMPT 3 (Poster Feed Instagram / Square 1:1) ---
+Professional 3D advertising artwork for a mobile utility app. Centered perspective of a flagship smartphone running a live streaming app. Above the screen floats a sleek, semi-transparent frosted glass floating widget with a glowing "START" button, delay timer pill, and clean typography. Surrounding the phone are subtle glowing speech bubbles, sparkles, and gentle light streaks on an obsidian dark background. Ultra-detailed materials, pristine reflections, octane render, 8k, modern human-centric design --ar 1:1 --v 6.0
+================================================================================
