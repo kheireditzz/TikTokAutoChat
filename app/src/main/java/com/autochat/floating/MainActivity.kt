@@ -473,82 +473,99 @@ class MainActivity : Activity() {
             Toast.makeText(this, "Nominal Rp $exactTotalAmount disalin", Toast.LENGTH_SHORT).show()
         }
 
-        // Panggil Dongtube Payment API untuk buat invoice
-        tvLoadingStatus.text = "Menghubungkan ke Dongtube Payment..."
-        layoutLoading.visibility = View.VISIBLE
-        layoutContent.visibility = View.GONE
-        layoutSuccess.visibility = View.GONE
+        val pbLoading = dialog.findViewById<ProgressBar>(R.id.pbQrisLoading)
+        val btnRetryInvoice = dialog.findViewById<Button>(R.id.btnRetryInvoice)
 
-        licenseMgr.createDongtubeInvoice(10000) { invoice, preloadedBitmap, errorMsg ->
-            if (!isDialogActive) return@createDongtubeInvoice
+        fun loadInvoice() {
+            if (!isDialogActive) return
+            pbLoading.visibility = View.VISIBLE
+            btnRetryInvoice.visibility = View.GONE
+            tvLoadingStatus.text = "Menghubungkan ke Dongtube Payment..."
+            layoutLoading.visibility = View.VISIBLE
+            layoutContent.visibility = View.GONE
+            layoutSuccess.visibility = View.GONE
 
-            if (invoice != null) {
-                currentInvoiceId = invoice.invoiceId
-                exactTotalAmount = invoice.total
+            licenseMgr.createDongtubeInvoice(10000) { invoice, preloadedBitmap, errorMsg ->
+                if (!isDialogActive) return@createDongtubeInvoice
 
-                val formatRupiah = NumberFormat.getNumberInstance(Locale("in", "ID"))
-                tvTotalAmount.text = "Rp ${formatRupiah.format(invoice.total)}"
-                tvInvoiceNote.text = "*Transfer SESUAI nominal Rp ${formatRupiah.format(invoice.total)} termasuk kode unik/fee"
+                if (invoice != null) {
+                    currentInvoiceId = invoice.invoiceId
+                    exactTotalAmount = invoice.total
 
-                if (preloadedBitmap != null) {
-                    // Instan tanpa delay!
-                    ivQris.setImageBitmap(preloadedBitmap)
-                    layoutLoading.visibility = View.GONE
-                    layoutContent.visibility = View.VISIBLE
+                    val formatRupiah = NumberFormat.getNumberInstance(Locale("in", "ID"))
+                    tvTotalAmount.text = "Rp ${formatRupiah.format(invoice.total)}"
+                    tvInvoiceNote.text = "*Transfer SESUAI nominal Rp ${formatRupiah.format(invoice.total)} termasuk kode unik/fee"
+
+                    if (preloadedBitmap != null) {
+                        // Instan tanpa delay!
+                        ivQris.setImageBitmap(preloadedBitmap)
+                        layoutLoading.visibility = View.GONE
+                        layoutContent.visibility = View.VISIBLE
+                    } else {
+                        // Fallback jika belum selesai di-decode
+                        bgExecutor.execute {
+                            try {
+                                val imgUrl = URL(invoice.qrisImageUrl)
+                                val conn = imgUrl.openConnection()
+                                conn.connectTimeout = 6000
+                                conn.readTimeout = 6000
+                                val bitmap = BitmapFactory.decodeStream(conn.getInputStream())
+                                mainHandler.post {
+                                    if (isDialogActive && bitmap != null) {
+                                        ivQris.setImageBitmap(bitmap)
+                                        layoutLoading.visibility = View.GONE
+                                        layoutContent.visibility = View.VISIBLE
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                mainHandler.post {
+                                    if (isDialogActive) {
+                                        pbLoading.visibility = View.GONE
+                                        btnRetryInvoice.visibility = View.VISIBLE
+                                        tvLoadingStatus.text = "Gagal memuat gambar QR: ${e.localizedMessage}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Handler Polling Status Pembayaran Otomatis
+                    pollingRunnable = object : Runnable {
+                        override fun run() {
+                            if (!isDialogActive || currentInvoiceId == null) return
+
+                            licenseMgr.checkDongtubeInvoiceStatus(currentInvoiceId!!) { isPaid, status, _ ->
+                                if (!isDialogActive) return@checkDongtubeInvoiceStatus
+
+                                if (isPaid) {
+                                    stopPolling()
+                                    layoutContent.visibility = View.GONE
+                                    layoutSuccess.visibility = View.VISIBLE
+                                    updateLicenseUI()
+                                    Toast.makeText(this@MainActivity, "Pembayaran Berhasil Dikonfirmasi!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    tvStatusLive.text = "Menunggu transfer... (${status})"
+                                    mainHandler.postDelayed(this, 3500L)
+                                }
+                            }
+                        }
+                    }
+                    mainHandler.postDelayed(pollingRunnable!!, 3500L)
+
                 } else {
-                    // Fallback jika belum selesai di-decode
-                    bgExecutor.execute {
-                        try {
-                            val imgUrl = URL(invoice.qrisImageUrl)
-                            val conn = imgUrl.openConnection()
-                            conn.connectTimeout = 6000
-                            conn.readTimeout = 6000
-                            val bitmap = BitmapFactory.decodeStream(conn.getInputStream())
-                            mainHandler.post {
-                                if (isDialogActive && bitmap != null) {
-                                    ivQris.setImageBitmap(bitmap)
-                                    layoutLoading.visibility = View.GONE
-                                    layoutContent.visibility = View.VISIBLE
-                                }
-                            }
-                        } catch (e: Exception) {
-                            mainHandler.post {
-                                if (isDialogActive) {
-                                    tvLoadingStatus.text = "Gagal memuat QRIS: ${e.localizedMessage}"
-                                }
-                            }
-                        }
-                    }
+                    pbLoading.visibility = View.GONE
+                    btnRetryInvoice.visibility = View.VISIBLE
+                    tvLoadingStatus.text = errorMsg ?: "Jalur QRIS sedang padat, silakan coba lagi."
                 }
-
-                // Handler Polling Status Pembayaran Otomatis
-                pollingRunnable = object : Runnable {
-                    override fun run() {
-                        if (!isDialogActive || currentInvoiceId == null) return
-
-                        licenseMgr.checkDongtubeInvoiceStatus(currentInvoiceId!!) { isPaid, status, _ ->
-                            if (!isDialogActive) return@checkDongtubeInvoiceStatus
-
-                            if (isPaid) {
-                                stopPolling()
-                                layoutContent.visibility = View.GONE
-                                layoutSuccess.visibility = View.VISIBLE
-                                updateLicenseUI()
-                                Toast.makeText(this@MainActivity, "Pembayaran Berhasil Dikonfirmasi!", Toast.LENGTH_LONG).show()
-                            } else {
-                                tvStatusLive.text = "Menunggu transfer... (${status})"
-                                mainHandler.postDelayed(this, 3500L)
-                            }
-                        }
-                    }
-                }
-                mainHandler.postDelayed(pollingRunnable!!, 3500L)
-
-            } else {
-                tvLoadingStatus.text = errorMsg ?: "Gagal membuat tagihan QRIS"
-                Toast.makeText(this, errorMsg ?: "Gagal membuat invoice", Toast.LENGTH_LONG).show()
             }
         }
+
+        btnRetryInvoice.setOnClickListener {
+            loadInvoice()
+        }
+
+        // Panggil pertama kali
+        loadInvoice()
 
         btnCheckManual.setOnClickListener {
             val invId = currentInvoiceId

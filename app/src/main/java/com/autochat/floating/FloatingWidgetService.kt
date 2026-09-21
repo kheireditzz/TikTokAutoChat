@@ -353,7 +353,7 @@ class FloatingWidgetService : Service() {
         // Listener jika target batas pesan telah tercapai
         TikTokAccessibilityService.instance?.setOnTargetReachedListener { reachedCount ->
             isRunning = false
-            btnToggle.text = "MULAI"
+            btnToggle.text = "Mulai"
             btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
             statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
             bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
@@ -365,7 +365,7 @@ class FloatingWidgetService : Service() {
         fun stopRunningState() {
             TikTokAccessibilityService.instance?.stopAutoChat()
             isRunning = false
-            btnToggle.text = "MULAI"
+            btnToggle.text = "Mulai"
             btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
             statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
             bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
@@ -476,7 +476,7 @@ class FloatingWidgetService : Service() {
 
                 service.setOnTargetReachedListener { reachedCount ->
                     isRunning = false
-                    btnToggle.text = "MULAI"
+                    btnToggle.text = "Mulai"
                     btnToggle.setBackgroundResource(R.drawable.bg_tiktok_gradient)
                     statusIndicator.setBackgroundColor(Color.parseColor("#94A3B8"))
                     bubbleStatusDot.setBackgroundColor(Color.parseColor("#94A3B8"))
@@ -685,22 +685,22 @@ class FloatingWidgetService : Service() {
         }
 
         fun updateLiveCoordinatesDisplay() {
-            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
-            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val center1 = pin1.findViewById<View>(R.id.viewTargetCenter) ?: pin1.findViewById<View>(R.id.flTargetCircle)
+            val center2 = pin2.findViewById<View>(R.id.viewTargetCenter) ?: pin2.findViewById<View>(R.id.flTargetCircle)
             val loc1 = IntArray(2)
             val loc2 = IntArray(2)
-            circle1.getLocationOnScreen(loc1)
-            circle2.getLocationOnScreen(loc2)
-            val cX = loc1[0] + circle1.width / 2
-            val cY = loc1[1] + circle1.height / 2
-            val sX = loc2[0] + circle2.width / 2
-            val sY = loc2[1] + circle2.height / 2
+            center1.getLocationOnScreen(loc1)
+            center2.getLocationOnScreen(loc2)
+            val cX = loc1[0] + center1.width / 2
+            val cY = loc1[1] + center1.height / 2
+            val sX = loc2[0] + center2.width / 2
+            val sY = loc2[1] + center2.height / 2
             tvCoordInfo.text = "🔴 Chat: ($cX, $cY) • 🔵 Kirim: ($sX, $sY)"
         }
 
         fun makeDraggable(v: View, p: WindowManager.LayoutParams) {
             var startX = 0
-            var startY = 0
+            startY = 0
             var touchX = 0f
             var touchY = 0f
 
@@ -731,16 +731,16 @@ class FloatingWidgetService : Service() {
         makeDraggable(pin2, pin2Params)
 
         btnSave.setOnClickListener {
-            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
-            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val center1 = pin1.findViewById<View>(R.id.viewTargetCenter) ?: pin1.findViewById<View>(R.id.flTargetCircle)
+            val center2 = pin2.findViewById<View>(R.id.viewTargetCenter) ?: pin2.findViewById<View>(R.id.flTargetCircle)
             val loc1 = IntArray(2)
             val loc2 = IntArray(2)
-            circle1.getLocationOnScreen(loc1)
-            circle2.getLocationOnScreen(loc2)
-            val cX = (loc1[0] + circle1.width / 2f)
-            val cY = (loc1[1] + circle1.height / 2f)
-            val sX = (loc2[0] + circle2.width / 2f)
-            val sY = (loc2[1] + circle2.height / 2f)
+            center1.getLocationOnScreen(loc1)
+            center2.getLocationOnScreen(loc2)
+            val cX = (loc1[0] + center1.width / 2f)
+            val cY = (loc1[1] + center1.height / 2f)
+            val sX = (loc2[0] + center2.width / 2f)
+            val sY = (loc2[1] + center2.height / 2f)
 
             prefs.edit()
                 .putFloat("calibrated_chat_x", cX)
@@ -755,16 +755,16 @@ class FloatingWidgetService : Service() {
         }
 
         btnTest.setOnClickListener {
-            val circle1 = pin1.findViewById<View>(R.id.flTargetCircle)
-            val circle2 = pin2.findViewById<View>(R.id.flTargetCircle)
+            val center1 = pin1.findViewById<View>(R.id.viewTargetCenter) ?: pin1.findViewById<View>(R.id.flTargetCircle)
+            val center2 = pin2.findViewById<View>(R.id.viewTargetCenter) ?: pin2.findViewById<View>(R.id.flTargetCircle)
             val loc1 = IntArray(2)
             val loc2 = IntArray(2)
-            circle1.getLocationOnScreen(loc1)
-            circle2.getLocationOnScreen(loc2)
-            val cX = loc1[0] + circle1.width / 2f
-            val cY = loc1[1] + circle1.height / 2f
-            val sX = loc2[0] + circle2.width / 2f
-            val sY = loc2[1] + circle2.height / 2f
+            center1.getLocationOnScreen(loc1)
+            center2.getLocationOnScreen(loc2)
+            val cX = loc1[0] + center1.width / 2f
+            val cY = loc1[1] + center1.height / 2f
+            val sX = loc2[0] + center2.width / 2f
+            val sY = loc2[1] + center2.height / 2f
 
             val service = TikTokAccessibilityService.instance
             if (service != null) {

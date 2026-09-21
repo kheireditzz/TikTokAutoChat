@@ -439,11 +439,11 @@
                 android:id="@+id/btnLaunchFloating"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:text="Buka Widget Melayang  →"
-                android:textSize="14sp"
+                android:text="Mulai"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:background="@drawable/bg_btn_black"
+                android:background="@drawable/bg_tiktok_gradient"
                 android:elevation="2dp"
                 android:stateListAnimator="@null" />
 

@@ -187,14 +187,21 @@ class TikTokAccessibilityService : AccessibilityService() {
 
     /**
      * WORKFLOW PENGIRIMAN CERDAS & FLEKSIBEL:
-     * 1. Cek apakah ada input chat yang sudah aktif di layar.
-     * 2. Jika belum, picu tombol chat (baik via koordinat kalibrasi atau deteksi node).
-     * 3. Tunggu keyboard / input muncul (polling ringan 300ms).
-     * 4. Isi teks ke input dan kirimkan via tombol kirim.
+     * 1. Jika koordinat sudah dikalibrasi (Chat & Kirim), jalankan alur direct tap presisi:
+     *    - Langsung tap titik Chat kalibrasi tanpa terdistraksi elemen lain
+     *    - Tunggu sebentar agar keyboard / input aktif
+     *    - Salin teks dan tempel / kirim langsung di titik Kirim kalibrasi
+     * 2. Jika belum dikalibrasi, gunakan deteksi cerdas node accessibility.
      */
     private fun executeSmartKeyboardWorkflow(textToType: String) {
         if (!isRunning) {
             isTypingWorkflowRunning = false
+            return
+        }
+
+        // PRIORITAS MUTLAK: Mode Kalibrasi Manual Presisi Tinggi
+        if (calibratedChatX > 0 && calibratedChatY > 0 && calibratedSendX > 0 && calibratedSendY > 0) {
+            executeDirectCalibratedWorkflow(textToType)
             return
         }
 
@@ -214,6 +221,64 @@ class TikTokAccessibilityService : AccessibilityService() {
 
         // Tunggu sampai input/keyboard aktif muncul
         waitForKeyboardInputAndProceed(textToType, attempt = 0, maxAttempts = 5)
+    }
+
+    /**
+     * Eksekusi alur kalibrasi murni:
+     * Tap titik Chat -> Tunggu 350ms -> Set clipboard & paste -> Tunggu 250ms -> Tap titik Kirim
+     */
+    private fun executeDirectCalibratedWorkflow(textToType: String) {
+        // Step 1: Tap titik kalibrasi CHAT
+        simulateTap(calibratedChatX, calibratedChatY)
+
+        // Step 2: Siapkan clipboard
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        if (clipboard != null) {
+            val clip = ClipData.newPlainText("AutoChat", textToType)
+            clipboard.setPrimaryClip(clip)
+        }
+
+        // Step 3: Tunggu keyboard / field responsif
+        handler.postDelayed({
+            if (!isRunning) {
+                isTypingWorkflowRunning = false
+                return@postDelayed
+            }
+
+            // Coba isi teks via active input jika terdeteksi
+            val root = rootInActiveWindow
+            val activeInput = if (root != null) findActiveTikTokInput(root) else null
+            if (activeInput != null) {
+                val args = Bundle().apply {
+                    putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, textToType)
+                }
+                val setSuccess = activeInput.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+                if (!setSuccess) {
+                    activeInput.performAction(AccessibilityNodeInfo.ACTION_PASTE)
+                }
+            } else if (root != null) {
+                // Fallback paste pada root window yang aktif
+                root.performAction(AccessibilityNodeInfo.ACTION_PASTE)
+            }
+
+            // Step 4: Beri jeda sebelum tap tombol KIRIM
+            handler.postDelayed({
+                if (!isRunning) {
+                    isTypingWorkflowRunning = false
+                    return@postDelayed
+                }
+
+                // Tap titik kalibrasi KIRIM
+                simulateTap(calibratedSendX, calibratedSendY)
+
+                if (activeInput != null) {
+                    dispatchImeSend(activeInput)
+                }
+
+                notifySuccess(textToType)
+                isTypingWorkflowRunning = false
+            }, 250)
+        }, 350)
     }
 
     private fun waitForKeyboardInputAndProceed(textToType: String, attempt: Int, maxAttempts: Int) {
@@ -511,7 +576,7 @@ class TikTokAccessibilityService : AccessibilityService() {
                 moveTo(x, y)
             }
             val gesture = GestureDescription.Builder()
-                .addStroke(GestureDescription.StrokeDescription(path, 0, 70))
+                .addStroke(GestureDescription.StrokeDescription(path, 0, 50))
                 .build()
             dispatchGesture(gesture, null, null)
         }

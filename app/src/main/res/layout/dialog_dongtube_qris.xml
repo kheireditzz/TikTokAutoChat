@@ -93,6 +93,7 @@
             android:visibility="visible">
 
             <ProgressBar
+                android:id="@+id/pbQrisLoading"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:indeterminateTint="#FE2C55" />
@@ -104,7 +105,25 @@
                 android:text="Menghubungkan ke Dongtube Payment..."
                 android:textColor="#64748B"
                 android:textSize="12sp"
+                android:gravity="center"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="12dp" />
+
+            <Button
+                android:id="@+id/btnRetryInvoice"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_btn_black"
+                android:text="🔄  Coba Lagi"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginTop="14dp"
+                android:visibility="gone"
+                android:stateListAnimator="@null" />
         </LinearLayout>
 
         <!-- Layout QRIS Content (Tampak setelah invoice didapat) -->

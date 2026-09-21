@@ -322,67 +322,110 @@ class LicenseManager private constructor(private val context: Context) {
     }
 
     private fun fetchInvoiceDirectly(amount: Int, onResult: (DongtubeInvoice?, android.graphics.Bitmap?, String?) -> Unit) {
-        try {
-            val apiKey = getApiKey()
-            val urlStr = "$BASE_URL/api/v1/invoice?apikey=$apiKey&amount=$amount"
-            val url = URL(urlStr)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+        val apiKey = getApiKey()
+        val urlStr = "$BASE_URL/api/v1/invoice?apikey=$apiKey&amount=$amount"
+        var lastError = "Gagal membuat invoice QRIS"
 
-            val responseCode = conn.responseCode
-            if (responseCode == 200) {
-                val reader = BufferedReader(InputStreamReader(conn.inputStream))
-                val sb = StringBuilder()
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
-                    sb.append(line)
-                }
-                reader.close()
+        // Auto-retry hingga 3 kali jika server gateway sedang throttled / kode 400 / timeout
+        for (attempt in 1..3) {
+            try {
+                val url = URL(urlStr)
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.connectTimeout = 7000
+                conn.readTimeout = 7000
 
-                val json = JSONObject(sb.toString())
-                if (json.optBoolean("success", false)) {
-                    val invId = json.getString("invoice_id")
-                    val invAmount = json.getInt("amount")
-                    val invFee = json.optInt("fee", 0)
-                    val invTotal = json.getInt("total")
-                    var qrisPath = json.getString("qris_image")
-                    if (!qrisPath.startsWith("http")) {
-                        qrisPath = "$BASE_URL$qrisPath"
+                val responseCode = conn.responseCode
+                if (responseCode == 200) {
+                    val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                    val sb = StringBuilder()
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        sb.append(line)
                     }
-                    val expiredAt = json.optString("expired_at", "")
+                    reader.close()
 
-                    val invoice = DongtubeInvoice(
-                        invoiceId = invId,
-                        amount = invAmount,
-                        fee = invFee,
-                        total = invTotal,
-                        qrisImageUrl = qrisPath,
-                        expiredAt = expiredAt
-                    )
+                    val json = JSONObject(sb.toString())
+                    if (json.optBoolean("success", false)) {
+                        val invId = json.getString("invoice_id")
+                        val invAmount = json.getInt("amount")
+                        val invFee = json.optInt("fee", 0)
+                        val invTotal = json.getInt("total")
+                        var qrisPath = json.getString("qris_image")
+                        if (!qrisPath.startsWith("http")) {
+                            qrisPath = "$BASE_URL$qrisPath"
+                        }
+                        val expiredAt = json.optString("expired_at", "")
 
-                    // Langsung unduh bitmap gambar QR secara paralel/sekuensial cepat
-                    var bitmap: android.graphics.Bitmap? = null
-                    try {
-                        val imgUrl = URL(qrisPath)
-                        val imgConn = imgUrl.openConnection()
-                        imgConn.connectTimeout = 6000
-                        imgConn.readTimeout = 6000
-                        bitmap = android.graphics.BitmapFactory.decodeStream(imgConn.getInputStream())
-                    } catch (_: Exception) {}
+                        val invoice = DongtubeInvoice(
+                            invoiceId = invId,
+                            amount = invAmount,
+                            fee = invFee,
+                            total = invTotal,
+                            qrisImageUrl = qrisPath,
+                            expiredAt = expiredAt
+                        )
 
-                    onResult(invoice, bitmap, null)
+                        // Langsung unduh bitmap gambar QR secara paralel/sekuensial cepat
+                        var bitmap: android.graphics.Bitmap? = null
+                        try {
+                            val imgUrl = URL(qrisPath)
+                            val imgConn = imgUrl.openConnection()
+                            imgConn.connectTimeout = 5000
+                            imgConn.readTimeout = 5000
+                            bitmap = android.graphics.BitmapFactory.decodeStream(imgConn.getInputStream())
+                        } catch (_: Exception) {}
+
+                        onResult(invoice, bitmap, null)
+                        return
+                    } else {
+                        val err = json.optString("error", "")
+                        lastError = if (err.contains("menolak", ignoreCase = true) || err.contains("4034703")) {
+                            "Jalur QRIS sedang padat, silakan coba beberapa detik lagi."
+                        } else if (err.isNotEmpty()) {
+                            err
+                        } else {
+                            "Gagal membuat invoice QRIS"
+                        }
+                    }
                 } else {
-                    val err = json.optString("error", "Gagal membuat invoice")
-                    onResult(null, null, err)
+                    val errorStream = conn.errorStream
+                    if (errorStream != null) {
+                        val reader = BufferedReader(InputStreamReader(errorStream))
+                        val sb = StringBuilder()
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            sb.append(line)
+                        }
+                        reader.close()
+                        try {
+                            val json = JSONObject(sb.toString())
+                            val err = json.optString("error", "")
+                            if (err.contains("menolak", ignoreCase = true) || err.contains("4034703")) {
+                                lastError = "Jalur QRIS sedang padat, silakan coba lagi."
+                            } else if (err.isNotEmpty()) {
+                                lastError = err
+                            }
+                        } catch (_: Exception) {
+                            lastError = "Jalur QRIS sedang padat (Kode: $responseCode). Silakan coba lagi."
+                        }
+                    } else {
+                        lastError = "Server pembayaran merespons kode: $responseCode"
+                    }
                 }
-            } else {
-                onResult(null, null, "Server Dongtube merespons kode: $responseCode")
+            } catch (e: Exception) {
+                lastError = "Koneksi terganggu: ${e.localizedMessage ?: "Periksa internet Anda"}"
             }
-        } catch (e: Exception) {
-            onResult(null, null, "Koneksi gagal: ${e.localizedMessage ?: "Periksa jaringan Anda"}")
+
+            // Tunggu 1 detik sebelum percobaan ulang jika masih ada sisa attempt
+            if (attempt < 3) {
+                try {
+                    Thread.sleep(1000)
+                } catch (_: Exception) {}
+            }
         }
+
+        onResult(null, null, lastError)
     }
 
     fun createDongtubeInvoice(amount: Int = 10000, callback: (DongtubeInvoice?, android.graphics.Bitmap?, String?) -> Unit) {
