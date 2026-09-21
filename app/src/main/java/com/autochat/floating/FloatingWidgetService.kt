@@ -700,7 +700,7 @@ class FloatingWidgetService : Service() {
 
         fun makeDraggable(v: View, p: WindowManager.LayoutParams) {
             var startX = 0
-            startY = 0
+            var startY = 0
             var touchX = 0f
             var touchY = 0f
 
