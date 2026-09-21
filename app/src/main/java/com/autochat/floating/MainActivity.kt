@@ -479,7 +479,7 @@ class MainActivity : Activity() {
         layoutContent.visibility = View.GONE
         layoutSuccess.visibility = View.GONE
 
-        licenseMgr.createDongtubeInvoice(10000) { invoice, errorMsg ->
+        licenseMgr.createDongtubeInvoice(10000) { invoice, preloadedBitmap, errorMsg ->
             if (!isDialogActive) return@createDongtubeInvoice
 
             if (invoice != null) {
@@ -490,25 +490,32 @@ class MainActivity : Activity() {
                 tvTotalAmount.text = "Rp ${formatRupiah.format(invoice.total)}"
                 tvInvoiceNote.text = "*Transfer SESUAI nominal Rp ${formatRupiah.format(invoice.total)} termasuk kode unik/fee"
 
-                // Muat QRIS Image dari server
-                bgExecutor.execute {
-                    try {
-                        val imgUrl = URL(invoice.qrisImageUrl)
-                        val conn = imgUrl.openConnection()
-                        conn.connectTimeout = 8000
-                        conn.readTimeout = 8000
-                        val bitmap = BitmapFactory.decodeStream(conn.getInputStream())
-                        mainHandler.post {
-                            if (isDialogActive && bitmap != null) {
-                                ivQris.setImageBitmap(bitmap)
-                                layoutLoading.visibility = View.GONE
-                                layoutContent.visibility = View.VISIBLE
+                if (preloadedBitmap != null) {
+                    // Instan tanpa delay!
+                    ivQris.setImageBitmap(preloadedBitmap)
+                    layoutLoading.visibility = View.GONE
+                    layoutContent.visibility = View.VISIBLE
+                } else {
+                    // Fallback jika belum selesai di-decode
+                    bgExecutor.execute {
+                        try {
+                            val imgUrl = URL(invoice.qrisImageUrl)
+                            val conn = imgUrl.openConnection()
+                            conn.connectTimeout = 6000
+                            conn.readTimeout = 6000
+                            val bitmap = BitmapFactory.decodeStream(conn.getInputStream())
+                            mainHandler.post {
+                                if (isDialogActive && bitmap != null) {
+                                    ivQris.setImageBitmap(bitmap)
+                                    layoutLoading.visibility = View.GONE
+                                    layoutContent.visibility = View.VISIBLE
+                                }
                             }
-                        }
-                    } catch (e: Exception) {
-                        mainHandler.post {
-                            if (isDialogActive) {
-                                tvLoadingStatus.text = "Gagal memuat QRIS: ${e.localizedMessage}"
+                        } catch (e: Exception) {
+                            mainHandler.post {
+                                if (isDialogActive) {
+                                    tvLoadingStatus.text = "Gagal memuat QRIS: ${e.localizedMessage}"
+                                }
                             }
                         }
                     }
@@ -723,6 +730,8 @@ class MainActivity : Activity() {
         loadSavedSettings()
         updateLicenseUI()
         startCountdownTimer()
+        // Prefetch QRIS lebih awal di background agar saat tombol Beli ditekan, gambar langsung muncul instan!
+        LicenseManager.getInstance(this).prefetchDongtubeInvoice(10000)
     }
 
     override fun onPause() {

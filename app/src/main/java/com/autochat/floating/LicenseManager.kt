@@ -71,6 +71,14 @@ class LicenseManager private constructor(private val context: Context) {
         private const val HMAC_SALT = "AutoChat_Dongtube_Secure_Salt_2026_xK9#"
     }
 
+    // In-memory Fast Prefetch Cache untuk QRIS instan
+    @Volatile
+    private var cachedPrefetchedInvoice: DongtubeInvoice? = null
+    @Volatile
+    private var cachedPrefetchedBitmap: android.graphics.Bitmap? = null
+    @Volatile
+    private var isPrefetching = false
+
     private val prefs: SharedPreferences = context.getSharedPreferences("AutoChatLicenseVault", Context.MODE_PRIVATE)
     private val executor = Executors.newCachedThreadPool()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -85,7 +93,10 @@ class LicenseManager private constructor(private val context: Context) {
     init {
         // Pulihkan dari media storage jika app baru diinstall ulang
         restoreFromPersistentStorages()
-        syncNetworkTimeAndIp(null)
+        syncNetworkTimeAndIp {
+            // Prefetch invoice & QRIS di background sejak awal buka aplikasi
+            prefetchDongtubeInvoice(10000)
+        }
     }
 
     private fun generateStableDeviceId(): String {
@@ -284,63 +295,116 @@ class LicenseManager private constructor(private val context: Context) {
         }
     }
 
-    fun createDongtubeInvoice(amount: Int = 10000, callback: (DongtubeInvoice?, String?) -> Unit) {
+    /**
+     * Prefetch invoice & gambar QRIS di background agar saat tombol Beli ditekan, QR langsung instan muncul tanpa jeda.
+     */
+    fun prefetchDongtubeInvoice(amount: Int = 10000) {
+        val state = getLicenseState()
+        if (state.isLifetime || isPrefetching) return
+
+        // Jika sudah ada cache yang belum kadaluarsa, tidak perlu fetch ulang
+        if (cachedPrefetchedInvoice != null && cachedPrefetchedBitmap != null) return
+
+        isPrefetching = true
         executor.execute {
             try {
-                val apiKey = getApiKey()
-                val urlStr = "$BASE_URL/api/v1/invoice?apikey=$apiKey&amount=$amount"
-                val url = URL(urlStr)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "GET"
-                conn.connectTimeout = 12000
-                conn.readTimeout = 12000
-
-                val responseCode = conn.responseCode
-                if (responseCode == 200) {
-                    val reader = BufferedReader(InputStreamReader(conn.inputStream))
-                    val sb = StringBuilder()
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        sb.append(line)
+                fetchInvoiceDirectly(amount) { invoice, bitmap, _ ->
+                    if (invoice != null && bitmap != null) {
+                        cachedPrefetchedInvoice = invoice
+                        cachedPrefetchedBitmap = bitmap
                     }
-                    reader.close()
-
-                    val json = JSONObject(sb.toString())
-                    if (json.optBoolean("success", false)) {
-                        val invId = json.getString("invoice_id")
-                        val invAmount = json.getInt("amount")
-                        val invFee = json.optInt("fee", 0)
-                        val invTotal = json.getInt("total")
-                        var qrisPath = json.getString("qris_image")
-                        if (!qrisPath.startsWith("http")) {
-                            qrisPath = "$BASE_URL$qrisPath"
-                        }
-                        val expiredAt = json.optString("expired_at", "")
-
-                        val invoice = DongtubeInvoice(
-                            invoiceId = invId,
-                            amount = invAmount,
-                            fee = invFee,
-                            total = invTotal,
-                            qrisImageUrl = qrisPath,
-                            expiredAt = expiredAt
-                        )
-
-                        mainHandler.post {
-                            callback(invoice, null)
-                        }
-                    } else {
-                        val err = json.optString("error", "Gagal membuat invoice")
-                        mainHandler.post { callback(null, err) }
-                    }
-                } else {
-                    mainHandler.post {
-                        callback(null, "Server Dongtube merespons kode: $responseCode")
-                    }
+                    isPrefetching = false
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+                isPrefetching = false
+            }
+        }
+    }
+
+    private fun fetchInvoiceDirectly(amount: Int, onResult: (DongtubeInvoice?, android.graphics.Bitmap?, String?) -> Unit) {
+        try {
+            val apiKey = getApiKey()
+            val urlStr = "$BASE_URL/api/v1/invoice?apikey=$apiKey&amount=$amount"
+            val url = URL(urlStr)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 8000
+            conn.readTimeout = 8000
+
+            val responseCode = conn.responseCode
+            if (responseCode == 200) {
+                val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                val sb = StringBuilder()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    sb.append(line)
+                }
+                reader.close()
+
+                val json = JSONObject(sb.toString())
+                if (json.optBoolean("success", false)) {
+                    val invId = json.getString("invoice_id")
+                    val invAmount = json.getInt("amount")
+                    val invFee = json.optInt("fee", 0)
+                    val invTotal = json.getInt("total")
+                    var qrisPath = json.getString("qris_image")
+                    if (!qrisPath.startsWith("http")) {
+                        qrisPath = "$BASE_URL$qrisPath"
+                    }
+                    val expiredAt = json.optString("expired_at", "")
+
+                    val invoice = DongtubeInvoice(
+                        invoiceId = invId,
+                        amount = invAmount,
+                        fee = invFee,
+                        total = invTotal,
+                        qrisImageUrl = qrisPath,
+                        expiredAt = expiredAt
+                    )
+
+                    // Langsung unduh bitmap gambar QR secara paralel/sekuensial cepat
+                    var bitmap: android.graphics.Bitmap? = null
+                    try {
+                        val imgUrl = URL(qrisPath)
+                        val imgConn = imgUrl.openConnection()
+                        imgConn.connectTimeout = 6000
+                        imgConn.readTimeout = 6000
+                        bitmap = android.graphics.BitmapFactory.decodeStream(imgConn.getInputStream())
+                    } catch (_: Exception) {}
+
+                    onResult(invoice, bitmap, null)
+                } else {
+                    val err = json.optString("error", "Gagal membuat invoice")
+                    onResult(null, null, err)
+                }
+            } else {
+                onResult(null, null, "Server Dongtube merespons kode: $responseCode")
+            }
+        } catch (e: Exception) {
+            onResult(null, null, "Koneksi gagal: ${e.localizedMessage ?: "Periksa jaringan Anda"}")
+        }
+    }
+
+    fun createDongtubeInvoice(amount: Int = 10000, callback: (DongtubeInvoice?, android.graphics.Bitmap?, String?) -> Unit) {
+        // Cek apakah sudah ada di prefetch cache (Ultra-fast instant load!)
+        val cachedInv = cachedPrefetchedInvoice
+        val cachedBmp = cachedPrefetchedBitmap
+        if (cachedInv != null && cachedBmp != null) {
+            // Gunakan cache dan kosongkan untuk invoice berikutnya
+            cachedPrefetchedInvoice = null
+            cachedPrefetchedBitmap = null
+            mainHandler.post {
+                callback(cachedInv, cachedBmp, null)
+            }
+            // Siapkan prefetch berikutnya di background
+            prefetchDongtubeInvoice(amount)
+            return
+        }
+
+        executor.execute {
+            fetchInvoiceDirectly(amount) { inv, bmp, err ->
                 mainHandler.post {
-                    callback(null, "Koneksi gagal: ${e.localizedMessage ?: "Periksa jaringan Anda"}")
+                    callback(inv, bmp, err)
                 }
             }
         }
